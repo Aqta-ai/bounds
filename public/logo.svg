@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- App icon background — Shamrock -->
+  <rect width="100" height="100" rx="20" fill="#009B72"/>
+
+  <!-- Document body with dog-ear -->
+  <polygon points="22,14 62,14 78,30 78,86 22,86" fill="#ffffff"/>
+  <!-- Dog-ear fold shadow -->
+  <polygon points="62,14 78,30 62,30" fill="#80CDB9"/>
+
+  <!-- Text line 1 -->
+  <rect x="30" y="38" width="38" height="4" rx="2" fill="#CCF0E6"/>
+  <!-- Text line 2 -->
+  <rect x="30" y="46" width="28" height="4" rx="2" fill="#CCF0E6"/>
+
+  <!-- REDACTION BAR -->
+  <rect x="28" y="54" width="42" height="8" rx="1.5" fill="#003D2E"/>
+
+  <!-- Text line 3 -->
+  <rect x="30" y="66" width="32" height="4" rx="2" fill="#CCF0E6"/>
+  <!-- Text line 4 -->
+  <rect x="30" y="74" width="22" height="4" rx="2" fill="#CCF0E6"/>
+</svg>

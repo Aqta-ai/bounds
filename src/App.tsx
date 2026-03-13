@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
-import { WifiOff, ArchiveRestore } from 'lucide-react'
+import { WifiOff, ArchiveRestore, Info } from 'lucide-react'
+import { AboutModal } from './components/AboutModal'
 import type { AppStep, Detection, DetectionResult, PiiType, PipelineResult, PipelineStep, RedactionOptions } from './types'
 import { useLanguage } from './i18n'
 import { runDetection, buildRedactedPdf } from './pipeline/RedactionPipeline'
@@ -25,6 +26,7 @@ export function App() {
   const [error, setError] = useState<string | null>(null)
   const [restoreMode, setRestoreMode] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
+  const [showAbout, setShowAbout] = useState(false)
 
   const handleFile = useCallback(
     async (file: File) => {
@@ -134,17 +136,18 @@ export function App() {
             <span className="font-bold text-base text-brand-green tracking-tight">{t('app_title')}</span>
           </div>
           <div
-            className="flex items-center gap-1.5 bg-brand-green/10 border border-brand-green/20 text-brand-green text-xs font-semibold px-3 py-1.5 rounded-full cursor-default"
+            className="flex items-center gap-1.5 bg-brand-green/10 border border-brand-green/20 text-brand-green text-xs font-semibold px-3 py-1.5 rounded-full cursor-default select-none"
             title="No data leaves your device. All AI inference, PDF processing, and encryption run locally in your browser using WebAssembly."
           >
             <WifiOff className="w-3 h-3" />
             {t('privacy_badge')}
+            <Info className="w-3 h-3 opacity-60" />
           </div>
         </div>
       </header>
 
       {/* Main */}
-      <main className="flex-1 flex flex-col items-center justify-start px-6 py-10 gap-10">
+      <main className="flex-1 flex flex-col items-center justify-center px-6 py-10 gap-10">
         {!restoreMode && <ProgressStepper current={step} />}
 
         {error && (
@@ -207,18 +210,17 @@ export function App() {
       {/* Footer */}
       <footer className="border-t border-gray-100 px-6 py-3 text-center">
         <p className="text-xs text-gray-400">
-          bounds,{' '}
-          <a
-            href="https://github.com/Aqta-ai/bounds"
-            target="_blank"
-            rel="noopener noreferrer"
+          Built by Anya, Aqta · MIT License{' · '}
+          <button
+            onClick={() => setShowAbout(true)}
             className="underline underline-offset-2 hover:text-gray-600 transition-colors"
           >
-            Open source
-          </a>
-          {', '}MIT License
+            About
+          </button>
         </p>
       </footer>
+
+      {showAbout && <AboutModal onClose={() => setShowAbout(false)} />}
     </div>
   )
 }

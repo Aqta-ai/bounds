@@ -490,12 +490,9 @@ describe('Token numbering', () => {
 // False positive avoidance
 // ---------------------------------------------------------------------------
 describe('False positive avoidance', () => {
-  it('does not match a plain table number as US SSN', () => {
-    // "100 00 0000" looks like SSN but "100" is not a valid SSN area code — regex still matches
-    // at minimum verify no IBAN is produced for a random 9-digit number
+  it('does not match 000-00-0000 as SSN (all-zero area/group/serial are invalid)', () => {
     const r = detect('Table ref 000-00-0000')
-    // This is technically in SSN format — just verify no crash and proper typing
-    expect(Array.isArray(r)).toBe(true)
+    expect(r.filter((d) => d.type === 'SSN')).toHaveLength(0)
   })
 
   it('does not match a bare domain as email', () => {

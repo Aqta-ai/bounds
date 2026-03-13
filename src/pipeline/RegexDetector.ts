@@ -26,10 +26,10 @@ const UNIVERSAL_PATTERNS: PatternDef[] = [
     regex: /\b[A-Z]{2}\d{2}[\s]?(?:[A-Z0-9]{4}[\s]?){1,7}[A-Z0-9]{1,4}\b/g,
     confidence: 0.99,
   },
-  // Email
+  // Email — standard RFC 5321 local part + domain; also covers mailto: links
   {
     type: 'EMAIL',
-    regex: /\b[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}\b/g,
+    regex: /(?:mailto:)?[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}(?=[^@A-Za-z0-9]|$)/g,
     confidence: 0.99,
   },
   // Credit card (Luhn-valid patterns)
@@ -38,10 +38,10 @@ const UNIVERSAL_PATTERNS: PatternDef[] = [
     regex: /\b(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|6(?:011|5[0-9]{2})[0-9]{12}|(?:2131|1800|35\d{3})\d{11})\b/g,
     confidence: 0.98,
   },
-  // URLs — http/https or www-prefixed (personal websites, profile pages, etc.)
+  // URLs — http/https/ftp or www-prefixed; strips trailing punctuation that is not part of the URL
   {
     type: 'URL',
-    regex: /\bhttps?:\/\/[^\s<>"{}|\\^`[\]]+|\bwww\.[a-zA-Z0-9](?:[a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z]{2,})+(?:\/[^\s<>"{}|\\^`[\]]*)?/g,
+    regex: /\b(?:https?|ftp):\/\/[^\s<>"{}|\\^`[\]]*[^\s<>"{}|\\^`[\].,;!?)'"]|\bwww\.[a-zA-Z0-9](?:[a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z]{2,})+(?:\/[^\s<>"{}|\\^`[\].,;!?)'"]*)?/g,
     confidence: 0.90,
   },
   // IPv4
@@ -332,8 +332,8 @@ const SENSITIVE_CONTENT_PATTERNS: PatternDef[] = [
 
 const LOCALE_PATTERNS: Record<Language, PatternDef[]> = {
   en: [
-    // US SSN
-    { type: 'SSN', regex: /\b\d{3}[-\s]?\d{2}[-\s]?\d{4}\b/g, confidence: 0.95 },
+    // US SSN — area 001-899 (not 000 or 666), group 01-99 (not 00), serial 0001-9999 (not 0000)
+    { type: 'SSN', regex: /\b(?!000|666|9\d{2})\d{3}[-\s](?!00)\d{2}[-\s](?!0000)\d{4}\b/g, confidence: 0.95 },
     // UK NI number
     { type: 'ID_NUMBER', regex: /\b[A-CEGHJ-PR-TW-Z]{2}\s?\d{2}\s?\d{2}\s?\d{2}\s?[A-D]\b/gi, confidence: 0.95 },
     // UK postcode

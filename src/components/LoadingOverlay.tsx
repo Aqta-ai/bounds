@@ -60,9 +60,9 @@ export function LoadingOverlay({ step, t }: Props) {
           style={{ width: `${isDownloading ? Math.round(step.modelProgress) : pct}%` }}
         />
       </div>
-      <p className="text-xs text-gray-400">
-        {isDownloading ? `${Math.round(step.modelProgress)}%` : `${pct}%`}
-      </p>
+      {!isDownloading && (
+        <p className="text-xs text-gray-400">{pct}%</p>
+      )}
     </div>
   )
 }

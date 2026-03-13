@@ -92,6 +92,47 @@ npm run type-check  # TypeScript type validation
 npm run preview     # Preview the production build locally
 ```
 
+## Testing
+
+All 176 unit tests run fully offline — no browser, no network, no model downloads.
+
+```bash
+npm install
+npm test
+```
+
+Expected output:
+
+```
+ ✓ src/__tests__/fileUtils.test.ts          (12 tests)
+ ✓ src/__tests__/NERWorker.test.ts          (19 tests)
+ ✓ src/__tests__/KeyVaultService.test.ts    (16 tests)
+ ✓ src/__tests__/ExplainWorker.test.ts      (11 tests)
+ ✓ src/__tests__/RegexDetector.test.ts      (75 tests)
+ ✓ src/__tests__/PDFEngine.test.ts          (17 tests)
+ ✓ src/__tests__/RedactionPipeline.test.ts  (26 tests)
+
+ Test Files  7 passed (7)
+      Tests  176 passed (176)
+   Duration  ~700ms
+```
+
+| Suite | What it covers |
+|---|---|
+| `RegexDetector` | IBAN, email, credit card, SSN, Swiss AHV, IP, phone, DOB — locale variants and edge cases |
+| `RedactionPipeline` | Risk score levels, category weights, disabled-detection exclusions |
+| `NERWorker` | NER label → PII type mapping; detection gating on the `enabled` flag |
+| `KeyVaultService` | AES-256-GCM encrypt/decrypt round-trip; key export/import; `buildMap` |
+| `PDFEngine` | `findSpanBBox` 3-pass matching; `findOcrWordBBox` window and part-word fallback |
+| `ExplainWorker` | `buildExplainPrompt` output structure |
+| `fileUtils` | `stemName`; base64 encode/decode round-trip |
+
+Watch mode (re-runs on save):
+
+```bash
+npm run test:watch
+```
+
 ---
 
 ## Self-hosting 🏠
@@ -121,7 +162,7 @@ No database, no server-side processing, no environment variables needed. Drop th
 
 ## Architecture 🏗️
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for a full breakdown of the pipeline, reversible redaction design, and detection types.
+See [architecture.png](architecture.png) for a full data-flow diagram, or [ARCHITECTURE.md](ARCHITECTURE.md) for a written breakdown.
 
 ```
 Browser (local only)

@@ -1,0 +1,78 @@
+flowchart TD
+    subgraph UI["UI — React (4-step wizard)"]
+        DZ["DropZone\nUpload & locale select"]
+        LO["LoadingOverlay\nProgress bar"]
+        RR["RedactionReview\nToggle detections"]
+        EP["ExportPanel\nDownload files"]
+    end
+
+    subgraph Pipeline["RedactionPipeline (main thread)"]
+        RD["Phase 1 · Detection\nrunDetection()"]
+        RP["Phase 2 · Export\nbuildRedactedPdf()"]
+    end
+
+    subgraph Workers["Web Workers (off-thread)"]
+        NW["NERWorker\n@xenova/transformers\nBERT multilingual"]
+        OW["OCRWorker\nTesseract.js\nWASM"]
+        EW["ExplainWorker\nPrivacy summary\nAI text generation"]
+    end
+
+    subgraph Engine["PDFEngine"]
+        EL["extractLayouts()\npdfjs-dist text extraction"]
+        AR["applyRedactions()\nRasterise → flat PNG\ntext layer destroyed"]
+        BB["findSpanBBox()\nBounding box resolution\n3-pass matching"]
+    end
+
+    subgraph Detectors["Detection"]
+        RX["RegexDetector\n40+ locale-aware patterns\nIBAN · email · phone · SSN…"]
+        NER["NER via NERWorker\nnames · orgs · locations"]
+        OCR["OCR via OCRWorker\nscanned / image pages"]
+    end
+
+    subgraph Vault["KeyVaultService"]
+        KG["generateKey()\nAES-256-GCM\nWeb Crypto API"]
+        EN["encrypt()\nRedactionMap → ciphertext"]
+        DE["decrypt()\nRestore original values"]
+    end
+
+    subgraph Outputs["Output files"]
+        PDF["redacted.pdf\nrasterised flat image\nno text layer"]
+        BND[".bounds\nencrypted vault\nJSON + AES-GCM ciphertext"]
+        KEY[".key\n32-byte AES raw key"]
+        AUD["-audit.json\nrisk score · breakdown"]
+    end
+
+    File(["PDF file\n(local, never uploaded)"]) -->|drop / click| DZ
+    DZ -->|File| RD
+    RD --> EL
+    EL -->|text spans + page layouts| RX
+    EL -->|sparse / image pages| OCR
+    RX -->|regex detections| RD
+    NER -->|NER detections| RD
+    OCR -->|OCR words + detections| RD
+    RD -->|detections + layouts| BB
+    BB -->|bounding boxes resolved| KG
+    KG -->|encrypted vault| RD
+    RD -->|DetectionResult| RR
+    RR -->|user toggles| RP
+    RP --> AR
+    AR -->|redacted PDF bytes| EP
+    RP --> EN
+    EN -->|.bounds blob| EP
+    KG -->|.key blob| EP
+    EP --> PDF
+    EP --> BND
+    EP --> KEY
+    EP --> AUD
+
+    RD <-->|model inference| NW
+    RD <-->|OCR inference| OW
+    RP <-->|privacy summary| EW
+
+    style UI fill:#f0fdf4,stroke:#86efac
+    style Pipeline fill:#eff6ff,stroke:#93c5fd
+    style Workers fill:#faf5ff,stroke:#d8b4fe
+    style Engine fill:#fff7ed,stroke:#fdba74
+    style Detectors fill:#fefce8,stroke:#fde047
+    style Vault fill:#fff1f2,stroke:#fda4af
+    style Outputs fill:#f8fafc,stroke:#cbd5e1

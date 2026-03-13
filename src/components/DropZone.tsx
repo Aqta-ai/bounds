@@ -58,10 +58,7 @@ export function DropZone({ onFile, language, onLanguageChange, t }: Props) {
 
   return (
     <div className="flex flex-col items-center gap-6 w-full max-w-xl mx-auto">
-      <div className="text-center">
-        <h1 className="text-2xl font-bold text-gray-900">{t('hero_headline')}</h1>
-        <p className="text-sm text-gray-500 mt-2 max-w-md">{t('hero_sub')}</p>
-      </div>
+      <p className="text-sm text-gray-500 text-center max-w-md">{t('hero_sub')}</p>
       <button
         type="button"
         onClick={() => inputRef.current?.click()}

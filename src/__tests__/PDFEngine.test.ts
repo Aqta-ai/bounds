@@ -68,16 +68,14 @@ describe('findSpanBBox — multi-span window match', () => {
     expect(bbox!.x).toBe(0) // union starts at first span
   })
 
-  it('does not match spans on different lines (y diff > 4)', () => {
+  it('does not match spans on different lines (y diff > 4), falls back to word match', () => {
     const spans = [
       span('John', 0, 700, 30, 12),
       span('Smith', 36, 720, 40, 12), // 20px apart — different line
     ]
-    // Should fall through to word fallback (≥4 chars) and find "John" or "Smith"
+    // Multi-span window pass fails (different lines); pass 3 word fallback picks up "John" (≥4 chars)
     const bbox = findSpanBBox(spans, 'John Smith')
-    // Pass 3 word fallback should still find something here ("John" ≥4 chars)
-    // so this tests that it doesn't crash; the exact result is fallback-dependent
-    expect(bbox !== undefined).toBe(true)
+    expect(bbox).not.toBeNull()
   })
 })
 
@@ -90,14 +88,12 @@ describe('findSpanBBox — word fallback (pass 3)', () => {
     expect(bbox).not.toBeNull()
   })
 
-  it('does not fall back for words shorter than 4 chars', () => {
+  it('does not fall back for words shorter than 4 chars — returns null', () => {
     const spans = [span('the big cat', 0, 700)]
-    // None of the needle words will match ("A" < 4 chars) — but "big" and "cat"
-    // both happen to appear. Verifying we don't crash.
+    // Needle "A big cat": no single span contains the full string,
+    // and every word (A=1, big=3, cat=3) is below the 4-char threshold, so pass 3 skips all.
     const bbox = findSpanBBox(spans, 'A big cat')
-    // "big" (3 chars) and "cat" (3 chars) are excluded from fallback
-    // so result may be null (spans don't contain exact "A big cat")
-    expect(bbox === null || bbox !== null).toBe(true) // no crash
+    expect(bbox).toBeNull()
   })
 })
 

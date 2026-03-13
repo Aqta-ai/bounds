@@ -57,7 +57,7 @@ export function ExportPanel({ result, onStartOver, t }: Props) {
         <h2 className="text-xl font-semibold text-gray-900">{t('export_title')}</h2>
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 rounded-2xl border border-gray-100 p-3">
         {/* Redacted PDF */}
         <button
           onClick={downloadPdf}
@@ -121,7 +121,7 @@ export function ExportPanel({ result, onStartOver, t }: Props) {
 
       {/* Security assurance */}
       <div className="rounded-xl bg-gray-50 border border-gray-200 px-4 py-3 text-xs text-gray-500">
-        <span className="font-semibold text-gray-700">Redactions are permanent.</span> Black boxes are burned into the PDF, they cannot be lifted or reversed by anyone without your <span className="font-mono">.key</span> file. The key uses AES-256-GCM encryption, which is mathematically infeasible to brute-force.
+        <span className="font-semibold text-gray-700">Redactions are permanent and irreversible.</span> Every redacted page is rasterised into a flat image — the original text layer is destroyed and cannot be extracted by any PDF reader or tool. Black boxes cannot be lifted or unredacted by anyone without your <span className="font-mono">.key</span> file. The vault is protected by AES-256-GCM encryption, which is mathematically infeasible to brute-force.
       </div>
 
       <div className="border-t pt-4">

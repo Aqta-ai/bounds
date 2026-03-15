@@ -179,4 +179,4 @@ Thanks to the GenAI Zurich community and GoCalma for inspiring privacy-first inn
 
 ---
 
-*bounds is an open-source project by Anya, Aqta Technologies Ltd · MIT Licence*
+*bounds is an open-source project by Anya Chueayen, Aqta Technologies Ltd · MIT Licence*

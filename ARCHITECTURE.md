@@ -184,4 +184,4 @@ src/
 
 ---
 
-*Built by Anya · Aqta Technologies Ltd · MIT Licence*
+*Built by Anya Chueayen · Aqta Technologies Ltd · MIT Licence*

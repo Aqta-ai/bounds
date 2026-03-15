@@ -4,6 +4,7 @@
   "description": "Bounds — browser-local PDF PII redaction with reversible encryption",
   "type": "module",
   "private": true,
+  "author": "Anya Chueayen",
   "license": "MIT",
   "scripts": {
     "dev": "vite",

@@ -1,7 +1,6 @@
 # bounds 🔒
 
 [![DEMO VIDEO](https://img.shields.io/badge/DEMO%20VIDEO-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/watch?v=XHLaRmNPfCs)
-[![60s DEMO](https://img.shields.io/badge/60s%20DEMO-6E40C9?style=for-the-badge)](https://bounds.aqta.ai/demo.html)
 [![LIVE APP](https://img.shields.io/badge/LIVE%20APP-22863A?style=for-the-badge)](https://bounds.aqta.ai)
 ![BUILT WITH](https://img.shields.io/badge/BUILT%20WITH-4A4A4A?style=for-the-badge)
 [![BERT NER](https://img.shields.io/badge/BERT%20NER-E34F26?style=for-the-badge)](https://huggingface.co/Xenova/bert-base-NER)

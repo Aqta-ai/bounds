@@ -7,10 +7,8 @@
   "license": "MIT",
   "scripts": {
     "dev": "vite",
-    "dev:demo": "vite --open /demo.html",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "preview:demo": "vite preview --open /demo.html",
     "type-check": "tsc --noEmit",
     "lint": "eslint src --ext .ts,.tsx",
     "test": "vitest run",

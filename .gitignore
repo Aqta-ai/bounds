@@ -37,3 +37,12 @@ pnpm-debug.log*
 # Test coverage
 coverage/
 .vercel
+
+# Demo video page 
+demo.html
+src/demo-entry.tsx
+src/components/DemoVideoPage.tsx
+src/styles/demo-video.css
+src/pages/DemoVideo.tsx
+DEMO_VIDEO_README.md
+DEMO_VIDEO_SUMMARY.md

@@ -133,16 +133,6 @@ All MIT/Apache 2.0 licensed.
 
 ---
 
-## GoCalma Challenge: Financial Document Privacy 💼
-
-GoCalma is a personal finance platform that helps users manage important documents and optimize their financial situation. Current workflow: users upload sensitive financial documents (bank statements, tax returns, insurance policies, contracts) to centralized platforms.
-
-**Bounds solution:** Redact locally before upload. GoCalma never sees PII, but gets financial context for optimization insights. Users control access via decryption key.
-
-**Positioning:** "The only financial platform where your documents never leave your device unredacted."
-
----
-
 ## Architecture 🏗️
 
 See [architecture.png](architecture.png) or [ARCHITECTURE.md](ARCHITECTURE.md) for details.

@@ -119,7 +119,16 @@ const NOT_A_PERSON = new Set([
   'department', 'diagnosis', 'outpatient', 'inpatient',
   'referring physician', 'coverage', 'policy', 'claim', 'claim no',
   'insurance', 'supplemental', 'national id', 'address', 'phone',
+  // ID card field labels (Swiss/EU) — all-caps labels that NER may misclassify as PER
+  'ahv', 'avs', 'ahv/avs', 'avs/ahv', 'valid until', 'place of birth',
+  'nationality', 'document no', 'document no.', 'given names', 'given name',
+  'date of birth', 'identity card', 'carte d\'identité', 'ausweiskarte',
 ])
+
+// ID card label prefixes — NER sometimes captures label text + name as one span.
+// If a PERSON detection starts with one of these uppercase keywords, strip the prefix.
+// Matches "VALID UNTIL NA Léa Marie" → extract "Léa Marie" if pattern found.
+const ID_LABEL_PREFIX_RE = /^(?:VALID\s+UNTIL|PLACE\s+OF\s+BIRTH|DATE\s+OF\s+BIRTH|GIVEN\s+NAMES?|SURNAME|NATIONALITY|AHV|AVS|DOCUMENT\s+NO\.?|NA|NO\.?)\s+/i
 
 // Build Detection objects from raw NER results (without bboxes yet)
 let _nerIdCounter = 0
@@ -138,7 +147,22 @@ export function buildNERDetections(
     const type = nerLabelToPiiType(raw.type) ?? 'MISC'
     if (raw.confidence < 0.65) continue
     // Strip trailing punctuation before blocklist check so "Name:" matches "name"
-    const normalised = raw.text.trim().toLowerCase().replace(/[:\-.,;]+$/, '')
+    let text = raw.text.trim()
+    // Strip ID card label prefixes that NER sometimes captures as part of a name span
+    // e.g. "VALID UNTIL NA Léa Marie" → "Léa Marie"
+    if (type === 'PERSON') {
+      let stripped = text.replace(ID_LABEL_PREFIX_RE, '')
+      // Keep stripping until no more prefix is found (handles "VALID UNTIL NA Léa Marie")
+      while (stripped !== text) { text = stripped; stripped = text.replace(ID_LABEL_PREFIX_RE, '') }
+      text = text.trim()
+      // Strip trailing field-label words that NER over-captures from adjacent columns
+      // e.g. "Sophie Laurent Date" → "Sophie Laurent", "Jean Dubois No" → "Jean Dubois"
+      text = text.replace(/\s+(?:Date|DOB|No\.?|Nr\.?|Id|Phone|Email|Address|Born|Signature|Patient|Name|Ref)\.?\s*$/i, '').trim()
+      // Strip trailing bare digits or date fragments (e.g. "Marie 12" → "Marie")
+      text = text.replace(/\s+\d[\d.\-\/]*$/, '').trim()
+    }
+    if (text.length < 2) continue
+    const normalised = text.toLowerCase().replace(/[:\-.,;]+$/, '')
     if (type === 'PERSON' && NOT_A_PERSON.has(normalised)) continue
     const n = (tokenCounters.get(type) ?? 0) + 1
     tokenCounters.set(type, n)
@@ -146,12 +170,13 @@ export function buildNERDetections(
     results.push({
       id: `ner_${++_nerIdCounter}`,
       type,
-      text: raw.text.trim(),
+      text,
       token,
       pageIndex,
       confidence: raw.confidence,
       source: 'NER',
       enabled: !NER_DISABLED_BY_DEFAULT.has(type),
+      ruleId: 'ner_bert',
     })
   }
   return results

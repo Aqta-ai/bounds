@@ -16,7 +16,7 @@ export function RedactionBadge({ detection, onToggle }: Props) {
           ? `${color.bg} ${color.text} ${color.border}`
           : 'bg-gray-50 text-gray-400 border-gray-200 line-through'
       }`}
-      title={`${PII_TYPE_LABELS[detection.type]}: "${detection.text}" (${Math.round(detection.confidence * 100)}%)`}
+      title={`${PII_TYPE_LABELS[detection.type]}: "${detection.text}" · ${detection.ruleId ? detection.ruleId.replace(/_/g, ' ') : detection.source} · ${Math.round(detection.confidence * 100)}% confidence`}
     >
       <span className={`w-1.5 h-1.5 rounded-full ${detection.enabled ? '' : 'bg-gray-300'}`}
         style={detection.enabled ? { backgroundColor: color.hex } : undefined}

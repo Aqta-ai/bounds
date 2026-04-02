@@ -1,11 +1,14 @@
 import type { Language } from '../types'
 
 const LANGUAGES: { code: Language; label: string; short: string }[] = [
-  { code: 'en', label: 'English', short: 'EN' },
-  { code: 'de', label: 'Deutsch', short: 'DE' },
-  { code: 'fr', label: 'Français', short: 'FR' },
-  { code: 'it', label: 'Italiano', short: 'IT' },
-  { code: 'es', label: 'Español', short: 'ES' },
+  { code: 'en', label: 'English',    short: 'EN' },
+  { code: 'de', label: 'Deutsch',    short: 'DE' },
+  { code: 'fr', label: 'Français',   short: 'FR' },
+  { code: 'it', label: 'Italiano',   short: 'IT' },
+  { code: 'es', label: 'Español',    short: 'ES' },
+  { code: 'pt', label: 'Português',  short: 'PT' },
+  { code: 'nl', label: 'Nederlands', short: 'NL' },
+  { code: 'pl', label: 'Polski',     short: 'PL' },
 ]
 
 interface Props {
@@ -16,22 +19,21 @@ interface Props {
 
 export function LanguagePicker({ value, onChange, label }: Props) {
   return (
-    <div className="flex flex-col gap-2">
-      <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">{label}</label>
-      <div className="flex gap-1.5 flex-wrap">
+    <div className="flex flex-wrap items-center justify-center gap-2">
+      <span className="hidden sm:inline text-xs font-medium text-gray-400 uppercase tracking-wide whitespace-nowrap">{label}</span>
+      <div className="flex flex-wrap justify-center gap-1">
         {LANGUAGES.map((lang) => (
           <button
             key={lang.code}
             onClick={() => onChange(lang.code)}
             title={lang.label}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-all ${
+            className={`px-2.5 py-1 rounded-md text-xs font-semibold tracking-wide transition-all ${
               value === lang.code
-                ? 'bg-brand-green text-white border-brand-green shadow-sm'
-                : 'bg-white text-gray-600 border-gray-200 hover:border-brand-green hover:text-brand-green'
+                ? 'bg-brand-green text-white shadow-sm'
+                : 'bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700'
             }`}
           >
-            <span className="hidden sm:inline">{lang.label}</span>
-            <span className="sm:hidden">{lang.short}</span>
+            {lang.short}
           </button>
         ))}
       </div>

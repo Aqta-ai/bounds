@@ -41,30 +41,30 @@ describe('computeRisk — levels', () => {
     expect(riskLevel).toBe('low')
   })
 
-  it('returns "medium" for score 5–14', () => {
-    // 5 × EMAIL (weight 1) = 5
-    const dets = Array.from({ length: 5 }, () => ({ ...det('EMAIL'), id: Math.random().toString() }))
+  it('returns "medium" for score 6–19', () => {
+    // 6 × EMAIL (weight 1) = 6
+    const dets = Array.from({ length: 6 }, () => ({ ...det('EMAIL'), id: Math.random().toString() }))
     const { riskLevel, riskScore } = computeRisk(dets)
-    expect(riskScore).toBe(5)
+    expect(riskScore).toBe(6)
     expect(riskLevel).toBe('medium')
   })
 
-  it('returns "high" for score 15–29', () => {
-    // 5 × PERSON (weight 2) = 10, + 3 × IBAN (weight 3) = 9 → total 19
+  it('returns "high" for score 20–44', () => {
+    // 5 × PERSON (weight 2) = 10, + 5 × IBAN (weight 3) = 15 → total 25
     const dets = [
       ...Array.from({ length: 5 }, (_, i) => ({ ...det('PERSON'), id: `p${i}` })),
-      ...Array.from({ length: 3 }, (_, i) => ({ ...det('IBAN'), id: `i${i}` })),
+      ...Array.from({ length: 5 }, (_, i) => ({ ...det('IBAN'), id: `i${i}` })),
     ]
     const { riskLevel, riskScore } = computeRisk(dets)
-    expect(riskScore).toBe(19)
+    expect(riskScore).toBe(25)
     expect(riskLevel).toBe('high')
   })
 
-  it('returns "critical" for score ≥ 30', () => {
-    // 8 × SSN (weight 4) = 32
-    const dets = Array.from({ length: 8 }, (_, i) => ({ ...det('SSN'), id: `s${i}` }))
+  it('returns "critical" for score ≥ 45', () => {
+    // 12 × SSN (weight 4) = 48
+    const dets = Array.from({ length: 12 }, (_, i) => ({ ...det('SSN'), id: `s${i}` }))
     const { riskLevel, riskScore } = computeRisk(dets)
-    expect(riskScore).toBe(32)
+    expect(riskScore).toBe(48)
     expect(riskLevel).toBe('critical')
   })
 })
@@ -111,25 +111,22 @@ describe('computeRisk — disabled detections', () => {
     expect(riskScore).toBe(4) // only SSN counted
   })
 
-  it('boundary: score exactly 15 → high (not medium)', () => {
-    // 5 × PERSON (2) + 5 × EMAIL (1) = 15
-    const dets = [
-      ...Array.from({ length: 5 }, (_, i) => ({ ...det('PERSON'), id: `p${i}` })),
-      ...Array.from({ length: 5 }, (_, i) => ({ ...det('EMAIL'), id: `e${i}` })),
-    ]
+  it('boundary: score exactly 20 → high (not medium)', () => {
+    // 10 × PERSON (2) = 20
+    const dets = Array.from({ length: 10 }, (_, i) => ({ ...det('PERSON'), id: `p${i}` }))
     const { riskLevel, riskScore } = computeRisk(dets)
-    expect(riskScore).toBe(15)
+    expect(riskScore).toBe(20)
     expect(riskLevel).toBe('high')
   })
 
-  it('boundary: score exactly 30 → critical (not high)', () => {
-    // 10 × PERSON (2) + 10 × EMAIL (1) = 30
+  it('boundary: score exactly 45 → critical (not high)', () => {
+    // 9 × SSN (4) + 9 × EMAIL (1) = 36 + 9 = 45
     const dets = [
-      ...Array.from({ length: 10 }, (_, i) => ({ ...det('PERSON'), id: `p${i}` })),
-      ...Array.from({ length: 10 }, (_, i) => ({ ...det('EMAIL'), id: `e${i}` })),
+      ...Array.from({ length: 9 }, (_, i) => ({ ...det('SSN'), id: `s${i}` })),
+      ...Array.from({ length: 9 }, (_, i) => ({ ...det('EMAIL'), id: `e${i}` })),
     ]
     const { riskLevel, riskScore } = computeRisk(dets)
-    expect(riskScore).toBe(30)
+    expect(riskScore).toBe(45)
     expect(riskLevel).toBe('critical')
   })
 })

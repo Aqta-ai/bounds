@@ -58,7 +58,7 @@ export function RestorePanel({ t, onBack }: Props) {
   function downloadCsv() {
     if (!result) return
     const rows = [
-      ['Type', 'Token', 'Original value'],
+      [t('restore_col_type'), t('restore_col_token'), t('restore_col_original')],
       ...result.detections.map((d) => [
         PII_TYPE_LABELS[d.type] ?? d.type,
         d.token,
@@ -194,9 +194,9 @@ export function RestorePanel({ t, onBack }: Props) {
               </button>
             </div>
             <div className="grid grid-cols-[auto_1fr_1fr] text-xs text-gray-400 font-medium px-4 py-2 bg-gray-50 border-b border-gray-100">
-              <span className="w-24">Type</span>
-              <span>Token</span>
-              <span>Original value</span>
+              <span className="w-24">{t('restore_col_type')}</span>
+              <span>{t('restore_col_token')}</span>
+              <span>{t('restore_col_original')}</span>
             </div>
             <div className="divide-y divide-gray-100 max-h-72 overflow-y-auto">
               {result.detections.map((d) => {

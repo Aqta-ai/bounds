@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 240px;
+    padding: 18px 16px 14px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+    font-size: 13px;
+    color: #2A2D34;
+    background: #fff;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .logo img { width: 28px; height: 28px; border-radius: 6px; }
+  .logo-text {
+    font-size: 1.15rem;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+  }
+  .logo-text span { color: #009E60; }
+  .tagline {
+    font-size: 11px;
+    color: #8A9099;
+    margin-bottom: 14px;
+    line-height: 1.5;
+  }
+  .status {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    background: #f0faf5;
+    border: 1px solid #b3e6cf;
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+  }
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #009E60;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 3px rgba(0,158,96,0.2);
+  }
+  .status p {
+    font-size: 12px;
+    font-weight: 600;
+    color: #007a4a;
+    line-height: 1.4;
+  }
+  .status small {
+    display: block;
+    font-weight: 400;
+    color: #8A9099;
+    font-size: 11px;
+    margin-top: 1px;
+  }
+  a {
+    display: block;
+    text-align: center;
+    font-size: 11px;
+    color: #8A9099;
+    text-decoration: none;
+    padding-top: 8px;
+    border-top: 1px solid #F4F6F8;
+  }
+  a:hover { color: #009E60; }
+</style>
+</head>
+<body>
+  <div class="logo">
+    <img src="icons/icon48.png" alt="Bounds" />
+    <span class="logo-text">b<span>●</span>unds</span>
+  </div>
+  <p class="tagline">PDF privacy guard for your browser.</p>
+  <div class="status">
+    <div class="dot"></div>
+    <p>Active on all sites
+      <small>Alerts you before a PDF is uploaded. Nothing is read or sent.</small>
+    </p>
+  </div>
+  <a href="https://bounds.aqta.ai" target="_blank">Open full redaction tool →</a>
+</body>
+</html>

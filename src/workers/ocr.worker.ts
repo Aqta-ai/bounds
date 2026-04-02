@@ -1,8 +1,10 @@
 // OCR Web Worker — runs Tesseract.js WASM in isolation.
 // Only invoked for pages with no extractable text (scanned image PDFs).
 //
-// The Tesseract worker is cached at module level so WASM + traineddata are
-// only downloaded/initialised once per language per session, not once per page.
+// Tesseract worker + WASM are served from /public so OCR runs fully offline.
+// workerBlobURL: false prevents Tesseract from trying to use importScripts
+// inside our ES-module worker (which would fail — importScripts is not
+// available in module workers).
 
 import { createWorker } from 'tesseract.js'
 
@@ -16,6 +18,10 @@ async function getTesseractWorker(lang: string) {
     _tesseractWorker = null
   }
   _tesseractWorker = await createWorker(lang, 1, {
+    workerPath: '/tesseract-worker.min.js',
+    corePath: '/tesseract-core-simd-lstm.wasm.js',
+    langPath: '/',
+    workerBlobURL: false,
     logger: (m: { status: string; progress: number }) => {
       self.postMessage({ type: 'ocr_progress', status: m.status, progress: m.progress })
     },

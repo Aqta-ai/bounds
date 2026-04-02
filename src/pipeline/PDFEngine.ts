@@ -1,5 +1,5 @@
-import { PDFDocument, PDFPage, rgb, degrees } from 'pdf-lib'
-import type { BBox, Detection, OcrWord, PageLayout, RedactionOptions, TextSpan } from '../types'
+import { PDFDocument, PDFPage, StandardFonts, rgb, degrees } from 'pdf-lib'
+import type { Annotation, BBox, Detection, OcrWord, PageLayout, RedactionOptions, TextSpan } from '../types'
 
 // ---------------------------------------------------------------------------
 // PDFEngine
@@ -27,7 +27,19 @@ async function getPdfjs() {
 export async function extractLayouts(buffer: ArrayBuffer): Promise<PageLayout[]> {
   const pdfjs = await getPdfjs()
   const loadingTask = pdfjs.getDocument({ data: new Uint8Array(buffer.slice(0)) })
-  const pdf = await loadingTask.promise
+  let pdf: Awaited<typeof loadingTask.promise>
+  try {
+    pdf = await loadingTask.promise
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err)
+    if (/password/i.test(msg) || /encrypt/i.test(msg)) {
+      throw new Error('This PDF is password-protected. Remove the password first, then upload again.')
+    }
+    if (/invalid\s+pdf/i.test(msg) || /missing\s+pdf/i.test(msg) || /corrupted/i.test(msg)) {
+      throw new Error('This file appears to be corrupted or is not a valid PDF.')
+    }
+    throw err
+  }
   const layouts: PageLayout[] = []
 
   for (let i = 0; i < pdf.numPages; i++) {
@@ -151,6 +163,7 @@ async function rasterizePageWithRedactions(
 function addWatermarkToPage(
   page: PDFPage,
   watermark: { text: string; opacity: number },
+  font: import('pdf-lib').PDFFont,
 ): void {
   if (!watermark.text.trim()) return
   const { width, height } = page.getSize()
@@ -160,9 +173,91 @@ function addWatermarkToPage(
     x: width / 2 - (textLen * fontSize * 0.28),
     y: height / 2,
     size: fontSize,
+    font,
     color: rgb(0.45, 0.45, 0.45),
     opacity: watermark.opacity,
     rotate: degrees(45),
+  })
+}
+
+// ---------------------------------------------------------------------------
+// Stamp a small footer note at the bottom of a pdf-lib page
+// ---------------------------------------------------------------------------
+function addFooterToPage(
+  page: PDFPage,
+  footer: { text: string },
+  font: import('pdf-lib').PDFFont,
+): void {
+  if (!footer.text.trim()) return
+  const { width } = page.getSize()
+  page.drawText(footer.text, {
+    x: 20,
+    y: 10,
+    size: 7,
+    font,
+    color: rgb(0.55, 0.55, 0.55),
+    maxWidth: width - 40,
+  })
+}
+
+// ---------------------------------------------------------------------------
+// Draw an Adobe-style text annotation box on a pdf-lib page.
+// If ann.bbox is provided (drawn by user), the box is placed at that position.
+// Otherwise defaults to top-right corner.
+// ---------------------------------------------------------------------------
+function addAnnotationToPage(
+  page: PDFPage,
+  ann: import('../types').Annotation,
+  font: import('pdf-lib').PDFFont,
+): void {
+  if (!ann.text.trim()) return
+  const { width, height } = page.getSize()
+  const fontSize = 8
+  const padding = 6
+
+  let boxX: number, boxY: number, boxWidth: number, boxHeight: number
+
+  if (ann.bbox) {
+    // User drew a box — use its exact position and size (PDF user-space coords)
+    boxX = ann.bbox.x
+    boxY = ann.bbox.y
+    boxWidth = Math.max(ann.bbox.width, 40)
+    boxHeight = Math.max(ann.bbox.height, 16)
+  } else {
+    // Default: top-right corner, auto-sized to fit text
+    boxWidth = Math.min(220, width - 40)
+    // Wrap text manually at ~36 chars per line to estimate box height
+    const words = ann.text.split(' ')
+    const lines: string[] = []
+    let current = ''
+    for (const word of words) {
+      const candidate = current ? `${current} ${word}` : word
+      if (candidate.length > 36 && current) { lines.push(current); current = word }
+      else current = candidate
+    }
+    if (current) lines.push(current)
+    boxHeight = lines.length * (fontSize + 3) + padding * 2
+    boxX = width - boxWidth - 20
+    boxY = height - boxHeight - 20
+  }
+
+  // Background
+  page.drawRectangle({
+    x: boxX, y: boxY, width: boxWidth, height: boxHeight,
+    color: rgb(1, 0.98, 0.88),
+    borderColor: rgb(0.85, 0.7, 0.2),
+    borderWidth: 1,
+    opacity: 0.95,
+  })
+  // Text
+  page.drawText(ann.text, {
+    x: boxX + padding,
+    y: boxY + boxHeight - padding - fontSize,
+    size: fontSize,
+    font,
+    color: rgb(0.2, 0.15, 0.0),
+    maxWidth: boxWidth - padding * 2,
+    lineHeight: fontSize + 3,
   })
 }
 
@@ -181,6 +276,9 @@ export async function applyRedactions(
   const originalDoc = await PDFDocument.load(originalBuffer)
   const newDoc = await PDFDocument.create()
 
+  // Embed Helvetica once — required for drawText on both new and copied pages
+  const helvetica = await newDoc.embedFont(StandardFonts.Helvetica)
+
   // Load pdfjs doc once for all rasterizations
   const pdfjs = await getPdfjs()
   const pdfjsDoc = await pdfjs.getDocument({ data: new Uint8Array(originalBuffer.slice(0)) }).promise
@@ -191,6 +289,14 @@ export async function applyRedactions(
     if (!d.enabled) continue
     if (!byPage.has(d.pageIndex)) byPage.set(d.pageIndex, [])
     byPage.get(d.pageIndex)!.push(d)
+  }
+
+  // Group annotations by 0-indexed page
+  const annotationsByPage = new Map<number, Annotation[]>()
+  for (const ann of options.annotations) {
+    const idx = ann.page - 1
+    if (!annotationsByPage.has(idx)) annotationsByPage.set(idx, [])
+    annotationsByPage.get(idx)!.push(ann)
   }
 
   const pageCount = originalDoc.getPageCount()
@@ -209,16 +315,21 @@ export async function applyRedactions(
       const newPage = newDoc.addPage([pageW, pageH])
       newPage.drawImage(image, { x: 0, y: 0, width: pageW, height: pageH })
 
-      if (options.watermark.enabled) {
-        addWatermarkToPage(newPage, options.watermark)
+      if (options.watermark.enabled) addWatermarkToPage(newPage, options.watermark, helvetica)
+      if (options.footer.enabled)    addFooterToPage(newPage, options.footer, helvetica)
+      for (const ann of annotationsByPage.get(i) ?? []) {
+        addAnnotationToPage(newPage, ann, helvetica)
       }
     } else {
       // ── Copy original page intact ───────────────────────────────────────────
       const [copied] = await newDoc.copyPages(originalDoc, [i])
       newDoc.addPage(copied)
+      const pg = newDoc.getPage(newDoc.getPageCount() - 1)
 
-      if (options.watermark.enabled) {
-        addWatermarkToPage(newDoc.getPage(newDoc.getPageCount() - 1), options.watermark)
+      if (options.watermark.enabled) addWatermarkToPage(pg, options.watermark, helvetica)
+      if (options.footer.enabled)    addFooterToPage(pg, options.footer, helvetica)
+      for (const ann of annotationsByPage.get(i) ?? []) {
+        addAnnotationToPage(pg, ann, helvetica)
       }
     }
   }
@@ -243,7 +354,7 @@ function unionBBox(spans: TextSpan[]): { x: number; y: number; width: number; he
  *
  *   Pass 1 — exact substring in a single span
  *   Pass 2 — join 2–5 consecutive same-line spans (handles multi-word names)
- *   Pass 3 — any significant word match ≥4 chars (last-resort fallback)
+ *   Pass 3 — any significant word match ≥3 chars (last-resort fallback)
  *
  * `occurrence` (0-based) skips that many earlier matches so duplicate text
  * on the same page (e.g. a name in two columns) each get their own bbox.
@@ -286,11 +397,13 @@ export function findSpanBBox(
     }
   }
 
-  // Pass 3 doesn't support occurrence — fall back to first significant word match
-  const words = needle.split(' ').filter((w) => w.length >= 4)
-  for (const word of words) {
+  // Pass 3 — any significant word (≥3 chars) from the needle (last-resort)
+  seen = 0
+  const needleWords = needle.split(' ').filter((w) => w.length >= 3)
+  for (const word of needleWords) {
     for (const span of spans) {
       if (span.text.toLowerCase().includes(word)) {
+        if (seen++ < occurrence) continue
         return { x: span.x, y: span.y, width: span.width, height: span.height }
       }
     }
@@ -329,25 +442,30 @@ export function findOcrWordBBox(
   matchText: string,
   pageHeight: number,
   scale: number,
+  occurrence = 0,
 ): BBox | null {
   const needle = matchText.trim().toLowerCase().replace(/\s+/g, ' ')
   if (!needle) return null
   const lowers = words.map((w) => w.text.toLowerCase())
 
   // Pass 1 — single word
+  let seen = 0
   for (let i = 0; i < words.length; i++) {
     if (lowers[i].includes(needle)) {
+      if (seen++ < occurrence) continue
       const w = words[i]
       return imgBBoxToPdf(w.x0, w.y0, w.x1, w.y1, pageHeight, scale)
     }
   }
 
   // Pass 2 — consecutive window
+  seen = 0
   for (let windowSize = 2; windowSize <= 6; windowSize++) {
     for (let i = 0; i <= words.length - windowSize; i++) {
       const group = words.slice(i, i + windowSize)
       const joined = group.map((w) => w.text).join(' ').toLowerCase()
       if (joined.includes(needle)) {
+        if (seen++ < occurrence) continue
         const x0 = Math.min(...group.map((w) => w.x0))
         const y0 = Math.min(...group.map((w) => w.y0))
         const x1 = Math.max(...group.map((w) => w.x1))
@@ -358,10 +476,12 @@ export function findOcrWordBBox(
   }
 
   // Pass 3 — any significant part word
-  const parts = needle.split(' ').filter((p) => p.length >= 4)
+  seen = 0
+  const parts = needle.split(' ').filter((p) => p.length >= 3)
   for (const part of parts) {
     for (let i = 0; i < words.length; i++) {
       if (lowers[i].includes(part)) {
+        if (seen++ < occurrence) continue
         const w = words[i]
         return imgBBoxToPdf(w.x0, w.y0, w.x1, w.y1, pageHeight, scale)
       }

@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback } from 'react'
-import { CheckSquare, Square, ChevronLeft, ChevronRight, Loader2, UploadCloud, ShieldCheck, Plus, X } from 'lucide-react'
-import type { Detection, PiiType, RedactionOptions } from '../types'
+import { CheckSquare, Square, ChevronLeft, ChevronRight, Loader2, UploadCloud, ShieldCheck, Plus, X, Sparkles, Pencil, MessageSquarePlus } from 'lucide-react'
+import type { Annotation, BBox, Detection, PiiType, RedactionOptions } from '../types'
 import { DEFAULT_REDACTION_OPTIONS } from '../types'
 import { RedactionBadge } from './RedactionBadge'
 import { ConfidenceSlider } from './ConfidenceSlider'
@@ -20,9 +20,43 @@ interface Props {
   onToggleAll: (enabled: boolean, ids?: string[]) => void
   onConfirm: (options: RedactionOptions) => void
   onStartOver: () => void
-  onAddDetection: (text: string, type: PiiType, pageIndex: number) => void
+  onAddDetection: (text: string, type: PiiType, pageIndex: number, bboxOverride?: BBox) => void
   isExporting?: boolean
+  aiSummary?: string | null
+  aiSummaryLoading?: boolean
   t: (key: string, vars?: Record<string, string | number>) => string
+}
+
+// ---------------------------------------------------------------------------
+// Confidence histogram — mini bar chart showing how detections are distributed
+// across confidence levels. Makes it clear why moving the slider in the 50–90%
+// range often doesn't change the count (most detections cluster at >90%).
+// ---------------------------------------------------------------------------
+function ConfidenceHistogram({ detections, threshold }: { detections: Detection[]; threshold: number }) {
+  const BUCKETS = 10
+  const counts = new Array<number>(BUCKETS).fill(0)
+  for (const d of detections) {
+    const bucket = Math.min(BUCKETS - 1, Math.floor(d.confidence * BUCKETS))
+    counts[bucket]++
+  }
+  const max = Math.max(...counts, 1)
+  return (
+    <div className="flex items-end gap-px h-6" title="Detection confidence distribution">
+      {counts.map((count, i) => {
+        const bucketMin = i / BUCKETS
+        const active = bucketMin >= threshold
+        const pct = Math.round((count / max) * 100)
+        return (
+          <div
+            key={i}
+            className={`flex-1 rounded-sm transition-all ${active ? 'bg-brand-green/60' : 'bg-gray-200'}`}
+            style={{ height: `${Math.max(pct, count > 0 ? 15 : 0)}%` }}
+            title={`${Math.round(bucketMin * 100)}–${Math.round((i + 1) / BUCKETS * 100)}%: ${count}`}
+          />
+        )
+      })}
+    </div>
+  )
 }
 
 /** Returns page indices (0-based) + null for ellipsis gaps. */
@@ -52,15 +86,24 @@ export function RedactionReview({
   onStartOver,
   onAddDetection,
   isExporting = false,
+  aiSummary,
+  aiSummaryLoading = false,
   t,
 }: Props) {
-  const [threshold, setThreshold] = useState(0.5)
+  const [threshold, setThreshold] = useState(0.7)
   const [activePage, setActivePage] = useState(0)
   const [options, setOptions] = useState<RedactionOptions>(DEFAULT_REDACTION_OPTIONS)
   const [showManual, setShowManual] = useState(false)
   const [manualText, setManualText] = useState('')
   const [manualType, setManualType] = useState<PiiType>('MISC')
   const [manualPage, setManualPage] = useState(0)
+  const [drawMode, setDrawMode] = useState(false)
+  const [pendingBox, setPendingBox] = useState<{ bbox: BBox; pageIndex: number } | null>(null)
+  const [pendingBoxType, setPendingBoxType] = useState<PiiType>('MISC')
+  const [pendingBoxLabel, setPendingBoxLabel] = useState('')
+  const [annotateMode, setAnnotateMode] = useState(false)
+  const [pendingAnnotation, setPendingAnnotation] = useState<{ bbox: BBox; pageIndex: number } | null>(null)
+  const [pendingAnnotationText, setPendingAnnotationText] = useState('')
 
   const handleManualAdd = useCallback(() => {
     if (!manualText.trim()) return
@@ -68,6 +111,38 @@ export function RedactionReview({
     setManualText('')
     setShowManual(false)
   }, [manualText, manualType, manualPage, onAddDetection])
+
+  const handleBoxDrawn = useCallback((bbox: BBox) => {
+    setDrawMode(false)
+    setPendingBox({ bbox, pageIndex: activePage })
+    setPendingBoxLabel('')
+  }, [activePage])
+
+  const handlePendingBoxConfirm = useCallback(() => {
+    if (!pendingBox) return
+    onAddDetection(pendingBoxLabel.trim() || `drawn_${pendingBoxType.toLowerCase()}`, pendingBoxType, pendingBox.pageIndex, pendingBox.bbox)
+    setPendingBox(null)
+    setPendingBoxLabel('')
+  }, [pendingBox, pendingBoxLabel, pendingBoxType, onAddDetection])
+
+  const handleAnnotationDrawn = useCallback((bbox: BBox) => {
+    setAnnotateMode(false)
+    setPendingAnnotation({ bbox, pageIndex: activePage })
+    setPendingAnnotationText('')
+  }, [activePage])
+
+  const handleAnnotationConfirm = useCallback(() => {
+    if (!pendingAnnotation || !pendingAnnotationText.trim()) return
+    const ann: Annotation = {
+      id: `ann_${Date.now()}`,
+      page: pendingAnnotation.pageIndex + 1,
+      text: pendingAnnotationText.trim(),
+      bbox: pendingAnnotation.bbox,
+    }
+    setOptions((prev) => ({ ...prev, annotations: [...prev.annotations, ann] }))
+    setPendingAnnotation(null)
+    setPendingAnnotationText('')
+  }, [pendingAnnotation, pendingAnnotationText])
 
   const visible = useMemo(
     () => detections.filter((d) => d.confidence >= threshold),
@@ -175,7 +250,7 @@ export function RedactionReview({
                   disabled={!manualText.trim()}
                   className="px-4 py-2 bg-brand-green text-white text-sm font-semibold rounded-lg hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
                 >
-                  Add
+                  {t('review_add')}
                 </button>
               </div>
             </div>
@@ -205,18 +280,25 @@ export function RedactionReview({
       {/* OCR failure warning */}
       {ocrFailedPages.length > 0 && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm text-amber-800">
-          <span className="font-semibold">Scanned page detected,</span>{' '}
-          OCR could not extract text from page{ocrFailedPages.length > 1 ? 's' : ''}{' '}
-          {ocrFailedPages.join(', ')}. PII in embedded images may be missed.
-          Use <span className="font-semibold">Add manually</span> to mark any sensitive fields below.
+          <span className="font-semibold">{t('review_ocr_warning')}</span>{' '}
+          {ocrFailedPages.length > 1 ? t('review_ocr_failed_pages_plural') : t('review_ocr_failed_pages')}{' '}
+          {ocrFailedPages.join(', ')}.{' '}
+          {t('review_ocr_add_hint')}
         </div>
       )}
 
       {/* Controls bar */}
       <div className="bg-gray-50 rounded-xl px-4 py-3 flex flex-col gap-2">
         <ConfidenceSlider value={threshold} onChange={setThreshold} label={t('review_confidence')} />
+        {/* Confidence histogram — shows why mid-range slider moves may not change count */}
+        <ConfidenceHistogram detections={detections} threshold={threshold} />
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-600">{t('review_count', { n: visible.length })}</span>
+          <span className="text-sm text-gray-600">
+            <span className="font-semibold text-gray-900">{enabledCount}</span>
+            <span className="text-gray-400"> {t('review_of')} </span>
+            <span className="font-semibold text-gray-900">{visible.length}</span>
+            <span className="text-gray-500"> {t('review_selected')}</span>
+          </span>
           <button
             onClick={() => onToggleAll(!allEnabled, visible.map((d) => d.id))}
             className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900"
@@ -227,11 +309,63 @@ export function RedactionReview({
         </div>
       </div>
 
+      {/* AI privacy summary — Flan-T5 generated, streamed in as ready */}
+      {(aiSummary || aiSummaryLoading) && (
+        <div className="rounded-xl border border-brand-green/25 bg-brand-green/5 px-4 py-3 flex gap-3 items-start">
+          <Sparkles className="w-4 h-4 text-brand-green shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-semibold text-brand-green uppercase tracking-wide mb-1">{t('review_privacy_analysis')}</p>
+            {aiSummaryLoading && !aiSummary ? (
+              <div className="flex items-center gap-2 text-sm text-gray-400">
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                {t('review_generating_summary')}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-700 leading-relaxed">{aiSummary}</p>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Two-column layout: PDF viewer left, badge list + options right */}
       <div className="flex flex-col lg:flex-row gap-4 items-start">
 
         {/* Left: live PDF page viewer */}
         <div className="flex flex-col gap-2 min-w-0">
+          {/* Draw mode toolbar */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              onClick={() => { setDrawMode((m) => !m); setAnnotateMode(false); setPendingBox(null) }}
+              className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border transition-all ${
+                drawMode
+                  ? 'bg-brand-green text-white border-brand-green'
+                  : 'bg-white text-gray-600 border-gray-200 hover:border-brand-green hover:text-brand-green'
+              }`}
+            >
+              <Pencil className="w-3 h-3" />
+              {drawMode ? t('review_draw_mode_active') : t('review_redact_box')}
+            </button>
+            <button
+              onClick={() => { setAnnotateMode((m) => !m); setDrawMode(false); setPendingAnnotation(null) }}
+              className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border transition-all ${
+                annotateMode
+                  ? 'bg-amber-500 text-white border-amber-500'
+                  : 'bg-white text-gray-600 border-gray-200 hover:border-amber-400 hover:text-amber-600'
+              }`}
+            >
+              <MessageSquarePlus className="w-3 h-3" />
+              {annotateMode ? t('review_draw_mode_active') : t('review_add_note_btn')}
+            </button>
+            {(drawMode || annotateMode) && (
+              <span className={`text-xs font-medium px-2.5 py-1 rounded-lg ${
+                annotateMode
+                  ? 'bg-amber-100 text-amber-700'
+                  : 'bg-brand-green/10 text-brand-green'
+              }`}>
+                {t('review_draw_hint')}
+              </span>
+            )}
+          </div>
           <PDFPageViewer
             pdfBuffer={pdfBuffer}
             pageIndex={activePage}
@@ -240,6 +374,10 @@ export function RedactionReview({
             scale={1.2}
             redactionColor={options.color}
             previewUnavailableText={t('preview_unavailable')}
+            drawMode={drawMode}
+            onBoxDrawn={handleBoxDrawn}
+            annotateMode={annotateMode}
+            onAnnotationDrawn={handleAnnotationDrawn}
           />
 
           {pageCount > 1 && (
@@ -258,7 +396,7 @@ export function RedactionReview({
                   <button
                     key={item}
                     onClick={() => setActivePage(item)}
-                    className={`w-7 h-7 rounded text-xs font-semibold transition-colors ${
+                    className={`w-8 h-8 rounded text-xs font-semibold transition-colors ${
                       item === activePage
                         ? 'bg-brand-green text-white'
                         : pagesWithDetections.includes(item)
@@ -282,21 +420,30 @@ export function RedactionReview({
         </div>
 
         {/* Right: detection list + options panel */}
-        <div className="flex-1 min-w-0 flex flex-col gap-3">
-          <div className="max-h-[380px] overflow-y-auto pr-1 flex flex-col gap-3">
+        <div className="flex-1 w-full flex flex-col gap-3">
+          <div className="max-h-[50vh] lg:max-h-[380px] overflow-y-auto pr-1 flex flex-col gap-3">
             {grouped.length > 0 ? (
-              grouped.map(([typeLabel, dets]) => (
+              grouped.map(([typeLabel, dets]) => {
+                const sources = [...new Set(dets.map((d) => d.source))]
+                const sourceLabel = sources.map((s) =>
+                  s === 'NER' ? t('review_source_ner') : s === 'REGEX' ? t('review_source_regex') : s === 'MANUAL' ? t('review_source_manual') : t('review_source_ocr')
+                ).join(' · ')
+                return (
                 <div key={typeLabel}>
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5">
-                    {typeLabel} ({dets.length})
-                  </p>
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                      {typeLabel} ({dets.length})
+                    </p>
+                    <span className="text-xs text-gray-300 font-normal lowercase">{sourceLabel}</span>
+                  </div>
                   <div className="flex flex-wrap gap-1.5">
                     {dets.map((d) => (
                       <RedactionBadge key={d.id} detection={d} onToggle={onToggle} />
                     ))}
                   </div>
                 </div>
-              ))
+                )
+              })
             ) : (
               <p className="text-sm text-gray-400 text-center py-8">
                 {pagesWithDetections.length > 0
@@ -306,14 +453,80 @@ export function RedactionReview({
             )}
           </div>
 
+          {/* Pending drawn box — confirm type before adding */}
+          {pendingBox && (
+            <div className="border border-brand-green/25 bg-brand-green/5 rounded-xl p-3 flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-brand-green uppercase tracking-wide">{t('review_confirm_box')}</span>
+                <button onClick={() => setPendingBox(null)}>
+                  <X className="w-3.5 h-3.5 text-gray-400 hover:text-gray-600" />
+                </button>
+              </div>
+              <input
+                type="text"
+                value={pendingBoxLabel}
+                onChange={(e) => setPendingBoxLabel(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handlePendingBoxConfirm()}
+                placeholder={t('review_box_label_placeholder')}
+                className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-green/30 bg-white"
+                autoFocus
+              />
+              <div className="flex gap-2">
+                <select
+                  value={pendingBoxType}
+                  onChange={(e) => setPendingBoxType(e.target.value as PiiType)}
+                  className="flex-1 text-sm border border-gray-200 rounded-lg px-2 py-2 focus:outline-none focus:ring-2 focus:ring-brand-green/30 bg-white"
+                >
+                  {Object.entries(PII_TYPE_LABELS).map(([value, label]) => (
+                    <option key={value} value={value}>{label}</option>
+                  ))}
+                </select>
+                <button
+                  onClick={handlePendingBoxConfirm}
+                  className="px-4 py-2 bg-brand-green text-white text-sm font-semibold rounded-lg hover:opacity-90 transition-opacity"
+                >
+                  {t('review_add')}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Pending annotation — type note text before confirming */}
+          {pendingAnnotation && (
+            <div className="border border-amber-300 bg-amber-50 rounded-xl p-3 flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-amber-700 uppercase tracking-wide">{t('review_note_on_page', { page: pendingAnnotation.pageIndex + 1 })}</span>
+                <button onClick={() => setPendingAnnotation(null)}>
+                  <X className="w-3.5 h-3.5 text-gray-400 hover:text-gray-600" />
+                </button>
+              </div>
+              <textarea
+                value={pendingAnnotationText}
+                onChange={(e) => setPendingAnnotationText(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleAnnotationConfirm() } }}
+                placeholder={t('review_note_placeholder')}
+                rows={2}
+                className="w-full text-sm border border-amber-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white resize-none"
+                autoFocus
+              />
+              <button
+                onClick={handleAnnotationConfirm}
+                disabled={!pendingAnnotationText.trim()}
+                className="w-full px-4 py-2 bg-amber-500 disabled:bg-gray-200 disabled:text-gray-400 text-white text-sm font-semibold rounded-lg hover:bg-amber-600 transition-colors"
+              >
+                {t('review_add_note_pdf')}
+              </button>
+            </div>
+          )}
+
           {/* Manual redaction add */}
-          <div className="border border-dashed border-gray-200 rounded-xl p-3">
+          <div className="border border-gray-200 rounded-xl p-3">
             {!showManual ? (
               <button
                 onClick={() => { setShowManual(true); setManualPage(activePage) }}
-                className="w-full flex items-center justify-center gap-1.5 text-sm text-gray-400 hover:text-gray-600 py-1 transition-colors"
+                className="w-full flex items-center justify-center gap-1.5 text-sm font-medium text-brand-green hover:bg-brand-green/5 border border-brand-green/30 hover:border-brand-green/60 rounded-lg py-2 px-3 transition-colors whitespace-nowrap"
               >
-                <Plus className="w-3.5 h-3.5" />
+                <Plus className="w-4 h-4" />
                 {t('review_add_manually_hint')}
               </button>
             ) : (
@@ -348,7 +561,7 @@ export function RedactionReview({
                     disabled={!manualText.trim()}
                     className="px-4 py-2 bg-brand-green text-white text-sm font-semibold rounded-lg hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
                   >
-                    Add
+                    {t('review_add')}
                   </button>
                 </div>
                 {pageCount > 1 && (

@@ -1,30 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 60" width="220" height="60">
-  <!-- Icon mark — brand green bg -->
-  <rect width="60" height="60" rx="12" fill="#009B72"/>
-
-  <!-- Document body with dog-ear -->
+  <!-- Icon mark -->
+  <rect width="60" height="60" rx="12" fill="#009E60"/>
   <polygon points="12,8 37,8 48,18 48,52 12,52" fill="#ffffff"/>
   <polygon points="37,8 48,18 37,18" fill="#80CDB9"/>
-
-  <!-- Text lines -->
   <rect x="17" y="23" width="23" height="2.5" rx="1.2" fill="#CCF0E6"/>
   <rect x="17" y="28" width="17" height="2.5" rx="1.2" fill="#CCF0E6"/>
-
-  <!-- Redaction bar -->
   <rect x="16" y="33" width="25" height="5" rx="1" fill="#003D2E"/>
-
-  <!-- Text lines below -->
   <rect x="17" y="41" width="19" height="2.5" rx="1.2" fill="#CCF0E6"/>
   <rect x="17" y="46" width="13" height="2.5" rx="1.2" fill="#CCF0E6"/>
 
-  <!-- Wordmark -->
+  <!-- Wordmark: b.ounds with green dot -->
   <text
     x="72"
     y="40"
     font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
     font-size="30"
-    font-weight="700"
+    font-weight="900"
     letter-spacing="-0.5"
-    fill="#009B72"
-  >bounds</text>
+    fill="#2A2D34"
+  >b<tspan fill="#009E60">.</tspan>ounds</text>
 </svg>

@@ -1,0 +1,126 @@
+#bounds-overlay {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 2147483647;
+  background: #ffffff;
+  border: 1.5px solid #009E60;
+  border-radius: 16px;
+  padding: 16px 18px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 158, 96, 0.12);
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+  font-size: 13px;
+  max-width: 400px;
+  min-width: 320px;
+  animation: bounds-in 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+  color: #2A2D34;
+}
+
+@keyframes bounds-in {
+  from { transform: translateY(20px) scale(0.97); opacity: 0; }
+  to   { transform: translateY(0)    scale(1);    opacity: 1; }
+}
+
+.bounds-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.bounds-icon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  background: #f0faf5;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #009E60;
+  margin-top: 1px;
+}
+
+.bounds-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.bounds-title {
+  margin: 0 0 6px;
+  line-height: 1.45;
+  color: #2A2D34;
+  font-size: 13px;
+}
+
+.bounds-title strong { font-weight: 700; }
+.bounds-title em     { font-style: normal; color: #8A9099; }
+
+.bounds-sub {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #8A9099;
+  line-height: 1.5;
+}
+.bounds-sub em { font-style: normal; color: #2A2D34; font-weight: 500; }
+
+.bounds-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.bounds-chip {
+  display: inline-block;
+  background: #f0faf5;
+  border: 1px solid #b3e6cf;
+  color: #007a4a;
+  border-radius: 100px;
+  padding: 2px 9px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.bounds-close {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #8A9099;
+  font-size: 18px;
+  line-height: 1;
+  padding: 0 0 0 4px;
+  margin-top: -2px;
+}
+.bounds-close:hover { color: #2A2D34; }
+
+.bounds-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.bounds-btn-primary,
+.bounds-btn-secondary {
+  flex: 1;
+  border: none;
+  border-radius: 10px;
+  padding: 9px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, opacity 0.15s;
+}
+
+.bounds-btn-primary {
+  background: #009E60;
+  color: #fff;
+}
+.bounds-btn-primary:hover { background: #008a54; }
+
+.bounds-btn-secondary {
+  background: #F4F6F8;
+  color: #8A9099;
+  border: 1px solid #E8EBEE;
+}
+.bounds-btn-secondary:hover { color: #2A2D34; border-color: #ccc; }

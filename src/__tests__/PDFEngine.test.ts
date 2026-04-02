@@ -73,14 +73,14 @@ describe('findSpanBBox — multi-span window match', () => {
       span('John', 0, 700, 30, 12),
       span('Smith', 36, 720, 40, 12), // 20px apart — different line
     ]
-    // Multi-span window pass fails (different lines); pass 3 word fallback picks up "John" (≥4 chars)
+    // Multi-span window pass fails (different lines); pass 3 word fallback picks up "John" (≥3 chars)
     const bbox = findSpanBBox(spans, 'John Smith')
     expect(bbox).not.toBeNull()
   })
 })
 
 describe('findSpanBBox — word fallback (pass 3)', () => {
-  it('finds a match via significant word (≥4 chars) when exact join fails', () => {
+  it('finds a match via significant word (≥3 chars) when exact join fails', () => {
     const spans = [span('Representative', 50, 700)]
     // "Representat" is ≥4 chars — the needle is longer than any single span content
     // but the fallback should match on the word "representative"
@@ -88,11 +88,11 @@ describe('findSpanBBox — word fallback (pass 3)', () => {
     expect(bbox).not.toBeNull()
   })
 
-  it('does not fall back for words shorter than 4 chars — returns null', () => {
-    const spans = [span('the big cat', 0, 700)]
-    // Needle "A big cat": no single span contains the full string,
-    // and every word (A=1, big=3, cat=3) is below the 4-char threshold, so pass 3 skips all.
-    const bbox = findSpanBBox(spans, 'A big cat')
+  it('does not fall back for words shorter than 3 chars — returns null', () => {
+    const spans = [span('or an if', 0, 700)]
+    // Needle "A or if": no single span contains the full string,
+    // and every word (A=1, or=2, if=2) is below the 3-char threshold, so pass 3 skips all.
+    const bbox = findSpanBBox(spans, 'A or if')
     expect(bbox).toBeNull()
   })
 })
@@ -156,7 +156,7 @@ describe('findOcrWordBBox — pass 3: part word fallback', () => {
   const PAGE_H = 1000
   const SCALE = 1.0
 
-  it('matches on a significant sub-word (≥4 chars) when exact fails', () => {
+  it('matches on a significant sub-word (≥3 chars) when exact fails', () => {
     const words = [word('Meier-Schmid', 10, 0, 120, 14)]
     const bbox = findOcrWordBBox(words, 'Meier Schmid', PAGE_H, SCALE)
     expect(bbox).not.toBeNull()

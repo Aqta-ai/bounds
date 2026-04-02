@@ -3,6 +3,7 @@ import { extractLayouts, applyRedactions, findSpanBBox, findOcrWordBBox } from '
 import { detectRegex, resetRegexIdCounter } from './RegexDetector'
 import { detectNER, buildNERDetections, resetNerIdCounter, setNERModelProgressCallback } from './NERWorker'
 import { ocrPageFull, renderPageToBlob, OCR_RENDER_SCALE } from './OCRWorker'
+import { isFaceDetectionSupported, detectFaces } from './FaceDetector'
 import { KeyVaultService } from './KeyVaultService'
 import { generateSummary } from './ExplainWorker'
 import { sha256Hex, stemName } from '../utils/fileUtils'
@@ -36,9 +37,12 @@ export function computeRisk(detections: Detection[]): { riskScore: number; riskL
   const enabled = detections.filter((d) => d.enabled)
   const riskScore = enabled.reduce((sum, d) => sum + (RISK_WEIGHTS[d.type] ?? 1), 0)
   let riskLevel: RiskLevel = 'clean'
-  if (riskScore >= 30)     riskLevel = 'critical'
-  else if (riskScore >= 15) riskLevel = 'high'
-  else if (riskScore >= 5)  riskLevel = 'medium'
+  // Thresholds: critical ≥ 45 (requires many high-weight items), high ≥ 20,
+  // medium ≥ 6, low > 0. This ensures a well-redacted document moves from
+  // Critical to High/Medium rather than staying Critical after redaction.
+  if (riskScore >= 45)     riskLevel = 'critical'
+  else if (riskScore >= 20) riskLevel = 'high'
+  else if (riskScore >= 6)  riskLevel = 'medium'
   else if (riskScore > 0)   riskLevel = 'low'
   return { riskScore, riskLevel }
 }
@@ -79,16 +83,26 @@ export async function runDetection(
   // Forward NER model download progress (first run only — cached on subsequent runs)
   setNERModelProgressCallback((pct) => onProgress({ stage: 'loading_model', modelProgress: pct }))
 
+  const faceDetectionAvailable = isFaceDetectionSupported()
+  const faceDetectionsWithBBox: Detection[] = []
+
   for (let i = 0; i < layouts.length; i++) {
     const layout = layouts[i]
     const textLayerText = layout.spans.map((s) => s.text).join(' ')
     let pageText = textLayerText
+    let pageBlob: Blob | null = null
 
-    if (layout.requiresOCR) {
+    // Render page to image once — reused for both OCR and face detection
+    if (layout.requiresOCR || faceDetectionAvailable) {
+      try {
+        pageBlob = await renderPageToBlob(buffer, i)
+      } catch { /* non-fatal — OCR/face detection will be skipped */ }
+    }
+
+    if (layout.requiresOCR && pageBlob) {
       onProgress({ stage: 'detecting_ocr', progress: Math.round((i / total) * 100), page: i + 1, total })
       try {
-        const blob = await renderPageToBlob(buffer, i)
-        const ocrResult = await ocrPageFull(blob, language)
+        const ocrResult = await ocrPageFull(pageBlob, language)
         if (ocrResult.text.trim()) {
           // Merge OCR text with text layer — don't replace, so text-layer detections
           // (e.g. headers/footers) are still found even on image-heavy pages.
@@ -105,24 +119,48 @@ export async function runDetection(
 
     pageTexts.push(pageText)
 
-    if (!pageText.trim()) continue
+    if (pageText.trim()) {
+      onProgress({ stage: 'detecting_regex', progress: Math.round((i / total) * 100) })
+      const regexDets = detectRegex(pageText, i, language, tokenCounters)
+      allDetections.push(...regexDets)
 
-    onProgress({ stage: 'detecting_regex', progress: Math.round((i / total) * 100) })
-    const regexDets = detectRegex(pageText, i, language, tokenCounters)
-    allDetections.push(...regexDets)
-
-    onProgress({ stage: 'detecting_ner', progress: Math.round((i / total) * 100), page: i + 1, total })
-    try {
-      const nerRaw = await detectNER(pageText, i, language)
-      const nerDets = buildNERDetections(nerRaw, i, tokenCounters)
-      const regexTexts = new Set(regexDets.map((d) => d.text.toLowerCase()))
-      for (const nerDet of nerDets) {
-        if (!regexTexts.has(nerDet.text.toLowerCase())) {
+      onProgress({ stage: 'detecting_ner', progress: Math.round((i / total) * 100), page: i + 1, total })
+      try {
+        const nerRaw = await detectNER(pageText, i, language)
+        const nerDets = buildNERDetections(nerRaw, i, tokenCounters)
+        const regexTexts = new Set(regexDets.map((d) => d.text.toLowerCase()))
+        for (const nerDet of nerDets) {
+          if (regexTexts.has(nerDet.text.toLowerCase())) continue
+          // Drop NER name fragments where every word is ≤2 chars (e.g. "Si Te")
+          if (nerDet.type === 'PERSON') {
+            const words = nerDet.text.trim().split(/\s+/)
+            if (words.every((w) => w.length <= 2)) continue
+          }
+          // Drop NER PERSON hits that are all-uppercase field labels (e.g. "AHV", "VALID UNTIL")
+          if (nerDet.type === 'PERSON') {
+            const trimmed = nerDet.text.trim()
+            if (trimmed.length > 0 && trimmed === trimmed.toUpperCase() && /[A-Z]/.test(trimmed)) {
+              const LABEL_RE = /^(AHV(\s*\/\s*AVS)?|AVS|BSN|NIF|NISS|NHI|VALID(\s+UNTIL)?|EXPIRES?|EXPIRY|NATIONALITY|AUTHORITY|ISSUING(\s+AUTHORITY)?|DOCUMENT(\s+(NO\.?|NUMBER))?|PERSONAL\s+(NO\.?|NUMBER)|CARD(\s+NO\.?)?|PASSPORT(\s+NO\.?)?|SURNAME|FORENAMES?|GIVEN\s+NAMES?|SEX|PLACE\s+OF\s+BIRTH|DATE\s+OF\s+BIRTH|TYPE|CODE|COUNTRY|CANTON|COMMUNE)$/
+              if (LABEL_RE.test(trimmed)) continue
+            }
+          }
+          // Drop NER address hits that contain common PDF metadata words
+          if (nerDet.type === 'ADDRESS') {
+            const lower = nerDet.text.toLowerCase()
+            if (/\b(page|pages|embedded|document|scan|synthetic|test|sample)\b/.test(lower)) continue
+          }
           allDetections.push(nerDet)
         }
+      } catch {
+        // NER unavailable — continue with regex only
       }
-    } catch {
-      // NER unavailable — continue with regex only
+    }
+
+    // Face detection — runs even on image-only pages with no text layer
+    if (pageBlob) {
+      onProgress({ stage: 'detecting_faces', progress: Math.round((i / total) * 100), page: i + 1, total })
+      const faces = await detectFaces(pageBlob, layout, i, tokenCounters)
+      faceDetectionsWithBBox.push(...faces)
     }
   }
 
@@ -147,7 +185,8 @@ export async function runDetection(
           .map((d) => d.text.trim().toLowerCase()),
       )
       if (existingOnPage.has(name)) continue
-      if (namePattern.test(pageTexts[pageIdx])) {
+      namePattern.lastIndex = 0
+      while (namePattern.exec(pageTexts[pageIdx]) !== null) {
         const n = (tokenCounters.get('PERSON') ?? 0) + 1
         tokenCounters.set('PERSON', n)
         allDetections.push({
@@ -159,9 +198,9 @@ export async function runDetection(
           confidence: 0.82,
           source: 'REGEX',
           enabled: true,
+          ruleId: 'name_propagation',
         })
       }
-      namePattern.lastIndex = 0
     }
   }
 
@@ -182,7 +221,7 @@ export async function runDetection(
       // images the text layer can contain invisible or mis-positioned text whose
       // coordinates don't correspond to any visible content, producing overlay
       // boxes that float over blank areas.
-      bbox = findOcrWordBBox(layout.ocrWords, det.text, layout.height, layout.ocrScale ?? 2.0)
+      bbox = findOcrWordBBox(layout.ocrWords, det.text, layout.height, layout.ocrScale ?? 2.0, occurrence)
     } else if (layout) {
       // Pure text-layer page: text-layer coords are authoritative.
       bbox = findSpanBBox(layout.spans, det.text, occurrence)
@@ -191,20 +230,23 @@ export async function runDetection(
       ...det,
       boundingBox: bbox ?? { x: 0, y: 0, width: 0, height: 0 },
     }
-  }).filter((det) => det.boundingBox.width > 0 || det.boundingBox.height > 0 || det.source === 'MANUAL')
+  }).filter((det) => (det.boundingBox.width > 0 && det.boundingBox.height > 0) || det.source === 'MANUAL')
+
+  // Merge face detections (bounding boxes already resolved from image coordinates)
+  const allDetectionsWithBBox = [...detectionsWithBBox, ...faceDetectionsWithBBox]
 
   // ── 4. Encrypt redaction map ─────────────────────────────────────────────
   onProgress({ stage: 'encrypting' })
   const vault = new KeyVaultService()
   await vault.generateKey()
-  const map = KeyVaultService.buildMap(detectionsWithBBox, documentHash, documentName)
+  const map = KeyVaultService.buildMap(allDetectionsWithBBox, documentHash, documentName)
   const keyFileBlob = await vault.encrypt(map)
   const rawKeyBlob = await vault.exportKeyBlob()
 
   onProgress({ stage: 'done' })
 
   return {
-    detections: detectionsWithBBox,
+    detections: allDetectionsWithBBox,
     layouts,
     keyFileBlob,
     rawKeyBlob,
@@ -242,7 +284,15 @@ export async function buildRedactedPdf(
   const keyFileBlob = await vault.encrypt(finalMap)
 
   // Risk scoring runs synchronously; privacy summary runs async in its worker.
+  // Pre-redaction: all items treated as enabled (original document risk)
+  const allEnabled = detections.map((d) => ({ ...d, enabled: true }))
+  const { riskScore: preRedactionRiskScore, riskLevel: preRedactionRiskLevel } = computeRisk(allEnabled)
+  // Risk of items being redacted (what the user toggled on)
   const { riskScore, riskLevel } = computeRisk(detections)
+  // Residual risk: items NOT being redacted (remain in the document)
+  const residualItems = detections.filter((d) => !d.enabled).map((d) => ({ ...d, enabled: true }))
+  const { riskScore: residualRiskScore, riskLevel: residualRiskLevel } = computeRisk(residualItems)
+
   onProgress({ stage: 'summarizing' })
   const privacySummary = await generateSummary(detections).catch(() => '')
 
@@ -255,6 +305,10 @@ export async function buildRedactedPdf(
     pageCount: detectionResult.pageCount,
     riskScore,
     riskLevel,
+    preRedactionRiskScore,
+    preRedactionRiskLevel,
+    residualRiskScore,
+    residualRiskLevel,
     privacySummary,
   }
 }

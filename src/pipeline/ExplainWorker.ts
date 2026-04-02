@@ -58,7 +58,7 @@ export function buildExplainPrompt(detections: Detection[]): string {
     .map(([label, n]) => `${n} ${label.toLowerCase()}${n > 1 ? 's' : ''}`)
     .join(', ')
 
-  return `Summarize the privacy risk in a document containing: ${items}. Write exactly one plain English sentence starting with "This document".`
+  return `Summarize in one plain sentence what personal data was found and redacted in a document containing: ${items}. Start with "This document".`
 }
 
 export function generateSummary(detections: Detection[]): Promise<string> {

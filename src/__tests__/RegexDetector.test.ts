@@ -302,10 +302,10 @@ describe('Address detection', () => {
 // Health data — defaultEnabled: false
 // ---------------------------------------------------------------------------
 describe('Health data detection', () => {
-  it('detects ICD-10 code but does NOT auto-enable it', () => {
+  it('detects ICD-10 code and auto-enables it', () => {
     const match = detect('Diagnosis: J18.9').find((d) => d.type === 'HEALTH_DATA')
     expect(match).toBeTruthy()
-    expect(match!.enabled).toBe(false)
+    expect(match!.enabled).toBe(true)
   })
 
   it('detects blood type but does NOT auto-enable it', () => {
@@ -323,13 +323,13 @@ describe('Health data detection', () => {
   it('detects medications label value', () => {
     const match = detect('Medications: Metoprolol 50mg').find((d) => d.type === 'HEALTH_DATA')
     expect(match).toBeTruthy()
-    expect(match!.enabled).toBe(false)
+    expect(match!.enabled).toBe(true)
   })
 
   it('detects diagnosis label value', () => {
     const match = detect('Diagnosis: Acute myocardial infarction').find((d) => d.type === 'HEALTH_DATA')
     expect(match).toBeTruthy()
-    expect(match!.enabled).toBe(false)
+    expect(match!.enabled).toBe(true)
   })
 
   it('detects blood group (B-)', () => {

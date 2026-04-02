@@ -6,8 +6,11 @@ import de from './de.json'
 import fr from './fr.json'
 import it from './it.json'
 import es from './es.json'
+import pt from './pt.json'
+import nl from './nl.json'
+import pl from './pl.json'
 
-const LOCALES: Record<Language, Record<string, string>> = { en, de, fr, it, es }
+const LOCALES: Record<Language, Record<string, string>> = { en, de, fr, it, es, pt, nl, pl }
 
 export function t(locale: Language, key: string, vars?: Record<string, string | number>): string {
   const dict = LOCALES[locale]

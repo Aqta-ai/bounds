@@ -20,7 +20,7 @@ Please open an issue before starting large changes so we can align on approach. 
 
 ---
 
-## 🙋‍♀️ Getting Help
+## Getting Help
 
 | Channel | Use for |
 |---------|---------|
@@ -30,7 +30,7 @@ Please open an issue before starting large changes so we can align on approach. 
 
 ---
 
-## 📜 Code of Conduct
+## Code of Conduct
 
 We are committed to a welcoming environment for all contributors.
 
@@ -43,20 +43,20 @@ Violations may result in warnings or bans. Report issues to [hello@aqta.ai](mail
 
 ---
 
-## 🏆 Recognition
+## Recognition
 
 Contributors are listed in the README, credited in release notes, and mentioned in blog posts (with permission).
 
 ---
 
-## 📄 License
+## Licence
 
 By contributing, you agree that your contributions will be licensed under the [MIT Licence](LICENSE).
 
 ---
 
-## 🙏 Thank You
+## Thank You
 
-Every contribution makes a difference. Whether you're fixing a typo, reporting a bug, or adding a feature — thank you for helping make the world's data safer.
+Every contribution makes a difference. Whether you're fixing a typo, reporting a bug, or adding a feature, thank you for helping make the world's data safer.
 
-**Ready to contribute?** [Fork the repo](https://github.com/Aqta-ai/bounds) and start coding! 🚀
+**Ready to contribute?** [Fork the repo](https://github.com/Aqta-ai/bounds) and start coding.

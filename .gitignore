@@ -37,3 +37,29 @@ pnpm-debug.log*
 # Test coverage
 coverage/
 .vercel
+
+# Large vendor binaries — fetched at build/runtime, not committed
+public/tesseract-core-lstm.wasm.js
+public/tesseract-core-simd-lstm.wasm.js
+public/tesseract-worker.min.js
+public/eng.traineddata.gz
+public/ultraface-320.onnx
+public/models/
+
+# Demo assets — photos and generated PDFs not committed (privacy + size)
+public/lea.jpeg
+public/demo-patient-report.pdf
+
+# Generated/packaged artifacts
+bounds-one-pager.pdf
+*.zip
+
+# Demo videos
+public/plane-demo.mp4
+
+# Pitch/presentation files — not part of the product
+pitch.html
+finals-slide.html
+print.html
+public/anya.png
+public/banner.html

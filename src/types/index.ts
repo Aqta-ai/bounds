@@ -18,7 +18,7 @@ export type PiiType =
   | 'PROPRIETARY'
   | 'LEGAL_CLAUSE'
 
-export type DetectionSource = 'NER' | 'REGEX' | 'OCR' | 'MANUAL'
+export type DetectionSource = 'NER' | 'REGEX' | 'OCR' | 'MANUAL' | 'FACE'
 
 export interface BBox {
   x: number
@@ -37,6 +37,7 @@ export interface Detection {
   confidence: number // 0–1
   source: DetectionSource
   enabled: boolean   // user can toggle individual detections
+  ruleId?: string    // e.g. 'email', 'swiss_ahv', 'label_person', 'ner_bert'
 }
 
 export interface OcrWord {
@@ -78,16 +79,27 @@ export interface RedactionMap {
   }>
 }
 
+export interface Annotation {
+  id: string
+  page: number   // 1-indexed, shown to user
+  text: string
+  bbox?: BBox    // PDF user-space position; if absent, defaults to top-right corner
+}
+
 export interface RedactionOptions {
   color: { r: number; g: number; b: number }  // 0–1 per channel
   labelStyle: 'blank' | 'token'
   watermark: { enabled: boolean; text: string; opacity: number }
+  footer: { enabled: boolean; text: string }
+  annotations: Annotation[]
 }
 
 export const DEFAULT_REDACTION_OPTIONS: RedactionOptions = {
   color: { r: 0, g: 0, b: 0 },
   labelStyle: 'blank',
   watermark: { enabled: false, text: 'CONFIDENTIAL', opacity: 0.15 },
+  footer: { enabled: false, text: `Redacted on ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })} · Bounds · bounds.aqta.ai` },
+  annotations: [],
 }
 
 /** Returned after detection + encryption pass (before PDF is generated). */
@@ -113,9 +125,13 @@ export interface PipelineResult {
   rawKeyBlob: Blob     // AES key bytes (.key)
   documentName: string
   pageCount: number
-  privacySummary?: string  // AI-generated plain-English risk summary
-  riskLevel: RiskLevel     // computed from detection types + counts
-  riskScore: number        // raw weighted score
+  privacySummary?: string       // AI-generated plain-English risk summary
+  riskLevel: RiskLevel          // risk of items being redacted
+  riskScore: number             // raw weighted score of items being redacted
+  preRedactionRiskScore: number // original document risk (all detected PII)
+  preRedactionRiskLevel: RiskLevel
+  residualRiskScore: number     // risk remaining after redaction (disabled items)
+  residualRiskLevel: RiskLevel
 }
 
 export type PipelineStep =
@@ -125,6 +141,7 @@ export type PipelineStep =
   | { stage: 'loading_model'; modelProgress: number }
   | { stage: 'detecting_ner'; progress: number; page: number; total: number }
   | { stage: 'detecting_ocr'; progress: number; page: number; total: number }
+  | { stage: 'detecting_faces'; progress: number; page: number; total: number }
   | { stage: 'redacting'; progress: number }
   | { stage: 'encrypting' }
   | { stage: 'summarizing' }
@@ -133,4 +150,4 @@ export type PipelineStep =
 
 export type AppStep = 0 | 1 | 2 | 3
 
-export type Language = 'en' | 'de' | 'fr' | 'it' | 'es'
+export type Language = 'en' | 'de' | 'fr' | 'it' | 'es' | 'pt' | 'nl' | 'pl'

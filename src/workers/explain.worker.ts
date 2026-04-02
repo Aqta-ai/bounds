@@ -5,6 +5,10 @@ import { pipeline, env } from '@xenova/transformers'
 
 env.allowRemoteModels = true
 env.allowLocalModels = false
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+;(env as any).backends.onnx.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.14.0/dist/'
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+;(env as any).backends.onnx.wasm.numThreads = 1
 
 type Text2TextPipeline = Awaited<ReturnType<typeof pipeline<'text2text-generation'>>>
 

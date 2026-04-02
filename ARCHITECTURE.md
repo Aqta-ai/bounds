@@ -56,9 +56,11 @@ graph TD
 
 4. **NER detection** (`NERWorker`) — A quantised multilingual BERT model (`Xenova/bert-base-multilingual-cased-ner-hrl`, ~430 MB ONNX, cached in IndexedDB after first load) runs in a Web Worker via `@xenova/transformers`. Returns entity spans (PERSON, ORG, ADDRESS, MISC) with confidence scores. Deduplicates against regex detections to avoid double-tagging.
 
-5. **Bounding box resolution** — Each detection's text span is matched back to its PDF coordinates so redaction boxes can be drawn precisely.
+5. **Face detection** (`FaceDetector`) — Uses the browser's native `FaceDetector` API (where available) to detect faces in image-only PDF pages. Bounding boxes are sanity-checked (size and aspect ratio) before being added as `FACE` detections.
 
-6. **Encryption** (`KeyVaultService`) — A fresh AES-256-GCM key is generated per session using the browser's built-in `crypto.subtle` API. The full redaction map (token → original value) is encrypted and written to a `.bounds` file. The raw key bytes are written to a `.key` file. The `.bounds` file contains only ciphertext — it is cryptographically useless without the `.key` file.
+6. **Bounding box resolution** — Each detection's text span is matched back to its PDF coordinates so redaction boxes can be drawn precisely.
+
+7. **Encryption** (`KeyVaultService`) — A fresh AES-256-GCM key is generated per session using the browser's built-in `crypto.subtle` API. The full redaction map (token → original value) is encrypted and written to a `.bounds` file. The raw key bytes are written to a `.key` file. The `.bounds` file contains only ciphertext — it is cryptographically useless without the `.key` file.
 
 ### Phase 2 — Export
 
@@ -68,15 +70,16 @@ graph TD
 
 ## Reversible redaction
 
-After redacting, the user downloads three files:
+After redacting, the user downloads four files:
 
 | File | Contents | Safe to share? |
 |---|---|---|
 | `document-redacted.pdf` | Original PDF with PII replaced by solid boxes | ✅ Yes |
 | `document.bounds` | AES-256-GCM encrypted redaction map (IV + ciphertext + plaintext summary of counts only) | ✅ Yes (useless without `.key`) |
 | `document.key` | Raw 32-byte AES key | ❌ Keep secret |
+| `document-audit.json` | Timestamped log of detection types and counts (no document content) | ✅ Yes |
 
-To restore the original: drag all three files back into Bounds. The `.bounds` and `.key` files are both required — neither is sufficient alone.
+To restore the original: drag the `.bounds` and `.key` files back into Bounds. Both are required — neither is sufficient alone.
 
 The `.bounds` file exposes only non-sensitive metadata in plaintext (filename, timestamp, count of redacted items by type — never the original values).
 
@@ -104,9 +107,9 @@ The `.bounds` file exposes only non-sensitive metadata in plaintext (filename, t
 
 ## Supported languages
 
-English · German · French · Italian · Spanish
+English · German · French · Italian · Spanish · Portuguese · Dutch · Polish
 
-Language selection affects: OCR engine language pack, regex locale rules, and the NER model (multilingual BERT handles all five natively).
+Language selection affects: OCR engine language pack, regex locale rules, and the NER model (multilingual BERT handles all eight natively).
 
 ---
 
@@ -129,14 +132,14 @@ There is no database, no backend, and no environment variables. The entire appli
 
 ## PWA
 
-`vite-plugin-pwa` (Workbox-based) is installed. When configured, it will:
+`vite-plugin-pwa` (Workbox-based) is configured in `vite.config.ts`. It:
 
-- Register a service worker that pre-caches the app shell and static assets
-- Cache the ONNX model files and WASM binaries in IndexedDB/Cache Storage after the first load
-- Enable full offline use after the initial visit
-- Make Bounds installable as a native-feeling app on desktop and mobile
+- Registers a service worker that pre-caches the app shell and static assets
+- Caches the ONNX model files and WASM binaries in IndexedDB/Cache Storage after the first load
+- Enables full offline use after the initial visit
+- Makes Bounds installable as a native-feeling app on desktop and mobile
 
-Service worker registration and Web App Manifest are not yet wired into `vite.config.ts` — this is in progress.
+The service worker is disabled in dev mode (`devOptions: { enabled: false }`) to prevent stale cache from intercepting Vite's HMR requests.
 
 ---
 
@@ -164,6 +167,7 @@ src/
 │   ├── RegexDetector.ts       — locale-aware structured PII patterns
 │   ├── NERWorker.ts           — BERT NER bridge to Web Worker
 │   ├── OCRWorker.ts           — tesseract.js bridge to Web Worker
+│   ├── FaceDetector.ts        — browser Face Detection API with bbox sanity checks
 │   └── KeyVaultService.ts     — AES-256-GCM encrypt/decrypt vault
 ├── workers/
 │   ├── ner.worker.ts          — Web Worker: @xenova/transformers inference
@@ -176,7 +180,7 @@ src/
 │   ├── ExportPanel.tsx
 │   └── ...
 ├── types/index.ts             — Detection, RedactionMap, PipelineStep, etc.
-├── i18n/                      — UI strings (en, de, fr, it, es)
+├── i18n/                      — UI strings (en, de, fr, it, es, pt, nl, pl)
 └── utils/
     ├── fileUtils.ts
     └── colors.ts

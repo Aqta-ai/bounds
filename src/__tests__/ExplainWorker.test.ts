@@ -34,12 +34,12 @@ describe('buildExplainPrompt', () => {
 
   it('prompt starts with instruction prefix', () => {
     const prompt = buildExplainPrompt([det('EMAIL')])
-    expect(prompt).toMatch(/^Summarize the privacy risk/)
+    expect(prompt).toMatch(/^Summarize in one plain sentence/)
   })
 
   it('prompt ends with sentence-start instruction', () => {
     const prompt = buildExplainPrompt([det('EMAIL')])
-    expect(prompt).toContain('starting with "This document"')
+    expect(prompt).toContain('Start with "This document"')
   })
 
   it('includes human-readable label, not raw PiiType key', () => {

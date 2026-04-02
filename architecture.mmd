@@ -27,6 +27,7 @@ flowchart TD
         RX["RegexDetector\n40+ locale-aware patterns\nIBAN · email · phone · SSN…"]
         NER["NER via NERWorker\nnames · orgs · locations"]
         OCR["OCR via OCRWorker\nscanned / image pages"]
+        FD["FaceDetector\nbrowser Face Detection API\nbbox sanity checks"]
     end
 
     subgraph Vault["KeyVaultService"]
@@ -47,9 +48,11 @@ flowchart TD
     RD --> EL
     EL -->|text spans + page layouts| RX
     EL -->|sparse / image pages| OCR
+    EL -->|image pages| FD
     RX -->|regex detections| RD
     NER -->|NER detections| RD
     OCR -->|OCR words + detections| RD
+    FD -->|face bounding boxes| RD
     RD -->|detections + layouts| BB
     BB -->|bounding boxes resolved| KG
     KG -->|encrypted vault| RD

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Privacy Policy — Bounds</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+    background: #f9fafb;
+    color: #1f2937;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px 24px;
+  }
+  .card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 40px;
+    max-width: 520px;
+    width: 100%;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+  .logo {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 24px; text-decoration: none;
+  }
+  .logo-text {
+    font-size: 1.2rem; font-weight: 900;
+    letter-spacing: -0.02em; color: #111827;
+  }
+  .logo-text span { color: #009B72; }
+  h1 { font-size: 1.25rem; font-weight: 700; color: #111827; }
+  .date { font-size: 0.75rem; color: #9ca3af; margin-top: 4px; margin-bottom: 32px; }
+  .item { display: flex; gap: 12px; margin-bottom: 20px; }
+  .icon {
+    width: 20px; height: 20px; flex-shrink: 0; margin-top: 1px;
+    color: #009B72;
+  }
+  .item h3 { font-size: 0.875rem; font-weight: 600; color: #111827; margin-bottom: 4px; }
+  .item p { font-size: 0.8rem; color: #6b7280; line-height: 1.6; }
+  code { font-size: 0.75rem; background: #f3f4f6; padding: 1px 5px; border-radius: 4px; }
+  .footer {
+    margin-top: 32px; padding-top: 20px; border-top: 1px solid #f3f4f6;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 0.75rem; color: #9ca3af;
+  }
+  .footer a { color: #009B72; text-decoration: none; }
+  .footer a:hover { text-decoration: underline; }
+  .back { display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; color: #6b7280; text-decoration: none; margin-bottom: 20px; }
+  .back:hover { color: #111827; }
+</style>
+</head>
+<body>
+  <div style="max-width:520px;width:100%;">
+    <a href="/" class="back">← Back to Bounds</a>
+  </div>
+  <div class="card">
+    <a href="/" class="logo">
+      <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="32" height="32" rx="8" fill="#009B72"/>
+        <circle cx="16" cy="16" r="6" fill="white"/>
+      </svg>
+      <span class="logo-text">b<span>●</span>unds</span>
+    </a>
+
+    <h1>Privacy Policy</h1>
+    <p class="date">Effective 1 April 2026 · bounds.aqta.ai</p>
+
+    <div class="item">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M18.364 5.636a9 9 0 1 1-12.728 0M12 3v9"/></svg>
+      <div>
+        <h3>No data ever leaves your device</h3>
+        <p>All PDF processing, AI inference, and encryption happens entirely inside your browser. We have no server that receives your files — not even metadata.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      <div>
+        <h3>No analytics, no tracking</h3>
+        <p>We do not use Google Analytics, Mixpanel, or any other tracking service. We do not know how many people use Bounds or what documents they process.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/><path d="M12 8v4l3 3"/></svg>
+      <div>
+        <h3>No cookies</h3>
+        <p>Bounds sets no cookies. Your language preference is stored in <code>localStorage</code> on your device only — never sent anywhere.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      <div>
+        <h3>What stays on your device</h3>
+        <p>AI models (BERT, Tesseract) are cached in your browser's IndexedDB after the first load. You can clear them any time via browser settings. No personal data is ever cached.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      <div>
+        <h3>Open source and auditable</h3>
+        <p>Every claim above is verifiable. Open DevTools → Network and upload a PDF — you will see zero outgoing requests. The full source is on <a href="https://github.com/Aqta-ai/bounds" target="_blank" rel="noopener">GitHub</a> under MIT licence.</p>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span>Bounds · <a href="mailto:hello@aqta.ai">hello@aqta.ai</a></span>
+      <a href="https://github.com/Aqta-ai/bounds" target="_blank" rel="noopener">View source</a>
+    </div>
+  </div>
+</body>
+</html>

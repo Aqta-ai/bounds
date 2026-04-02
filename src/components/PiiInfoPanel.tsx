@@ -3,15 +3,19 @@ import { ChevronDown, ChevronUp } from 'lucide-react'
 
 const PII_ITEM_KEYS = [
   'pii_item_name',
+  'pii_item_dob',
+  'pii_item_face',
   'pii_item_address',
   'pii_item_phone',
   'pii_item_email',
+  'pii_item_url',
   'pii_item_national_id',
   'pii_item_ahv',
   'pii_item_passport',
   'pii_item_patient',
   'pii_item_bank',
   'pii_item_credit_card',
+  'pii_item_health',
 ]
 
 interface Props {

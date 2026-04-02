@@ -1,12 +1,14 @@
 import type { Language, OcrWord } from '../types'
+import { createWorker } from 'tesseract.js'
 
 // ---------------------------------------------------------------------------
-// OCRWorker — main-thread facade for the ocr.worker.ts Web Worker.
-// Used only for pages that have no extractable text (scanned image PDFs).
+// OCRWorker — Tesseract.js facade. Runs directly on the main thread.
+// Tesseract.js v5 creates its own internal sub-worker; wrapping it in an
+// additional Web Worker causes nested-worker failures in ES-module contexts.
+// All Tesseract assets are served locally so OCR works fully offline.
 // ---------------------------------------------------------------------------
 
-/** Single source of truth for the render scale used during OCR. Must match layout.ocrScale in RedactionPipeline. */
-export const OCR_RENDER_SCALE = 2.0
+export const OCR_RENDER_SCALE = 3.0
 
 const TESSERACT_LANG_MAP: Record<Language, string> = {
   en: 'eng',
@@ -14,6 +16,9 @@ const TESSERACT_LANG_MAP: Record<Language, string> = {
   fr: 'fra',
   it: 'ita',
   es: 'spa',
+  pt: 'por',
+  nl: 'nld',
+  pl: 'pol',
 }
 
 export interface OcrResult {
@@ -21,81 +26,118 @@ export interface OcrResult {
   words: OcrWord[]
 }
 
-interface OCRJob {
-  id: number
-  resolve: (result: OcrResult) => void
-  reject: (err: Error) => void
+let _tesseractWorker: Awaited<ReturnType<typeof createWorker>> | null = null
+let _loadedLang: string | null = null
+
+async function getTesseractWorker(lang: string) {
+  if (_tesseractWorker && _loadedLang === lang) return _tesseractWorker
+  if (_tesseractWorker) {
+    await _tesseractWorker.terminate()
+    _tesseractWorker = null
+  }
+  _tesseractWorker = await createWorker(lang, 1, {
+    workerPath: '/tesseract-worker.min.js',
+    corePath: '/tesseract-core-simd-lstm.wasm.js',
+    langPath: '/',
+    workerBlobURL: false,
+  })
+  // preserve_interword_spaces: retain spatial word gaps — critical for multi-word
+  // names so "Jean Dubois" is tokenised as one entity rather than two fragments.
+  // Wrapped in try/catch — tesseract.js v5 parameter passthrough is inconsistent;
+  // if unsupported it should degrade gracefully rather than breaking OCR entirely.
+  try {
+    await _tesseractWorker.setParameters({ preserve_interword_spaces: '1' })
+  } catch (e) {
+    console.warn('preserve_interword_spaces not supported by this tesseract.js build, skipping', e)
+  }
+  _loadedLang = lang
+  return _tesseractWorker
 }
 
-let _worker: Worker | null = null
-let _jobCounter = 0
-const _pendingJobs = new Map<number, OCRJob>()
+// ---------------------------------------------------------------------------
+// Reconstruct natural reading order from OCR word bounding boxes.
+//
+// Tesseract's default text output reads in the order it segments text blocks —
+// on two-column forms this means the entire left column (all labels) comes
+// before the right column (all values). "Emergency contact:" and "Jean Dubois"
+// then sit ~20 lines apart in the text stream, breaking every label-context
+// regex that uses a tight whitespace budget.
+//
+// Fix: group words into rows by y-coordinate proximity, sort each row left→right,
+// then join. This restores "Emergency contact: Jean Dubois" as a single line
+// regardless of how Tesseract segmented the page.
+// ---------------------------------------------------------------------------
+function reconstructRowText(words: OcrWord[]): string {
+  if (words.length === 0) return ''
+  const heights = words.map((w) => w.y1 - w.y0).filter((h) => h > 0).sort((a, b) => a - b)
+  const medH = heights.length ? heights[Math.floor(heights.length / 2)] : 20
+  // Allow words within 0.75 line-heights of each other to be on the same row.
+  // ID card forms render labels and values 18px apart at canvas scale — a tighter
+  // tolerance would split them onto separate lines, breaking label-context regexes.
+  const tol = Math.max(8, medH * 0.75)
 
-function getWorker(): Worker {
-  if (!_worker) {
-    _worker = new Worker(new URL('../workers/ocr.worker.ts', import.meta.url), { type: 'module' })
-    _worker.onmessage = (e: MessageEvent<{ id: number; text?: string; words?: OcrWord[]; error?: string }>) => {
-      const { id, text, words, error } = e.data
-      const job = _pendingJobs.get(id)
-      if (!job) return
-      _pendingJobs.delete(id)
-      if (error) {
-        job.reject(new Error(error))
-      } else {
-        job.resolve({ text: text ?? '', words: words ?? [] })
-      }
-    }
-    _worker.onerror = (e) => {
-      for (const job of _pendingJobs.values()) {
-        job.reject(new Error(e.message))
-      }
-      _pendingJobs.clear()
-      _worker = null
+  const sorted = [...words].sort((a, b) => a.y0 - b.y0)
+  const rows: OcrWord[][] = []
+  let row: OcrWord[] = [sorted[0]]
+  let rowY = sorted[0].y0
+
+  for (let i = 1; i < sorted.length; i++) {
+    if (sorted[i].y0 - rowY <= tol) {
+      row.push(sorted[i])
+    } else {
+      rows.push(row)
+      row = [sorted[i]]
+      rowY = sorted[i].y0
     }
   }
-  return _worker
+  rows.push(row)
+
+  return rows
+    .map((r) => [...r].sort((a, b) => a.x0 - b.x0).map((w) => w.text).join(' '))
+    .join('\n')
 }
 
-/**
- * Run OCR on an ImageData blob for a single PDF page.
- * Returns extracted text and word-level bounding boxes (in image pixel coords).
- */
-export function ocrPageFull(imageBlob: Blob, language: Language): Promise<OcrResult> {
-  return new Promise((resolve, reject) => {
-    const id = ++_jobCounter
-    const tesseractLang = TESSERACT_LANG_MAP[language]
+export async function ocrPageFull(imageBlob: Blob, language: Language): Promise<OcrResult> {
+  const lang = TESSERACT_LANG_MAP[language]
+  const worker = await getTesseractWorker(lang)
+  const { data } = await worker.recognize(imageBlob)
 
-    const timer = setTimeout(() => {
-      if (_pendingJobs.has(id)) {
-        _pendingJobs.delete(id)
-        reject(new Error('OCR timed out'))
-      }
-    }, 90_000)
+  const allWords: OcrWord[] = (data.words ?? [])
+    .filter((w) => w.text.trim().length > 0)
+    .map((w) => ({
+      text: w.text,
+      confidence: w.confidence,
+      x0: w.bbox.x0,
+      y0: w.bbox.y0,
+      x1: w.bbox.x1,
+      y1: w.bbox.y1,
+    }))
 
-    _pendingJobs.set(id, {
-      id,
-      resolve: (r) => { clearTimeout(timer); resolve(r) },
-      reject: (e) => { clearTimeout(timer); reject(e) },
-    })
-    try {
-      getWorker().postMessage({ id, imageBlob, lang: tesseractLang })
-    } catch (err) {
-      clearTimeout(timer)
-      _pendingJobs.delete(id)
-      reject(err instanceof Error ? err : new Error(String(err)))
-    }
-  })
+  // Use BOTH Tesseract's raw text AND spatially-reconstructed row text.
+  //
+  // Why both? Tesseract's raw `data.text` preserves token boundaries like
+  // "04.07.1989" as a single string — essential for date/IBAN/phone regexes.
+  // `reconstructRowText` restores left→right reading order across columns —
+  // essential for label-context regexes on two-column forms where Tesseract
+  // reads the entire left column before the right ("Date of birth:" ... 20 lines
+  // later ... "1986-05-29"). Combining both means neither class of regex breaks.
+  const reconstructed = allWords.length > 0 ? reconstructRowText(allWords) : ''
+  const text = reconstructed ? `${data.text}\n${reconstructed}` : data.text
+
+  // Only high-confidence words for bbox lookup — avoids placing redaction boxes
+  // on OCR noise characters that would produce misaligned overlays.
+  const words = allWords.filter((w) => w.confidence >= 20)
+
+  return { text, words }
 }
 
-/** Convenience wrapper that returns plain text only. */
 export async function ocrPage(imageBlob: Blob, language: Language): Promise<string> {
   return (await ocrPageFull(imageBlob, language)).text
 }
 
 export function terminateOCRWorker(): void {
-  _worker?.terminate()
-  _worker = null
-  _pendingJobs.clear()
+  _tesseractWorker?.terminate()
+  _tesseractWorker = null
 }
 
 /**

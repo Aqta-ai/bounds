@@ -6,7 +6,7 @@
   "step_review": "Review",
   "step_export": "Export",
   "hero_headline": "Redact PDFs. Nothing leaves your device.",
-  "hero_tagline": "AI detection. Reversible encryption. Timestamped audit trail.",
+  "hero_tagline": "Redact before you prompt.",
   "hero_sub": "BERT NER detects names, addresses, IBANs, health data, and more across 104 languages, entirely in your browser. Permanently flat redacted PDF. Encrypted vault to restore originals. Audit log for compliance. No server. No account.",
   "drop_prompt": "Drop a PDF here or click to select",
   "drop_hint": "Only PDF files. Nothing leaves your device.",

@@ -79,7 +79,9 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 The source code is licensed under the [MIT Licence](LICENSE).
 
-"Bounds" and the Bounds logo are trademarks of Aqta Technologies Ltd and are not covered by the MIT Licence. You may fork and modify the code, but you may not use the Bounds name or logo to market a derivative product.
+**Bounds** is the open-source community edition. **Bounds AI** is the proprietary enterprise edition with additional features, managed by Aqta Technologies Ltd.
+
+"Bounds" and "Bounds AI" are trademarks of Aqta Technologies Ltd and are not covered by the MIT Licence. You may fork and modify the code, but you may not use the Bounds or Bounds AI name or logo to market a derivative product.
 
 ---
 

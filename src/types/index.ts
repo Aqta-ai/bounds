@@ -18,7 +18,7 @@ export type PiiType =
   | 'PROPRIETARY'
   | 'LEGAL_CLAUSE'
 
-export type DetectionSource = 'NER' | 'REGEX' | 'OCR' | 'MANUAL' | 'FACE'
+export type DetectionSource = 'NER' | 'REGEX' | 'OCR' | 'MANUAL' | 'FACE' | 'GEMMA'
 
 export interface BBox {
   x: number

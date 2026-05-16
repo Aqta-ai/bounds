@@ -41,6 +41,15 @@
     "typescript": "^5.5.3",
     "vite": "^5.3.1",
     "vite-plugin-pwa": "^1.2.0",
-    "vitest": "^1.6.0"
+    "vitest": "^1.6.0",
+    "@mlc-ai/web-llm": "^0.2.83"
+  },
+  "peerDependencies": {
+    "@mlc-ai/web-llm": "^0.2.79"
+  },
+  "peerDependenciesMeta": {
+    "@mlc-ai/web-llm": {
+      "optional": true
+    }
   }
 }

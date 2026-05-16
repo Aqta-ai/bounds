@@ -226,6 +226,10 @@ export function App() {
           <div className="flex flex-col items-center gap-4 w-full">
             {/* Hero */}
             <div className="text-center max-w-lg">
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-green border border-brand-green/30 bg-brand-green/5 rounded-full px-3 py-1 mb-2">
+                <span aria-hidden className="w-1.5 h-1.5 rounded-full bg-brand-green" />
+                Now with Gemma 4 contextual PHI
+              </span>
               <h1 className="text-3xl font-bold text-gray-900 tracking-tight leading-tight">
                 Redact PDFs.<br />Nothing leaves your device.
               </h1>
@@ -233,7 +237,7 @@ export function App() {
                 {t('hero_tagline')}
               </p>
               <div className="flex flex-wrap items-center justify-center gap-2 mt-3">
-                {['GDPR Art. 9', 'FADP Art. 5', 'HIPAA', 'AES-256-GCM', '104 languages'].map((badge) => (
+                {['Gemma 4 inside', 'GDPR Art. 9', 'FADP Art. 5', 'HIPAA', 'AES-256-GCM', '104 languages'].map((badge) => (
                   <span key={badge} className="text-xs font-medium text-gray-400 border border-gray-200 rounded-full px-2.5 py-0.5">{badge}</span>
                 ))}
               </div>

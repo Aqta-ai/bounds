@@ -205,7 +205,7 @@ export function App() {
               title="Click to learn how Bounds keeps your data private"
             >
               <WifiOff className="w-3 h-3" />
-              100% local · no uploads
+              On-device · no uploads
               <Info className="w-3 h-3 opacity-60" />
             </button>
           </div>

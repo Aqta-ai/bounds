@@ -7,7 +7,7 @@
 
 **Private PDF redaction. Everything runs in your browser. Nothing is uploaded.**
 
-Bounds finds and redacts personal information in PDFs using on-device AI. No server, no account, no data leaves your machine. Works offline.
+Bounds finds and redacts personal information in PDFs using on-device AI. No server, no account, no document content leaves your machine. Works offline after first load.
 
 > **Now with Gemma 4 contextual PHI.** Bounds ships a fifth detection layer powered by Google's Gemma 4 E2B running entirely in your browser (via WebLLM) or locally via Ollama. It catches the protected-health-information shapes that regex and named-entity recognition systematically miss — inline diagnoses, medication mentions, treatment narratives, indirect health context, sensitive social data, and genetic references. The HIPAA Safe Harbor #17 catch-all gap, closed without sending document bytes anywhere.
 >

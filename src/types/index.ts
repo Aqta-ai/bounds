@@ -37,7 +37,8 @@ export interface Detection {
   confidence: number // 0–1
   source: DetectionSource
   enabled: boolean   // user can toggle individual detections
-  ruleId?: string    // e.g. 'email', 'swiss_ahv', 'label_person', 'ner_bert'
+  ruleId?: string    // e.g. 'email', 'swiss_ahv', 'label_person', 'ner_bert', 'gemma:inline_diagnosis'
+  reason?: string    // optional human-readable justification, surfaced in the review UI as a tooltip (used by Gemma 4 contextual detections)
 }
 
 export interface OcrWord {

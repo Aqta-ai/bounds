@@ -9,7 +9,7 @@
 
 Bounds finds and redacts personal information in PDFs using on-device AI. No server, no account, no document content leaves your machine. Works offline after first load.
 
-> **Now with Gemma 4 contextual PHI.** Bounds ships a fifth detection layer powered by Google's Gemma 4 E2B running entirely in your browser (via WebLLM) or locally via Ollama. It catches the protected-health-information shapes that regex and named-entity recognition systematically miss: inline diagnoses, medication mentions, treatment narratives, indirect health context, sensitive social data, and genetic references. The HIPAA Safe Harbor #17 catch-all gap, closed without sending document bytes anywhere.
+> **Now with Gemma 4 contextual PHI.** Bounds ships a fifth detection layer powered by Google's Gemma 4 E2B running locally via Ollama. It catches the protected-health-information shapes that regex and named-entity recognition systematically miss: inline diagnoses, medication mentions, treatment narratives, indirect health context, sensitive social data, and genetic references. The HIPAA Safe Harbor #17 catch-all gap, closed without sending document bytes anywhere. The in-browser path activates the moment MLC ships a Gemma 4 WebLLM build.
 >
 > The Gemma 4 pipeline is open-sourced as a standalone toolkit at [Aqta-ai/bounds-gemma](https://github.com/Aqta-ai/bounds-gemma) (Apache-2.0). You can install it via `npm i bounds-gemma` and run the same contextual PHI detection against your own pipelines.
 
@@ -18,7 +18,7 @@ Bounds finds and redacts personal information in PDFs using on-device AI. No ser
 ## Features
 
 - **Five detection layers**: regex patterns (~99% on known patterns), BERT NER (10 trained languages with cross-lingual transfer across mBERT's 104-language pretraining corpus), Tesseract OCR (100% word accuracy on clean printed, 97.6% on noisy rotated/JPEG-compressed scans), face detection, **and Gemma 4 contextual PHI (~85% recall, 100% precision across French, Spanish, German, Hindi-Devanagari, Bengali via Ollama)**
-- **Gemma 4 in your browser**: `gemma-4-E2B-it-q4f16_1-MLC` via [@mlc-ai/web-llm](https://github.com/mlc-ai/web-llm), falls back to Ollama (`gemma4:e2b`) when available locally
+- **Gemma 4 via Ollama**: contextual layer uses `gemma4:e2b` running on a local Ollama daemon. The other four layers run with no extra install. WebLLM in-browser path is wired and activates when MLC publishes a Gemma 4 build.
 - **Reversible redaction**: AES-256-GCM encrypted vault lets you restore original values with a key file
 - **Works offline**: runs entirely in-browser via WebAssembly + WebGPU, works in airplane mode
 - **Batch processing**: drop multiple PDFs at once
@@ -51,7 +51,7 @@ npm install
 npm run dev
 ```
 
-On first use, the BERT NER model (~430 MB) downloads once and caches in the browser. The Gemma 4 E2B WebLLM model (~1.5 GB) downloads when you first enable contextual PHI in the settings panel. Subsequent runs are instant.
+On first use, the BERT NER model (~430 MB) downloads once and caches in the browser. The Gemma 4 contextual layer requires a local Ollama daemon with `ollama pull gemma4:e2b` (~7 GB); without it the other four layers run alone. Subsequent runs are instant.
 
 ```bash
 npm run build       # Production build

@@ -173,5 +173,6 @@
   "footer_privacy": "Privacy",
   "footer_github": "GitHub",
   "footer_chrome_ext": "Chrome extension",
-  "drop_privacy_note": "Tutta l'IA viene eseguita localmente via WebAssembly. Dopo il primo caricamento, nessun upload, nessun server."
+  "drop_privacy_note": "Tutta l'IA viene eseguita localmente via WebAssembly. Dopo il primo caricamento, nessun upload, nessun server.",
+  "about_extension": "Estensione Chrome intercetta i caricamenti PDF su qualsiasi sito (Gmail, portali pazienti, banche)."
 }

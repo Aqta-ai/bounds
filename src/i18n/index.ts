@@ -13,6 +13,8 @@ import ga from './ga.json'
 import th from './th.json'
 
 const LOCALES: Record<Language, Record<string, string>> = { en, de, fr, it, es, pt, nl, pl, ga, th }
+const STORAGE_KEY = 'bounds:lang'
+const VALID = new Set<Language>(['en', 'de', 'fr', 'it', 'es', 'pt', 'nl', 'pl', 'ga', 'th'])
 
 export function t(locale: Language, key: string, vars?: Record<string, string | number>): string {
   const dict = LOCALES[locale]
@@ -25,8 +27,20 @@ export function t(locale: Language, key: string, vars?: Record<string, string | 
   return str
 }
 
+function loadStoredLanguage(fallback: Language): Language {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (raw && VALID.has(raw as Language)) return raw as Language
+  } catch { /* private mode */ }
+  return fallback
+}
+
 export function useLanguage(initial: Language = 'en') {
-  const [language, setLanguage] = useState<Language>(initial)
+  const [language, setLanguageState] = useState<Language>(() => loadStoredLanguage(initial))
+  const setLanguage = useCallback((next: Language) => {
+    setLanguageState(next)
+    try { localStorage.setItem(STORAGE_KEY, next) } catch { /* private mode */ }
+  }, [])
   const translate = useCallback(
     (key: string, vars?: Record<string, string | number>) => t(language, key, vars),
     [language],

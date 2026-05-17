@@ -173,5 +173,6 @@
   "footer_privacy": "Privacy",
   "footer_github": "GitHub",
   "footer_chrome_ext": "Chrome extension",
-  "drop_privacy_note": "Alle AI draait lokaal via WebAssembly. Na het eerste laden: geen uploads, geen servers."
+  "drop_privacy_note": "Alle AI draait lokaal via WebAssembly. Na het eerste laden: geen uploads, geen servers.",
+  "about_extension": "Chrome-extensie onderschept PDF-uploads op elke site (Gmail, patiëntportalen, bankportalen)."
 }

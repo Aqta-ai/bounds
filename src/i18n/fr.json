@@ -173,5 +173,6 @@
   "footer_privacy": "Confidentialité",
   "footer_github": "GitHub",
   "footer_chrome_ext": "Extension Chrome",
-  "drop_privacy_note": "Toute l'IA s'exécute localement via WebAssembly. Après le premier chargement, aucun téléversement, aucun serveur."
+  "drop_privacy_note": "Toute l'IA s'exécute localement via WebAssembly. Après le premier chargement, aucun téléversement, aucun serveur.",
+  "about_extension": "Extension Chrome qui intercepte les téléversements PDF sur n'importe quel site (Gmail, portails patient, banques)."
 }

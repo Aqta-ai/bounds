@@ -1,4 +1,4 @@
-import { X, Github, Shield, Cpu, Lock, ScanText, FileText } from 'lucide-react'
+import { X, Github, Shield, Cpu, Lock, ScanText, FileText, Chrome } from 'lucide-react'
 
 interface AboutModalProps {
   onClose: () => void
@@ -56,6 +56,10 @@ export function AboutModal({ onClose, t }: AboutModalProps) {
           <li className="flex items-start gap-2.5 text-sm text-gray-600">
             <FileText className="w-4 h-4 text-brand-green mt-0.5 shrink-0" />
             <span>{t('about_audit')}</span>
+          </li>
+          <li className="flex items-start gap-2.5 text-sm text-gray-600">
+            <Chrome className="w-4 h-4 text-brand-green mt-0.5 shrink-0" />
+            <span>{t('about_extension')}</span>
           </li>
         </ul>
 

@@ -173,5 +173,6 @@
   "footer_privacy": "Datenschutz",
   "footer_github": "GitHub",
   "footer_chrome_ext": "Chrome-Erweiterung",
-  "drop_privacy_note": "Alle KI läuft lokal via WebAssembly. Nach dem ersten Laden: keine Uploads, keine Server."
+  "drop_privacy_note": "Alle KI läuft lokal via WebAssembly. Nach dem ersten Laden: keine Uploads, keine Server.",
+  "about_extension": "Chrome-Erweiterung fängt PDF-Uploads auf jeder Website ab (Gmail, Patientenportale, Bankportale)."
 }

@@ -173,5 +173,6 @@
   "footer_privacy": "Privacy",
   "footer_github": "GitHub",
   "footer_chrome_ext": "Chrome extension",
-  "drop_privacy_note": "AI ทั้งหมดทำงานบนเครื่องผ่าน WebAssembly หลังจากโหลดครั้งแรก ไม่มีการอัปโหลด ไม่มีเซิร์ฟเวอร์"
+  "drop_privacy_note": "AI ทั้งหมดทำงานบนเครื่องผ่าน WebAssembly หลังจากโหลดครั้งแรก ไม่มีการอัปโหลด ไม่มีเซิร์ฟเวอร์",
+  "about_extension": "ส่วนขยาย Chrome ดักจับการอัปโหลด PDF บนทุกเว็บไซต์ (Gmail, พอร์ทัลผู้ป่วย, ธนาคาร)."
 }

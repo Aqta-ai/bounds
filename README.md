@@ -94,7 +94,6 @@ Works on Vercel, Cloudflare Pages, Nginx, Docker. No backend required. The WebGP
 ## Related projects
 
 - **[Aqta-ai/bounds-gemma](https://github.com/Aqta-ai/bounds-gemma)**: the Gemma 4 contextual PHI pipeline as a standalone Apache-2.0 toolkit. Worker, parser, system prompt, unit tests, runnable smoke-test example. `npm i bounds-gemma`.
-- **[bounds.pro](https://bounds.pro)**: the proprietary enterprise edition with workspace, multi-tenant, audit, and encrypted vault management.
 
 ---
 

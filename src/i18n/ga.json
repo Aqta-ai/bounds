@@ -172,5 +172,6 @@
   "footer_about": "About",
   "footer_privacy": "Privacy",
   "footer_github": "GitHub",
-  "footer_chrome_ext": "Chrome extension"
+  "footer_chrome_ext": "Chrome extension",
+  "drop_privacy_note": "Ritheann an IS go léir go háitiúil trí WebAssembly. Tar éis an chéad luchtaithe, gan uaslódáil, gan freastalaí."
 }

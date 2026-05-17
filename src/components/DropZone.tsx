@@ -108,7 +108,7 @@ export function DropZone({ onFiles, language, onLanguageChange, t }: Props) {
       </button>
 
       <p className="text-xs text-gray-400 text-center">
-        All AI runs locally via WebAssembly. After first load, no uploads, no servers.
+        {t('drop_privacy_note')}
       </p>
 
       <LanguagePicker value={language} onChange={onLanguageChange} label={t('language_label')} />

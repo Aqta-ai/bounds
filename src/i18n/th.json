@@ -172,5 +172,6 @@
   "footer_about": "About",
   "footer_privacy": "Privacy",
   "footer_github": "GitHub",
-  "footer_chrome_ext": "Chrome extension"
+  "footer_chrome_ext": "Chrome extension",
+  "drop_privacy_note": "AI ทั้งหมดทำงานบนเครื่องผ่าน WebAssembly หลังจากโหลดครั้งแรก ไม่มีการอัปโหลด ไม่มีเซิร์ฟเวอร์"
 }

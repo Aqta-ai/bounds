@@ -172,5 +172,6 @@
   "footer_about": "À propos",
   "footer_privacy": "Confidentialité",
   "footer_github": "GitHub",
-  "footer_chrome_ext": "Extension Chrome"
+  "footer_chrome_ext": "Extension Chrome",
+  "drop_privacy_note": "Toute l'IA s'exécute localement via WebAssembly. Après le premier chargement, aucun téléversement, aucun serveur."
 }

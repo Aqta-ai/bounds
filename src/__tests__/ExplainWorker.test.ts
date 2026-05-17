@@ -34,7 +34,7 @@ describe('buildExplainPrompt', () => {
 
   it('prompt starts with instruction prefix', () => {
     const prompt = buildExplainPrompt([det('EMAIL')])
-    expect(prompt).toMatch(/^Summarize in one plain sentence/)
+    expect(prompt).toMatch(/^Summarise in one plain sentence/)
   })
 
   it('prompt ends with sentence-start instruction', () => {

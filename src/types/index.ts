@@ -152,4 +152,4 @@ export type PipelineStep =
 
 export type AppStep = 0 | 1 | 2 | 3
 
-export type Language = 'en' | 'de' | 'fr' | 'it' | 'es' | 'pt' | 'nl' | 'pl' | 'ga'
+export type Language = 'en' | 'de' | 'fr' | 'it' | 'es' | 'pt' | 'nl' | 'pl' | 'ga' | 'th'

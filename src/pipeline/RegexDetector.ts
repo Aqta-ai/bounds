@@ -384,6 +384,45 @@ const LABEL_CONTEXT_PATTERNS: PatternDef[] = [
     confidence: 0.93,
     ruleName: 'MRZ data line',
   },
+  // ---------------------------------------------------------------------------
+  // Global national-ID formats. These do not depend on the user's UI locale —
+  // an Indian / Brazilian / Nigerian / Thai document carries the same shape
+  // regardless of who is reviewing it.
+  // ---------------------------------------------------------------------------
+  // Aadhaar (India): 12 digits, conventionally grouped 4-4-4 with spaces or hyphens.
+  // Verhoeff-checksum-validated by UIDAI; we keep the regex format-only since a
+  // pure-numeric Aadhaar inside a paragraph is almost certainly the real thing.
+  {
+    type: 'ID_NUMBER',
+    regex: /\b[2-9]\d{3}[-\s]?\d{4}[-\s]?\d{4}\b/g,
+    confidence: 0.88,
+    ruleName: 'Aadhaar (India)',
+  },
+  // CPF (Brazil): 11 digits, traditional format XXX.XXX.XXX-XX. Required on
+  // every Brazilian SUS health record and patient form.
+  {
+    type: 'ID_NUMBER',
+    regex: /\b\d{3}\.\d{3}\.\d{3}-\d{2}\b/g,
+    confidence: 0.95,
+    ruleName: 'CPF (Brazil)',
+  },
+  // NIN (Nigeria): 11 digits issued by the National Identity Management
+  // Commission. Bare-numeric, so we require a label prefix to avoid colliding
+  // with random 11-digit numbers.
+  {
+    type: 'ID_NUMBER',
+    regex: /(?<=\b(?:NIN|National\s+Identification\s+Number)\s*[:\-]?\s{0,5})\d{11}\b/gi,
+    confidence: 0.96,
+    ruleName: 'NIN (Nigeria)',
+  },
+  // Thai National ID: 13 digits, conventionally grouped 1-4-5-2-1 with hyphens.
+  // E.g. "3-1009-12345-67-8". Required on every Thai health record (MOPH).
+  {
+    type: 'ID_NUMBER',
+    regex: /\b[1-8]-\d{4}-\d{5}-\d{2}-\d\b/g,
+    confidence: 0.95,
+    ruleName: 'Thai National ID',
+  },
 ]
 
 // ---------------------------------------------------------------------------
@@ -556,6 +595,12 @@ const LOCALE_PATTERNS: Record<Language, PatternDef[]> = {
     // Irish Medical Council number: 5–6 digit registration number, often
     // prefixed "MCN" or "IMC", e.g. "MCN 012345".
     { type: 'ID_NUMBER', regex: /\b(?:MCN|IMC)\s?\d{5,6}\b/gi, confidence: 0.85 },
+  ],
+  th: [
+    // Thai postcode: 5 digits, often after the province name. Bare-digit
+    // form is collision-prone, so we require it to follow a Thai place name
+    // (handles Thai script + Latin transliterations).
+    { type: 'ADDRESS', regex: /(?<=[฀-๿]\s+)\d{5}\b|\b\d{5}\s*(?=Thailand|ไทย)/g, confidence: 0.80 },
   ],
 }
 

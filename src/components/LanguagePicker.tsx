@@ -10,6 +10,7 @@ const LANGUAGES: { code: Language; label: string; short: string }[] = [
   { code: 'nl', label: 'Nederlands', short: 'NL' },
   { code: 'pl', label: 'Polski',     short: 'PL' },
   { code: 'ga', label: 'Gaeilge',    short: 'GA' },
+  { code: 'th', label: 'ไทย',         short: 'TH' },
 ]
 
 interface Props {

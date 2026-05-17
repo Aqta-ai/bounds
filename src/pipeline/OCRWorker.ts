@@ -20,6 +20,7 @@ const TESSERACT_LANG_MAP: Record<Language, string> = {
   nl: 'nld',
   pl: 'pol',
   ga: 'gle',
+  th: 'tha',
 }
 
 // Tessdata GitHub mirror that ships every Tesseract 4.x traineddata file

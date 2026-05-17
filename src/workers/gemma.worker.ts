@@ -1,5 +1,7 @@
 // Gemma Web Worker. Runs Gemma 4 nano either via Ollama at
 // localhost:11434 (preferred) or via WebLLM in-browser (fallback).
+// Override the Ollama URL with VITE_OLLAMA_URL at build time (e.g. for
+// machines where Docker has claimed 11434 and Ollama runs on 11435).
 //
 // Catches the six context-sensitive health-PHI categories that the
 // regex / NER / OCR layers miss:
@@ -32,6 +34,8 @@ type GemmaBackend = 'ollama' | 'webllm' | 'unavailable'
 let _backend: GemmaBackend = 'unavailable'
 let _backendDetected = false
 
+const OLLAMA_URL = (import.meta.env?.VITE_OLLAMA_URL as string | undefined) ?? 'http://localhost:11434'
+
 const SYSTEM_PROMPT = `You are a healthcare privacy auditor. The following is text extracted from a PDF page that may contain protected health information (PHI). Your job is to flag spans that contain PHI a regex or named-entity recogniser would MISS, focusing on these six categories ONLY:
 
   1. inline_diagnosis        Inline diagnosis without a structured label (e.g. "presents with generalised anxiety disorder").
@@ -61,7 +65,7 @@ Rules:
 
 async function probeOllama(): Promise<boolean> {
   try {
-    const res = await fetch('http://localhost:11434/api/tags', {
+    const res = await fetch(`${OLLAMA_URL}/api/tags`, {
       method: 'GET',
       signal: AbortSignal.timeout(1500),
     })
@@ -99,7 +103,7 @@ interface OllamaResponse {
 }
 
 async function callOllama(chunk: string): Promise<RawGemmaDetection[]> {
-  const res = await fetch('http://localhost:11434/api/chat', {
+  const res = await fetch(`${OLLAMA_URL}/api/chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({

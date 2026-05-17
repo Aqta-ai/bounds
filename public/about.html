@@ -85,7 +85,7 @@
       </li>
       <li>
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/><path d="M12 2L2 7l10 5 10-5-10-5z"/></svg>
-        Gemma 4 runs via WebLLM (in-browser WASM + WebGPU) by default. If you have Ollama running locally with <code>gemma4:e2b</code>, Bounds detects it and routes through that for faster inference. Either path keeps the document in your browser process.
+        Gemma 4 E2B runs via Ollama with <code>ollama pull gemma4:e2b</code> — ~5 B parameter MoE, fully on your machine. When Ollama is absent, the contextual layer is skipped and the other four detection layers run alone: we will not silently substitute an older Gemma version for the submission&rsquo;s headline claim. An in-browser Gemma 4 path activates the moment MLC publishes a WebLLM build.
       </li>
       <li>
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>

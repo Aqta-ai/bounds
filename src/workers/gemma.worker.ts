@@ -61,14 +61,11 @@ async function detectBackend(): Promise<GemmaBackend> {
   if (_backendDetected) return _backend
   if (await probeOllama()) {
     _backend = 'ollama'
-  } else if (typeof self !== 'undefined' && (self as unknown as { crossOriginIsolated?: boolean }).crossOriginIsolated) {
-    // WebLLM uses WebGPU + SharedArrayBuffer + multi-threaded WASM. All
-    // three require the page (and therefore this worker) to be served
-    // under cross-origin isolation (COOP: same-origin + COEP: require-corp).
-    // If the deployment skipped those headers, surface that up front rather
-    // than attempting a load that will fail mid-stream.
-    _backend = 'webllm'
   } else {
+    // Until MLC publishes a Gemma 4 WebLLM build, the in-browser path is
+    // dormant. We do not silently substitute Gemma 2 / Gemma 3 — the
+    // submission's contextual layer claim stands on Gemma 4 specifically,
+    // so the other four detection layers run alone when Ollama is absent.
     _backend = 'unavailable'
   }
   _backendDetected = true
@@ -119,11 +116,11 @@ async function callOllama(chunk: string): Promise<RawGemmaDetection[]> {
 // deployment that never lands on a Gemma-required document never pays the
 // download cost.
 //
-// The model id below resolves to Gemma 4 E2B Instruct, q4f16_1 quantisation,
-// served from the MLC CDN. Validated 2026-04-13. The constant lives
-// here rather than at
-// module scope so a build-time tree-shake of the WebLLM path also drops
-// the id. Requires WebGPU + shader-f16 feature in the browser.
+// WebLLM Gemma 4 build is not yet published by MLC. The constant stays
+// here so the in-browser path activates the day MLC publishes a Gemma 4
+// MLC variant; in the meantime detectBackend never returns 'webllm', so
+// this code is dormant. We deliberately do not fall back to an older
+// Gemma family in the browser — the submission stands on Gemma 4 only.
 const WEBLLM_MODEL_ID = 'gemma-4-E2B-it-q4f16_1-MLC'
 
 interface WebLLMEngine {

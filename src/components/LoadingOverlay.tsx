@@ -11,7 +11,10 @@ function progressLabel(step: PipelineStep, t: Props['t']): string {
   switch (step.stage) {
     case 'extracting':      return t('analyse_extracting')
     case 'detecting_regex': return t('analyse_regex')
-    case 'loading_model':   return t('analyse_loading_model', { progress: Math.round(step.modelProgress) })
+    case 'loading_model':   return t('analyse_loading_model', {
+      progress: Math.round(step.modelProgress),
+      model: step.modelName ?? 'AI model',
+    })
     case 'detecting_ner':   return t('analyse_ner', { page: step.page, total: step.total })
     case 'detecting_ocr':   return t('analyse_ocr', { page: step.page, total: step.total })
     case 'detecting_faces': return t('analyse_faces', { page: step.page, total: step.total })
@@ -23,18 +26,40 @@ function progressLabel(step: PipelineStep, t: Props['t']): string {
   }
 }
 
+// Pipeline timeline, monotonic 0–100:
+//   0–10   extracting
+//   10–80  per-page detection (five sub-stages per page: ocr → regex → ner → faces → gemma)
+//   80–95  redacting
+//   95–97  encrypting
+//   97–100 summarising + done
+//
+// loading_model fires once per session (BERT NER first inference); it is
+// overlaid onto the first 3 percentage points of the detection phase so the
+// bar never jumps backward when inference starts.
+const DETECT_START = 10
+const DETECT_END = 80
+const DETECT_WIDTH = DETECT_END - DETECT_START
+const SUB_STAGE_COUNT = 5
+
+function perPage(page: number, total: number, subStage: number): number {
+  if (!total || total <= 0) return DETECT_START
+  const pageSlice = DETECT_WIDTH / total
+  const sub = Math.max(0, Math.min(SUB_STAGE_COUNT, subStage))
+  return DETECT_START + (page - 1) * pageSlice + (sub / SUB_STAGE_COUNT) * pageSlice
+}
+
 function progressValue(step: PipelineStep): number {
   switch (step.stage) {
-    case 'extracting':      return step.progress * 0.15
-    case 'detecting_regex': return 15 + step.progress * 0.15
-    case 'loading_model':   return 50 + step.modelProgress * 0.15
-    case 'detecting_ocr':   return 30 + (step.page / step.total) * 20
-    case 'detecting_ner':   return 65 + (step.page / step.total) * 4
-    case 'detecting_faces': return 69 + (step.page / step.total) * 2
-    case 'detecting_gemma': return 71 + (step.page / step.total) * 4
-    case 'redacting':       return 75 + step.progress * 0.15
-    case 'encrypting':      return 90
-    case 'summarizing':     return 93
+    case 'extracting':      return step.progress * 0.10
+    case 'loading_model':   return DETECT_START + (step.modelProgress / 100) * 3
+    case 'detecting_ocr':   return perPage(step.page, step.total, 0)
+    case 'detecting_regex': return perPage(step.page, step.total, 1)
+    case 'detecting_ner':   return perPage(step.page, step.total, 2)
+    case 'detecting_faces': return perPage(step.page, step.total, 3)
+    case 'detecting_gemma': return perPage(step.page, step.total, 4)
+    case 'redacting':       return 80 + step.progress * 0.15
+    case 'encrypting':      return 95
+    case 'summarizing':     return 97
     case 'done':            return 100
     default:                return 0
   }
@@ -55,7 +80,10 @@ export function LoadingOverlay({ step, t }: Props) {
         {isDownloading ? (
           <div className="mt-1 flex flex-col gap-0.5">
             <p className="text-xs text-gray-400">
-              {t('loading_model_mb', { downloaded: Math.round((step.modelProgress / 100) * 430) })}
+              {t('loading_model_mb', {
+                downloaded: Math.round((step.modelProgress / 100) * (step.modelSizeMB ?? 430)),
+                total: step.modelSizeMB ?? 430,
+              })}
             </p>
             <p className="text-xs text-gray-400">
               {t('loading_model_local')}

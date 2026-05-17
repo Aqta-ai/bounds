@@ -86,6 +86,26 @@ describe('parseAndValidate — rejection cases', () => {
     expect(parseAndValidate(raw, SAMPLE_CHUNK)).toEqual([])
   })
 
+  it('accepts a model output that differs only in Unicode normalisation form', () => {
+    // "Café" — NFC: single é codepoint; NFD: 'e' + combining acute ́.
+    // The pipeline must accept either, so an LLM that re-encodes Unicode does
+    // not silently drop hits that genuinely appear in the source.
+    const wordNfc = String.fromCodePoint(0x64, 0x69, 0x61, 0x62, 0xe8, 0x74, 0x65) // "diabète"
+    const wordNfd = wordNfc.normalize('NFD')
+    expect(wordNfc).not.toBe(wordNfd) // guard: codepoint sequences differ
+    const sourceNfd = `Patient diagnosed with ${wordNfd} mellitus type 2.`
+    const raw = JSON.stringify([{
+      text: wordNfc,
+      type: 'HEALTH_DATA',
+      confidence: 0.82,
+      ruleId: 'gemma:inline_diagnosis',
+      reason: 'Inline diagnosis without a structured label.',
+    }])
+    const out = parseAndValidate(raw, sourceNfd)
+    expect(out).toHaveLength(1)
+    expect(out[0].text.normalize('NFC')).toBe(wordNfc)
+  })
+
   it('keeps the valid item when one of two is malformed', () => {
     const arr = JSON.stringify([
       {

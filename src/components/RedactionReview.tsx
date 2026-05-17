@@ -426,8 +426,13 @@ export function RedactionReview({
               grouped.map(([typeLabel, dets]) => {
                 const sources = [...new Set(dets.map((d) => d.source))]
                 const sourceLabel = sources.map((s) =>
-                  s === 'NER' ? t('review_source_ner') : s === 'REGEX' ? t('review_source_regex') : s === 'MANUAL' ? t('review_source_manual') : t('review_source_ocr')
+                  s === 'NER' ? t('review_source_ner') :
+                  s === 'REGEX' ? t('review_source_regex') :
+                  s === 'MANUAL' ? t('review_source_manual') :
+                  s === 'GEMMA' ? t('review_source_gemma') :
+                  t('review_source_ocr')
                 ).join(' · ')
+                const gemmaWithReason = dets.filter((d) => d.source === 'GEMMA' && d.reason)
                 return (
                 <div key={typeLabel}>
                   <div className="flex items-center gap-2 mb-1.5">
@@ -441,6 +446,16 @@ export function RedactionReview({
                       <RedactionBadge key={d.id} detection={d} onToggle={onToggle} />
                     ))}
                   </div>
+                  {gemmaWithReason.length > 0 && (
+                    <ul className="mt-1.5 pl-2 border-l-2 border-brand-green/30 flex flex-col gap-0.5">
+                      {gemmaWithReason.map((d) => (
+                        <li key={`reason_${d.id}`} className="text-[11px] text-gray-500 leading-snug">
+                          <span className="font-medium text-gray-700">{d.text}</span>
+                          <span className="text-gray-400"> — {d.reason}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
                 )
               })

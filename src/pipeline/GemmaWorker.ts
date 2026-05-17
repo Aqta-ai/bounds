@@ -143,13 +143,16 @@ function getWorker(): Worker {
       job.resolve(e.data.detections ?? [])
     }
     _worker.onerror = (e: ErrorEvent) => {
-      // Reject all pending jobs on worker crash.
+      // Reject all pending jobs on worker crash and clear the cached backend
+      // so the freshly spawned replacement worker re-probes Ollama / WebLLM
+      // instead of routing to a dead reference.
       const err = new Error(`GemmaWorker crashed: ${e.message}`)
       for (const job of _pendingJobs.values()) {
         job.reject(err)
       }
       _pendingJobs.clear()
       _worker = null
+      _resolvedBackend = null
     }
   }
   return _worker

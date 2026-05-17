@@ -138,8 +138,8 @@ export interface PipelineResult {
 export type PipelineStep =
   | { stage: 'idle' }
   | { stage: 'extracting'; progress: number }
-  | { stage: 'detecting_regex'; progress: number }
-  | { stage: 'loading_model'; modelProgress: number }
+  | { stage: 'detecting_regex'; progress: number; page: number; total: number }
+  | { stage: 'loading_model'; modelProgress: number; modelName?: string; modelSizeMB?: number }
   | { stage: 'detecting_ner'; progress: number; page: number; total: number }
   | { stage: 'detecting_ocr'; progress: number; page: number; total: number }
   | { stage: 'detecting_faces'; progress: number; page: number; total: number }

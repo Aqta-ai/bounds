@@ -8,6 +8,7 @@ import { useLanguage } from './i18n'
 import { runDetection, buildRedactedPdf } from './pipeline/RedactionPipeline'
 import { terminateNERWorker } from './pipeline/NERWorker'
 import { terminateOCRWorker } from './pipeline/OCRWorker'
+import { disposeGemmaWorker } from './pipeline/GemmaWorker'
 import { findSpanBBox } from './pipeline/PDFEngine'
 import { generateSummary } from './pipeline/ExplainWorker'
 import { buildPrivacySummary } from './utils/summaryUtils'
@@ -64,6 +65,7 @@ export function App() {
       } catch (err) {
         terminateNERWorker()
         terminateOCRWorker()
+        disposeGemmaWorker()
         setError(err instanceof Error ? err.message : String(err))
         setStep(0)
         setPipelineStep({ stage: 'idle' })
@@ -171,6 +173,7 @@ export function App() {
   const handleStartOver = useCallback(() => {
     terminateNERWorker()
     terminateOCRWorker()
+    disposeGemmaWorker()
     processingRef.current = false
     setStep(0)
     setDetections([])

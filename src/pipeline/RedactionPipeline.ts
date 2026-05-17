@@ -7,7 +7,7 @@ import { isFaceDetectionSupported, detectFaces } from './FaceDetector'
 import { KeyVaultService } from './KeyVaultService'
 import { generateSummary } from './ExplainWorker'
 import { sha256Hex, stemName } from '../utils/fileUtils'
-import { startGemmaJob, getGemmaBackend } from './GemmaWorker'
+import { startGemmaJob, getGemmaBackend, subscribeGemmaModelProgress } from './GemmaWorker'
 
 // Below this many characters of extracted page text, Gemma 4 contextual
 // PHI detection is skipped: tiny pages are nearly always headers, footers
@@ -88,7 +88,19 @@ export async function runDetection(
 
   // ── 2. Per-page detection ────────────────────────────────────────────────
   // Forward NER model download progress (first run only — cached on subsequent runs)
-  setNERModelProgressCallback((pct) => onProgress({ stage: 'loading_model', modelProgress: pct }))
+  setNERModelProgressCallback((pct) => onProgress({
+    stage: 'loading_model', modelProgress: pct, modelName: 'BERT NER', modelSizeMB: 430,
+  }))
+
+  // Forward Gemma 4 WebLLM model download progress when the fallback path
+  // is active (Ollama users skip this entirely). The MLC engine emits
+  // progress in 0..1; convert to 0..100 to share the loading_model bar.
+  const unsubGemmaProgress = subscribeGemmaModelProgress((pct) => onProgress({
+    stage: 'loading_model',
+    modelProgress: Math.round(pct * 100),
+    modelName: 'Gemma 4 E2B',
+    modelSizeMB: 1500,
+  }))
 
   const faceDetectionAvailable = isFaceDetectionSupported()
   const faceDetectionsWithBBox: Detection[] = []
@@ -127,7 +139,7 @@ export async function runDetection(
     pageTexts.push(pageText)
 
     if (pageText.trim()) {
-      onProgress({ stage: 'detecting_regex', progress: Math.round((i / total) * 100) })
+      onProgress({ stage: 'detecting_regex', progress: Math.round((i / total) * 100), page: i + 1, total })
       const regexDets = detectRegex(pageText, i, language, tokenCounters)
       allDetections.push(...regexDets)
 
@@ -199,15 +211,19 @@ export async function runDetection(
               reason: r.reason,
             })
           }
-        } catch {
-          // Gemma backend unreachable or model unloaded — silent fallback,
+        } catch (err) {
+          // Gemma backend unreachable or model unloaded — degrade gracefully,
           // the other four detection layers continue carrying the load.
+          // Log once per failure so a judge debugging Ollama setup can see why
+          // the contextual layer did not contribute.
+          console.warn('[Bounds] Gemma 4 page detection skipped:', err instanceof Error ? err.message : err)
         }
       }
     }
   }
 
   setNERModelProgressCallback(null)
+  unsubGemmaProgress()
 
   // ── 2b. Name propagation ─────────────────────────────────────────────────
   // Any PERSON name found by a high-confidence label-context regex (e.g. "Insured person:
@@ -259,12 +275,19 @@ export async function runDetection(
     occurrenceCounters.set(occKey, occurrence + 1)
     let bbox = null
     if (layout?.ocrWords && layout.ocrWords.length > 0) {
-      // Page was OCR-processed: only trust coordinates from the rendered image.
-      // Text-layer fallback is intentionally skipped — on pages with embedded
-      // images the text layer can contain invisible or mis-positioned text whose
-      // coordinates don't correspond to any visible content, producing overlay
-      // boxes that float over blank areas.
+      // Page was OCR-processed: prefer coordinates from the rendered image.
+      // Text-layer fallback is intentionally skipped for regex/NER hits —
+      // on pages with embedded images the text layer can contain invisible
+      // or mis-positioned text whose coordinates don't correspond to any
+      // visible content, producing overlay boxes that float over blank areas.
       bbox = findOcrWordBBox(layout.ocrWords, det.text, layout.height, layout.ocrScale ?? 2.0, occurrence)
+      // Gemma 4 contextual hits run over the text-layer + OCR merge, so a
+      // span the model picked up from the embedded text layer will not be
+      // present in ocrWords. Fall back to the text-layer span search so
+      // those detections still get a bounding box on hybrid pages.
+      if (!bbox && det.source === 'GEMMA') {
+        bbox = findSpanBBox(layout.spans, det.text, occurrence)
+      }
     } else if (layout) {
       // Pure text-layer page: text-layer coords are authoritative.
       bbox = findSpanBBox(layout.spans, det.text, occurrence)

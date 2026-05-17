@@ -36,7 +36,7 @@ export async function generateDemoPdf(): Promise<File> {
 
   // Header
   draw(p1, 'Calmara Mental Wellness Clinic', { f: bold, size: 15, color: rgb(0.05, 0.45, 0.35) })
-  draw(p1, 'PATIENT CONSULTATION REPORT · STRICTLY CONFIDENTIAL', { size: 9, color: rgb(0.5, 0.5, 0.5) })
+  draw(p1, 'PATIENT CONSULTATION REPORT · For clinical use only', { size: 9, color: rgb(0.5, 0.5, 0.5) })
   gap(0.5)
   rule(p1)
 

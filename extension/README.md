@@ -12,7 +12,7 @@ Intercepts PDF uploads on any website and warns you about sensitive data before 
 
 ## Demo flow
 
-1. Go to any site with a file upload (Gmail, GoCalma, a bank portal, even a blank HTML file with `<input type="file">`)
+1. Go to any site with a file upload (Gmail, a patient portal, a bank portal, even a blank HTML file with `<input type="file">`)
 2. Select a PDF containing sensitive data (use `public/demo-patient-report.pdf`)
 3. The Bounds overlay appears bottom-right with detected items before the upload proceeds
 4. Click **Redact with Bounds** — opens bounds.aqta.ai in a new tab

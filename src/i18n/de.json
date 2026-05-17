@@ -127,7 +127,7 @@
   "about_reversible": "Geschwärzte Seiten werden gerastert. Textebene wird zerstört, nicht überdeckt. Reversibel mit AES-256-GCM-Schlüsseldatei.",
   "about_annotations": "Rechtlicher Footer und Seitenanmerkungen. Notizen direkt ins PDF einfügen, wie Adobe Acrobat-Kommentare.",
   "about_audit": "Prüfbericht enthalten: Risikobewertung, Aufschlüsselung nach Datenkategorie, DSGVO Art. 83-Exposition.",
-  "about_built_by": "Bounds · MIT Licence · bounds.aqta.ai",
+  "about_built_by": "Bounds · MIT Licence",
   "about_source": "Quellcode",
   "options_custom": "Benutzerdefiniert",
   "options_custom_title": "Benutzerdefinierte Farbe wählen",

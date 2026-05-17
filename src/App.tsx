@@ -363,9 +363,6 @@ export function App() {
         >
           {t('footer_github')}
         </a>
-        <span className="text-gray-200">·</span>
-        <span className="text-xs text-gray-400">Built at</span>
-        <img src="/genaizurich-logo.svg" alt="GenAI Zürich Hackathon 2026" className="h-3 opacity-40" />
       </footer>
 
       {showAbout && <AboutModal onClose={() => setShowAbout(false)} t={t} />}

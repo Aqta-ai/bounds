@@ -127,7 +127,7 @@
   "about_reversible": "Les pages caviardées sont rastérisées. La couche texte est détruite, pas couverte. Réversible avec le fichier de clé AES-256-GCM.",
   "about_annotations": "Pied de page légal et annotations de page. Ajoutez des notes directement dans le PDF, comme les commentaires Adobe Acrobat.",
   "about_audit": "Rapport d'audit inclus : score de risque, détail par type d'information, exposition RGPD Art. 83.",
-  "about_built_by": "Bounds · MIT Licence · bounds.aqta.ai",
+  "about_built_by": "Bounds · MIT Licence",
   "about_source": "Source",
   "options_custom": "Personnalisé",
   "options_custom_title": "Choisir une couleur personnalisée",

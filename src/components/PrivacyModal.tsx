@@ -25,7 +25,7 @@ export function PrivacyModal({ onClose }: Props) {
           <ShieldCheck className="w-5 h-5 text-brand-green" />
           <h2 className="font-bold text-gray-900 text-lg">Privacy policy</h2>
         </div>
-        <p className="text-xs text-gray-400 mb-5">Effective 1 April 2026 · bounds.aqta.ai</p>
+        <p className="text-xs text-gray-400 mb-5">Effective May 2026</p>
 
         <div className="space-y-4 mb-6">
           <div className="flex items-start gap-3">

@@ -99,7 +99,7 @@ export const DEFAULT_REDACTION_OPTIONS: RedactionOptions = {
   color: { r: 0, g: 0, b: 0 },
   labelStyle: 'blank',
   watermark: { enabled: false, text: 'CONFIDENTIAL', opacity: 0.15 },
-  footer: { enabled: false, text: `Redacted on ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })} · Bounds · bounds.aqta.ai` },
+  footer: { enabled: false, text: `Redacted on ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })} · Bounds` },
   annotations: [],
 }
 

@@ -127,7 +127,7 @@
   "about_reversible": "Pages are rasterised on export — text layer destroyed, not covered. Reversible via AES-256-GCM encrypted vault.",
   "about_annotations": "Legal footer stamps and per-page annotations. Add redaction notes directly to the exported PDF.",
   "about_audit": "Signed audit report: risk score, PII breakdown by type, GDPR Art. 83 and FADP Art. 60 exposure mapping.",
-  "about_built_by": "Bounds · MIT Licence · bounds.aqta.ai",
+  "about_built_by": "Bounds · MIT Licence",
   "about_source": "View source",
   "options_custom": "Custom",
   "options_custom_title": "Pick a custom colour",

@@ -127,7 +127,7 @@
   "about_reversible": "Redacted pages are rasterised. Text layer destroyed, not covered. Reversible with AES-256-GCM key file.",
   "about_annotations": "Legal footer and page annotations. Add notes directly to the PDF, like Adobe Acrobat comments.",
   "about_audit": "Audit report included: risk score, breakdown by PII type, GDPR Art. 83 exposure.",
-  "about_built_by": "Bounds · MIT Licence · bounds.aqta.ai",
+  "about_built_by": "Bounds · MIT Licence",
   "about_source": "Source",
   "options_custom": "Custom",
   "options_custom_title": "Pick a custom colour",

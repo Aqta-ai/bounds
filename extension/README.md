@@ -1,6 +1,6 @@
 # Bounds Privacy Scanner — Chrome Extension
 
-Intercepts PDF uploads on any website and warns you about sensitive data before it leaves your device.
+Watches for PDF selections on any site that exposes an HTML5 file input (Gmail, most patient and bank portals, plain `<input type="file">` forms) and warns you about sensitive data before the upload proceeds. Sites that use custom file pickers or drag-and-drop SDKs (e.g. some single-page apps) are out of scope until they normalise on the platform file-input.
 
 ## Load for demo (sideload — no Chrome Web Store needed)
 

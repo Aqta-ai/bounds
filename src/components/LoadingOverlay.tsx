@@ -109,9 +109,13 @@ export function LoadingOverlay({ step, t }: Props) {
       )}
 
       {gemmaBackendLabel && (
-        <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-brand-green border border-brand-green/30 bg-brand-green/5 rounded-full px-2.5 py-0.5">
-          <Sparkles className="w-3 h-3" aria-hidden />
-          {gemmaBackendLabel}
+        <span
+          className={`inline-flex items-center gap-1.5 text-[11px] font-medium text-brand-green border border-brand-green/30 bg-brand-green/5 rounded-full px-2.5 py-0.5 transition-all ${
+            step.stage === 'detecting_gemma' ? 'ring-2 ring-brand-green/30 scale-105' : ''
+          }`}
+        >
+          <Sparkles className={`w-3 h-3 ${step.stage === 'detecting_gemma' ? 'animate-pulse' : ''}`} aria-hidden />
+          {step.stage === 'detecting_gemma' ? `${gemmaBackendLabel} · thinking…` : gemmaBackendLabel}
         </span>
       )}
 

@@ -28,7 +28,7 @@ export function AboutModal({ onClose, t }: AboutModalProps) {
             <h2 className="font-black text-lg text-gray-900 tracking-tight leading-none">
               b<span className="text-brand-green">●</span>unds
             </h2>
-            <p className="text-xs text-gray-400 mt-0.5">v0.2.0</p>
+            <p className="text-xs text-gray-400 mt-0.5">v0.3.0</p>
           </div>
         </div>
 

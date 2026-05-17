@@ -71,6 +71,32 @@ export default defineConfig({
               expiration: { maxEntries: 2, maxAgeSeconds: 60 * 60 * 24 * 365 },
             },
           },
+          {
+            // Hugging Face weights: BERT NER (~430 MB), Flan-T5 (~80 MB), and
+            // WebLLM Gemma 4 (~1.5 GB) all resolve to huggingface.co or its
+            // LFS / xet CDN. Without an explicit SW cache rule the entries
+            // transformers.js / WebLLM put in the Cache API are vulnerable to
+            // eviction under storage pressure, forcing a re-download on the
+            // next visit. CacheFirst with rangeRequests so partial-content
+            // fetches survive a reload mid-download.
+            urlPattern: /^https:\/\/(huggingface\.co|cdn-lfs(-.*)?\.huggingface\.co|cdn-lfs(-.*)?\.hf\.co|cas-bridge\.xethub\.hf\.co)\/.*/,
+            handler: 'CacheFirst' as const,
+            options: {
+              cacheName: 'hf-models',
+              expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              rangeRequests: true,
+              cacheableResponse: { statuses: [0, 200, 206] },
+            },
+          },
+          {
+            // WebLLM pulls shader and runtime artefacts from raw.githubusercontent.com.
+            urlPattern: /^https:\/\/raw\.githubusercontent\.com\/mlc-ai\/.*/,
+            handler: 'CacheFirst' as const,
+            options: {
+              cacheName: 'webllm-runtime',
+              expiration: { maxEntries: 50, maxAgeSeconds: 60 * 60 * 24 * 365 },
+            },
+          },
         ],
       },
     }),

@@ -106,8 +106,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Licence
 
-The source code is licensed under the [MIT Licence](LICENSE). The Gemma 4 pipeline at [bounds-gemma](https://github.com/Aqta-ai/bounds-gemma) is Apache-2.0.
+The source code is licensed under the [Apache-2.0 Licence](LICENSE). See [NOTICE](NOTICE) for third-party attributions (Google Gemma 4, HIPAA Safe Harbor categories).
 
 **Bounds** is the open-source community edition. **Bounds Pro** is the proprietary enterprise edition with additional features, managed by Aqta Technologies Ltd.
 
-"Bounds" and "Bounds Pro" are trademarks of Aqta Technologies Ltd and are not covered by the MIT Licence. You may fork and modify the code, but you may not use the Bounds or Bounds Pro name or logo to market a derivative product.
+"Bounds" and "Bounds Pro" are trademarks of Aqta Technologies Ltd and are not covered by the Apache-2.0 Licence. You may fork and modify the code, but you may not use the Bounds or Bounds Pro name or logo to market a derivative product.

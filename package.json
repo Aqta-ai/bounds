@@ -5,7 +5,7 @@
   "type": "module",
   "private": true,
   "author": "Anya Chueayen",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

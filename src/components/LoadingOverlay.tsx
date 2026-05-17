@@ -15,6 +15,7 @@ function progressLabel(step: PipelineStep, t: Props['t']): string {
     case 'detecting_ner':   return t('analyse_ner', { page: step.page, total: step.total })
     case 'detecting_ocr':   return t('analyse_ocr', { page: step.page, total: step.total })
     case 'detecting_faces': return t('analyse_faces', { page: step.page, total: step.total })
+    case 'detecting_gemma': return t('analyse_gemma', { page: step.page, total: step.total })
     case 'redacting':       return t('analyse_redacting')
     case 'encrypting':      return t('analyse_encrypting')
     case 'summarizing':     return t('analyse_summarizing')
@@ -30,7 +31,8 @@ function progressValue(step: PipelineStep): number {
     case 'detecting_ocr':   return 30 + (step.page / step.total) * 20
     case 'detecting_ner':   return 65 + (step.page / step.total) * 4
     case 'detecting_faces': return 69 + (step.page / step.total) * 2
-    case 'redacting':       return 70 + step.progress * 0.2
+    case 'detecting_gemma': return 71 + (step.page / step.total) * 4
+    case 'redacting':       return 75 + step.progress * 0.15
     case 'encrypting':      return 90
     case 'summarizing':     return 93
     case 'done':            return 100

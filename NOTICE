@@ -1,0 +1,21 @@
+Bounds
+Copyright 2026 Aqta Technologies Ltd
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may
+not use this code except in compliance with the License. You may obtain
+a copy of the License at:
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+This product uses Google's Gemma 4 model family via @mlc-ai/web-llm or
+Ollama. Gemma is provided by Google under the Gemma Prohibited Use
+Policy (https://ai.google.dev/gemma/prohibited_use_policy). Users of
+Bounds are responsible for complying with Google's terms.
+
+The contextual PHI taxonomy used in the Gemma worker's system prompts
+is derived from the HIPAA Safe Harbor identifier categories at 45 CFR
+164.514(b)(2), which are in the public domain.
+
+"Bounds" and "Bounds Pro" are trademarks of Aqta Technologies Ltd.
+The Apache-2.0 licence covers the source code; the trademarks are
+reserved and not licensed for derivative-product naming.

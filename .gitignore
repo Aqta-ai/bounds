@@ -63,3 +63,9 @@ finals-slide.html
 print.html
 public/anya.png
 public/banner.html
+
+# Local OG card drafting (designs, screenshots, exports) — production
+# OG image is generated dynamically at https://aqta.ai/og-image/bounds
+og-preview/
+*.og.png
+*.og.html

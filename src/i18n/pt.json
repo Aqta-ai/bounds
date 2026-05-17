@@ -174,5 +174,5 @@
   "footer_github": "GitHub",
   "footer_chrome_ext": "Chrome extension",
   "drop_privacy_note": "Toda a IA é executada localmente via WebAssembly. Após o primeiro carregamento, sem envios, sem servidores.",
-  "about_extension": "Extensão do Chrome que intercepta envios de PDF em qualquer site (Gmail, portais de pacientes, bancos)."
+  "about_extension": "Extensão opcional do Chrome que intercepta envios de PDF em qualquer site (Gmail, portais de pacientes, bancos). Instale separadamente na Chrome Web Store."
 }

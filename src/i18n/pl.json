@@ -174,5 +174,5 @@
   "footer_github": "GitHub",
   "footer_chrome_ext": "Chrome extension",
   "drop_privacy_note": "Cała AI działa lokalnie przez WebAssembly. Po pierwszym załadowaniu: bez przesyłania, bez serwerów.",
-  "about_extension": "Rozszerzenie Chrome przechwytuje przesyłanie PDF na każdej stronie (Gmail, portale pacjentów, banki)."
+  "about_extension": "Opcjonalne rozszerzenie Chrome przechwytuje przesyłanie PDF na każdej stronie (Gmail, portale pacjentów, banki). Zainstaluj osobno ze sklepu Chrome Web Store."
 }

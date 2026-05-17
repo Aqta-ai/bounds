@@ -174,5 +174,5 @@
   "footer_github": "GitHub",
   "footer_chrome_ext": "Chrome extension",
   "drop_privacy_note": "All AI runs locally via WebAssembly. After first load, no uploads, no servers.",
-  "about_extension": "Chrome extension intercepts PDF uploads on any site (Gmail, patient portals, bank portals)."
+  "about_extension": "Optional Chrome extension catches PDF uploads on any site (Gmail, patient portals, banks). Install separately from the Chrome Web Store."
 }

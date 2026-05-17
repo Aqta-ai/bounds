@@ -61,7 +61,7 @@ export function AboutModal({ onClose, t }: AboutModalProps) {
 
         <div className="border-t border-gray-100 pt-4 flex flex-col gap-3">
           <div className="flex flex-wrap gap-1.5">
-            {['GDPR', 'FADP', 'HIPAA', 'AES-256-GCM', 'MIT Licence'].map((badge) => (
+            {['GDPR', 'FADP', 'HIPAA', 'AES-256-GCM', 'Apache-2.0'].map((badge) => (
               <span key={badge} className="text-xs font-medium text-gray-500 border border-gray-200 rounded-full px-2.5 py-0.5">{badge}</span>
             ))}
           </div>

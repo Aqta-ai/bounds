@@ -1,11 +1,11 @@
 {
   "name": "bounds",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Bounds — browser-local PDF PII redaction with reversible encryption",
   "type": "module",
   "private": true,
   "author": "Anya Chueayen",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -25,6 +25,7 @@
     "tesseract.js": "^5.1.0"
   },
   "devDependencies": {
+    "@mlc-ai/web-llm": "^0.2.83",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
@@ -42,5 +43,13 @@
     "vite": "^5.3.1",
     "vite-plugin-pwa": "^1.2.0",
     "vitest": "^1.6.0"
+  },
+  "peerDependencies": {
+    "@mlc-ai/web-llm": "^0.2.79"
+  },
+  "peerDependenciesMeta": {
+    "@mlc-ai/web-llm": {
+      "optional": true
+    }
   }
 }

@@ -8,6 +8,7 @@ import { useLanguage } from './i18n'
 import { runDetection, buildRedactedPdf } from './pipeline/RedactionPipeline'
 import { terminateNERWorker } from './pipeline/NERWorker'
 import { terminateOCRWorker } from './pipeline/OCRWorker'
+import { disposeGemmaWorker } from './pipeline/GemmaWorker'
 import { findSpanBBox } from './pipeline/PDFEngine'
 import { generateSummary } from './pipeline/ExplainWorker'
 import { buildPrivacySummary } from './utils/summaryUtils'
@@ -64,6 +65,7 @@ export function App() {
       } catch (err) {
         terminateNERWorker()
         terminateOCRWorker()
+        disposeGemmaWorker()
         setError(err instanceof Error ? err.message : String(err))
         setStep(0)
         setPipelineStep({ stage: 'idle' })
@@ -171,6 +173,7 @@ export function App() {
   const handleStartOver = useCallback(() => {
     terminateNERWorker()
     terminateOCRWorker()
+    disposeGemmaWorker()
     processingRef.current = false
     setStep(0)
     setDetections([])
@@ -205,7 +208,7 @@ export function App() {
               title="Click to learn how Bounds keeps your data private"
             >
               <WifiOff className="w-3 h-3" />
-              100% local · no uploads
+              On-device · no uploads
               <Info className="w-3 h-3 opacity-60" />
             </button>
           </div>
@@ -226,6 +229,10 @@ export function App() {
           <div className="flex flex-col items-center gap-4 w-full">
             {/* Hero */}
             <div className="text-center max-w-lg">
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-green border border-brand-green/30 bg-brand-green/5 rounded-full px-3 py-1 mb-2">
+                <span aria-hidden className="w-1.5 h-1.5 rounded-full bg-brand-green" />
+                Now with Gemma 4 contextual PHI
+              </span>
               <h1 className="text-3xl font-bold text-gray-900 tracking-tight leading-tight">
                 Redact PDFs.<br />Nothing leaves your device.
               </h1>
@@ -233,7 +240,7 @@ export function App() {
                 {t('hero_tagline')}
               </p>
               <div className="flex flex-wrap items-center justify-center gap-2 mt-3">
-                {['GDPR Art. 9', 'FADP Art. 5', 'HIPAA', 'AES-256-GCM', '104 languages'].map((badge) => (
+                {['Gemma 4 inside', 'GDPR Art. 9', 'FADP Art. 5', 'HIPAA', 'AES-256-GCM', '104 languages'].map((badge) => (
                   <span key={badge} className="text-xs font-medium text-gray-400 border border-gray-200 rounded-full px-2.5 py-0.5">{badge}</span>
                 ))}
               </div>
@@ -359,9 +366,6 @@ export function App() {
         >
           {t('footer_github')}
         </a>
-        <span className="text-gray-200">·</span>
-        <span className="text-xs text-gray-400">Built at</span>
-        <img src="/genaizurich-logo.svg" alt="GenAI Zürich Hackathon 2026" className="h-3 opacity-40" />
       </footer>
 
       {showAbout && <AboutModal onClose={() => setShowAbout(false)} t={t} />}

@@ -51,7 +51,7 @@ Contributors are listed in the README, credited in release notes, and mentioned 
 
 ## Licence
 
-By contributing, you agree that your contributions will be licensed under the [MIT Licence](LICENSE).
+By contributing, you agree that your contributions will be licensed under the [Apache-2.0 Licence](LICENSE).
 
 ---
 

@@ -18,7 +18,7 @@ export type PiiType =
   | 'PROPRIETARY'
   | 'LEGAL_CLAUSE'
 
-export type DetectionSource = 'NER' | 'REGEX' | 'OCR' | 'MANUAL' | 'FACE'
+export type DetectionSource = 'NER' | 'REGEX' | 'OCR' | 'MANUAL' | 'FACE' | 'GEMMA'
 
 export interface BBox {
   x: number
@@ -37,7 +37,8 @@ export interface Detection {
   confidence: number // 0–1
   source: DetectionSource
   enabled: boolean   // user can toggle individual detections
-  ruleId?: string    // e.g. 'email', 'swiss_ahv', 'label_person', 'ner_bert'
+  ruleId?: string    // e.g. 'email', 'swiss_ahv', 'label_person', 'ner_bert', 'gemma:inline_diagnosis'
+  reason?: string    // optional human-readable justification, surfaced in the review UI as a tooltip (used by Gemma 4 contextual detections)
 }
 
 export interface OcrWord {
@@ -98,7 +99,7 @@ export const DEFAULT_REDACTION_OPTIONS: RedactionOptions = {
   color: { r: 0, g: 0, b: 0 },
   labelStyle: 'blank',
   watermark: { enabled: false, text: 'CONFIDENTIAL', opacity: 0.15 },
-  footer: { enabled: false, text: `Redacted on ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })} · Bounds · bounds.aqta.ai` },
+  footer: { enabled: false, text: `Redacted on ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })} · Bounds` },
   annotations: [],
 }
 
@@ -137,11 +138,12 @@ export interface PipelineResult {
 export type PipelineStep =
   | { stage: 'idle' }
   | { stage: 'extracting'; progress: number }
-  | { stage: 'detecting_regex'; progress: number }
-  | { stage: 'loading_model'; modelProgress: number }
+  | { stage: 'detecting_regex'; progress: number; page: number; total: number }
+  | { stage: 'loading_model'; modelProgress: number; modelName?: string; modelSizeMB?: number }
   | { stage: 'detecting_ner'; progress: number; page: number; total: number }
   | { stage: 'detecting_ocr'; progress: number; page: number; total: number }
   | { stage: 'detecting_faces'; progress: number; page: number; total: number }
+  | { stage: 'detecting_gemma'; progress: number; page: number; total: number }
   | { stage: 'redacting'; progress: number }
   | { stage: 'encrypting' }
   | { stage: 'summarizing' }

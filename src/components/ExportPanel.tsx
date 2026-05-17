@@ -142,7 +142,7 @@ export function ExportPanel({ result, onStartOver, onGoBack, t }: Props) {
         .sort((a, b) => b[1] - a[1])
         .map(([type, count]) => ({ type, count })),
       privacySummary: summary,
-      tool: 'Bounds, https://bounds.aqta.ai',
+      tool: 'Bounds',
     }
     return JSON.stringify(report, null, 2)
   }

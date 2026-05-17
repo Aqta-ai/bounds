@@ -25,7 +25,7 @@ export function PrivacyModal({ onClose }: Props) {
           <ShieldCheck className="w-5 h-5 text-brand-green" />
           <h2 className="font-bold text-gray-900 text-lg">Privacy policy</h2>
         </div>
-        <p className="text-xs text-gray-400 mb-5">Effective 1 April 2026 · bounds.aqta.ai</p>
+        <p className="text-xs text-gray-400 mb-5">Effective May 2026</p>
 
         <div className="space-y-4 mb-6">
           <div className="flex items-start gap-3">
@@ -53,14 +53,14 @@ export function PrivacyModal({ onClose }: Props) {
             <HardDrive className="w-4 h-4 text-brand-green mt-0.5 shrink-0" />
             <div>
               <p className="text-sm font-semibold text-gray-800">What stays on your device</p>
-              <p className="text-xs text-gray-500 mt-0.5">AI models (BERT, Tesseract) are cached in your browser's IndexedDB after the first load. You can clear them any time via browser settings. No personal data is ever cached.</p>
+              <p className="text-xs text-gray-500 mt-0.5">AI models (BERT, Tesseract, Gemma 4) are cached in your browser's IndexedDB after first load. You can clear them any time via browser settings. No personal data is ever cached.</p>
             </div>
           </div>
           <div className="flex items-start gap-3">
             <Code className="w-4 h-4 text-brand-green mt-0.5 shrink-0" />
             <div>
               <p className="text-sm font-semibold text-gray-800">Open source and auditable</p>
-              <p className="text-xs text-gray-500 mt-0.5">Every claim above is verifiable. Open DevTools, go to Network, and upload a PDF — you will see zero outgoing requests. The full source is on GitHub under MIT licence.</p>
+              <p className="text-xs text-gray-500 mt-0.5">Every claim above is verifiable. Open DevTools, go to Network, and upload a PDF — you will see zero outgoing requests carrying document bytes. Model files (BERT NER, Gemma 4 E2B, Tesseract, UltraFace) load once from public CDNs on first use; subsequent uses are fully offline. The full source is on GitHub under Apache-2.0.</p>
             </div>
           </div>
         </div>

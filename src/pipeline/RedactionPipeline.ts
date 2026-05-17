@@ -89,7 +89,7 @@ export async function runDetection(
   // ── 2. Per-page detection ────────────────────────────────────────────────
   // Forward NER model download progress (first run only — cached on subsequent runs)
   setNERModelProgressCallback((pct) => onProgress({
-    stage: 'loading_model', modelProgress: pct, modelName: 'BERT NER', modelSizeMB: 430,
+    stage: 'loading_model', modelProgress: pct, modelName: 'Multilingual NER', modelSizeMB: 430,
   }))
 
   // Forward Gemma 4 WebLLM model download progress when the fallback path

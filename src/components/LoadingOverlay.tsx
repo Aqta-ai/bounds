@@ -1,6 +1,8 @@
-import { Loader2, ShieldCheck } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Loader2, ShieldCheck, Sparkles } from 'lucide-react'
 import type { PipelineStep } from '../types'
 import { useNetworkGuard } from '../hooks/useNetworkGuard'
+import { subscribeGemmaBackend, type GemmaBackend } from '../pipeline/GemmaWorker'
 
 interface Props {
   step: PipelineStep
@@ -69,8 +71,22 @@ export function LoadingOverlay({ step, t }: Props) {
   const pct = Math.round(progressValue(step))
   const label = progressLabel(step, t)
   const { requestCount } = useNetworkGuard()
+  const [gemmaBackend, setGemmaBackend] = useState<GemmaBackend | null>(null)
+
+  useEffect(() => {
+    return subscribeGemmaBackend((backend) => setGemmaBackend(backend))
+  }, [])
 
   const isDownloading = step.stage === 'loading_model'
+
+  // Gemma backend label: shows whether the contextual PHI layer is live
+  // (Ollama / WebLLM) or skipped (unavailable). Subscribed once per overlay
+  // mount; the worker probes during the first pipeline run.
+  const gemmaBackendLabel =
+    gemmaBackend === 'ollama' ? 'Gemma 4 · Ollama'
+    : gemmaBackend === 'webllm' ? 'Gemma 4 · WebLLM'
+    : gemmaBackend === 'unavailable' ? null
+    : null
 
   return (
     <div className="flex flex-col items-center gap-6 w-full max-w-sm mx-auto py-12">
@@ -99,6 +115,13 @@ export function LoadingOverlay({ step, t }: Props) {
       </div>
       {!isDownloading && (
         <p className="text-xs text-gray-400">{pct}%</p>
+      )}
+
+      {gemmaBackendLabel && (
+        <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-brand-green border border-brand-green/30 bg-brand-green/5 rounded-full px-2.5 py-0.5">
+          <Sparkles className="w-3 h-3" aria-hidden />
+          {gemmaBackendLabel}
+        </span>
       )}
 
       {/* Live privacy proof widget */}

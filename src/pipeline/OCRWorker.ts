@@ -19,7 +19,14 @@ const TESSERACT_LANG_MAP: Record<Language, string> = {
   pt: 'por',
   nl: 'nld',
   pl: 'pol',
+  ga: 'gle',
 }
+
+// Tessdata GitHub mirror that ships every Tesseract 4.x traineddata file
+// (~120 languages including gle for Irish). The service worker has a
+// CacheFirst rule for this host, so first run pulls a few MB once and
+// subsequent runs are fully offline.
+const TESSDATA_CDN = 'https://tessdata.projectnaptha.com/4.0.0/'
 
 export interface OcrResult {
   text: string
@@ -35,10 +42,14 @@ async function getTesseractWorker(lang: string) {
     await _tesseractWorker.terminate()
     _tesseractWorker = null
   }
+  // English ships bundled locally at /eng.traineddata.gz for zero-network
+  // first-run; everything else loads from the tessdata CDN once and is
+  // SW-cached for offline.
+  const langPath = lang === 'eng' ? '/' : TESSDATA_CDN
   _tesseractWorker = await createWorker(lang, 1, {
     workerPath: '/tesseract-worker.min.js',
     corePath: '/tesseract-core-simd-lstm.wasm.js',
-    langPath: '/',
+    langPath,
     workerBlobURL: false,
   })
   // preserve_interword_spaces: retain spatial word gaps — critical for multi-word

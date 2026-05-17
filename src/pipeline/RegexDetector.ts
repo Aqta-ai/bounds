@@ -546,6 +546,17 @@ const LOCALE_PATTERNS: Record<Language, PatternDef[]> = {
     // Polish postcode: 00-000
     { type: 'ADDRESS', regex: /\b\d{2}-\d{3}\b/g, confidence: 0.85 },
   ],
+  ga: [
+    // Irish PPS number (Personal Public Service): 7 digits + 1-2 letters,
+    // e.g. "1234567T" or "1234567TA". Used across HSE, Revenue, social welfare.
+    { type: 'ID_NUMBER', regex: /\b\d{7}[A-W][A-Z]?\b/g, confidence: 0.90 },
+    // Irish Eircode: routing key (3 chars) + space + unique identifier (4 chars),
+    // e.g. "D02 XY45", "T12 K3F4". Always starts with a letter for the county.
+    { type: 'ADDRESS', regex: /\b[A-Z]\d{2}\s?[A-Z0-9]{4}\b/g, confidence: 0.88 },
+    // Irish Medical Council number: 5–6 digit registration number, often
+    // prefixed "MCN" or "IMC", e.g. "MCN 012345".
+    { type: 'ID_NUMBER', regex: /\b(?:MCN|IMC)\s?\d{5,6}\b/gi, confidence: 0.85 },
+  ],
 }
 
 // ---------------------------------------------------------------------------

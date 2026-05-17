@@ -29,15 +29,10 @@ function progressLabel(step: PipelineStep, t: Props['t']): string {
 }
 
 // Pipeline timeline, monotonic 0–100:
-//   0–10   extracting
-//   10–80  per-page detection (five sub-stages per page: ocr → regex → ner → faces → gemma)
-//   80–95  redacting
-//   95–97  encrypting
-//   97–100 summarising + done
-//
-// loading_model fires once per session (BERT NER first inference); it is
-// overlaid onto the first 3 percentage points of the detection phase so the
-// bar never jumps backward when inference starts.
+//   0–10   extracting · 10–80 per-page detection · 80–95 redacting ·
+//   95–97  encrypting · 97–100 summarising + done.
+// loading_model overlays the first 3% of detection so a fresh model
+// download does not make the bar jump backwards on first inference.
 const DETECT_START = 10
 const DETECT_END = 80
 const DETECT_WIDTH = DETECT_END - DETECT_START
@@ -79,13 +74,9 @@ export function LoadingOverlay({ step, t }: Props) {
 
   const isDownloading = step.stage === 'loading_model'
 
-  // Gemma backend label: shows whether the contextual PHI layer is live
-  // (Ollama / WebLLM) or skipped (unavailable). Subscribed once per overlay
-  // mount; the worker probes during the first pipeline run.
   const gemmaBackendLabel =
     gemmaBackend === 'ollama' ? 'Gemma 4 · Ollama'
     : gemmaBackend === 'webllm' ? 'Gemma 4 · WebLLM'
-    : gemmaBackend === 'unavailable' ? null
     : null
 
   return (
@@ -124,7 +115,6 @@ export function LoadingOverlay({ step, t }: Props) {
         </span>
       )}
 
-      {/* Live privacy proof widget */}
       <div className="w-full border border-brand-green/30 bg-brand-green/5 rounded-xl px-4 py-3 flex items-start gap-3">
         <ShieldCheck className="w-4 h-4 text-brand-green mt-0.5 shrink-0" />
         <div className="flex flex-col gap-1 min-w-0">

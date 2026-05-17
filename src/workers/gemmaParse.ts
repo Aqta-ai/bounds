@@ -1,6 +1,5 @@
-// Pure helpers for the Gemma worker. Extracted into a separate module so
-// they can be unit-tested without instantiating the Web Worker (which is
-// not available in the Node test environment).
+// Pure helpers split out so the Web Worker logic stays unit-testable
+// under Node, which has no Worker global.
 
 import type { PiiType } from '../types'
 
@@ -15,21 +14,10 @@ export interface RawGemmaDetection {
   reason: string
 }
 
-/**
- * Validate a model response and return the surviving detections.
- *
- * Rejects:
- *  - Malformed JSON.
- *  - Non-array top-level values.
- *  - Items with confidence below HEALTHCARE_CONFIDENCE_FLOOR (0.75).
- *  - Items whose text is not (after NFC normalisation) a substring of
- *    sourceChunk. This rejects model hallucinations and paraphrases while
- *    tolerating the NFC vs NFD differences that arise when text crosses
- *    PDF font ↔ LLM ↔ JS string boundaries (e.g. "café" vs "café").
- *  - Items with a type other than HEALTH_DATA.
- *  - Items with a ruleId outside the gemma:* namespace.
- *  - Items missing a reason field (the review panel surfaces it).
- */
+// Rejects malformed JSON, sub-floor confidence, wrong type, non-gemma
+// ruleId, missing reason, and any text not present in sourceChunk after
+// NFC normalisation. The NFC normalise is what tolerates the PDF-vs-LLM
+// encoding split that would otherwise drop legitimate hits.
 export function parseAndValidate(raw: string, sourceChunk: string): RawGemmaDetection[] {
   let parsed: unknown
   try {
@@ -64,11 +52,8 @@ export function parseAndValidate(raw: string, sourceChunk: string): RawGemmaDete
   return out
 }
 
-/**
- * Split text into chunks of at most CHUNK_MAX_CHARS, preferring paragraph
- * boundaries, falling back to sentence boundaries for paragraphs that
- * exceed the limit.
- */
+// Prefer paragraph boundaries; fall back to sentence boundaries inside
+// paragraphs larger than CHUNK_MAX_CHARS.
 export function chunkText(text: string): string[] {
   if (text.length <= CHUNK_MAX_CHARS) return [text]
   const chunks: string[] = []

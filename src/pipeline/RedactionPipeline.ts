@@ -9,17 +9,10 @@ import { generateSummary } from './ExplainWorker'
 import { sha256Hex, stemName } from '../utils/fileUtils'
 import { startGemmaJob, getGemmaBackend, subscribeGemmaModelProgress } from './GemmaWorker'
 
-// Below this many characters of extracted page text, Gemma 4 contextual
-// PHI detection is skipped: tiny pages are nearly always headers, footers
-// or blank, and the false-positive surface from running the LLM on them
-// outweighs any real signal.
+// Skip Gemma on tiny pages: hallucination risk outweighs signal on
+// fewer than ~100 chars (headers, footers, blanks).
 const GEMMA_MIN_PAGE_TEXT_CHARS = 100
 
-// ---------------------------------------------------------------------------
-// RedactionPipeline — orchestrates detection, then (separately) PDF output.
-// ---------------------------------------------------------------------------
-
-// Risk weight per PII type — higher = more sensitive data
 const RISK_WEIGHTS: Partial<Record<PiiType, number>> = {
   HEALTH_DATA:   4,
   SSN:           4,
@@ -182,12 +175,6 @@ export async function runDetection(
       faceDetectionsWithBBox.push(...faces)
     }
 
-    // Gemma 4 contextual PHI — runs after regex + NER have done their
-    // structured-pattern pass. Catches the six HIPAA Safe Harbor #17
-    // shapes the prior layers miss (inline diagnosis, medication in
-    // prose, treatment narrative, indirect health context, sensitive
-    // social, genetic reference). Backend-gated: Ollama preferred,
-    // WebLLM fallback, no-op if neither is reachable.
     if (pageText.trim().length >= GEMMA_MIN_PAGE_TEXT_CHARS) {
       const backend = getGemmaBackend()
       if (backend !== null && backend !== 'unavailable') {
@@ -212,10 +199,8 @@ export async function runDetection(
             })
           }
         } catch (err) {
-          // Gemma backend unreachable or model unloaded — degrade gracefully,
-          // the other four detection layers continue carrying the load.
-          // Log once per failure so anyone debugging an Ollama setup can see
-          // why the contextual layer did not contribute.
+          // Surfaces Ollama / WebLLM setup issues without blocking the
+          // four other layers.
           console.warn('[Bounds] Gemma 4 page detection skipped:', err instanceof Error ? err.message : err)
         }
       }

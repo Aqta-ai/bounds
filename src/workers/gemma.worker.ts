@@ -1,26 +1,5 @@
-// Gemma Web Worker. Runs Gemma 4 nano either via Ollama at
-// localhost:11434 (preferred) or via WebLLM in-browser (fallback).
-// Override the Ollama URL with VITE_OLLAMA_URL at build time (e.g. for
-// machines where Docker has claimed 11434 and Ollama runs on 11435).
-//
-// Catches the six context-sensitive health-PHI categories that the
-// regex / NER / OCR layers miss:
-//   1. Inline diagnosis without a structured label
-//      ("presents with generalised anxiety disorder")
-//   2. Medication mention in running prose
-//      ("she is on lithium and has been taking Adderall for three years")
-//   3. Treatment / procedure in narrative
-//      ("underwent CABG last April, followed by chemo")
-//   4. Indirect health context
-//      ("my therapist", "my insulin pump", "my dialysis centre")
-//   5. Sensitive social context
-//      ("gay male patient", "identifies as non-binary")
-//   6. Genetic data references
-//      ("BRCA1-positive", "family history of Huntington's")
-//
-// Output contract: a JSON array of {text, type, confidence, reason}
-// objects, rejected if the model emits malformed JSON or candidates
-// with confidence below the healthcare floor.
+// Probes Ollama first; falls back to WebLLM if absent. Override the
+// Ollama URL with VITE_OLLAMA_URL when Docker has claimed 11434.
 
 import {
   HEALTHCARE_CONFIDENCE_FLOOR,

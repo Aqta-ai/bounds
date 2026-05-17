@@ -2,10 +2,10 @@
 
 Contributions are welcome. A few areas where help is most valuable:
 
-- **New locales** — add regex patterns and i18n strings for additional languages
-- **PII type coverage** — new structured identifier patterns (tax IDs, healthcare IDs, etc.)
-- **OCR accuracy** — improvements to the Tesseract.js pipeline for scanned documents
-- **Accessibility** — keyboard navigation, screen reader support
+- **New locales**: add regex patterns and i18n strings for additional languages
+- **PII type coverage**: new structured identifier patterns (tax IDs, healthcare IDs, etc.)
+- **OCR accuracy**: improvements to the Tesseract.js pipeline for scanned documents
+- **Accessibility**: keyboard navigation, screen reader support
 
 ## Getting started
 

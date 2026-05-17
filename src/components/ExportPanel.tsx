@@ -42,7 +42,7 @@ function RiskBar({ level, score, label }: { level: RiskLevel; score: number; lab
 
 
 // ---------------------------------------------------------------------------
-// Renders page 1 of the redacted PDF onto a small canvas — gives judges a
+// Renders page 1 of the redacted PDF onto a small canvas. Gives the user a
 // thumbnail confirmation that redaction boxes are visible before downloading.
 // ---------------------------------------------------------------------------
 function RedactedPreview({ pdfBytes }: { pdfBytes: Uint8Array }) {

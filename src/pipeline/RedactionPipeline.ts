@@ -214,8 +214,8 @@ export async function runDetection(
         } catch (err) {
           // Gemma backend unreachable or model unloaded — degrade gracefully,
           // the other four detection layers continue carrying the load.
-          // Log once per failure so a judge debugging Ollama setup can see why
-          // the contextual layer did not contribute.
+          // Log once per failure so anyone debugging an Ollama setup can see
+          // why the contextual layer did not contribute.
           console.warn('[Bounds] Gemma 4 page detection skipped:', err instanceof Error ? err.message : err)
         }
       }

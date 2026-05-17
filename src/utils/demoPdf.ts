@@ -2,7 +2,8 @@ import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
 
 /**
  * Generates a synthetic Calmara clinical note with realistic PII.
- * Used as a demo document for hackathon judges — all data is fictitious.
+ * Used as a sample document for the in-app Try sample button. All data
+ * is fictitious.
  */
 export async function generateDemoPdf(): Promise<File> {
   const pdfDoc = await PDFDocument.create()
@@ -141,9 +142,9 @@ export async function generateDemoPdf(): Promise<File> {
 
 /**
  * Generates a scanned-style CV with Anya's photo.
- * The entire page is rendered to a canvas → PNG → embedded as an image in the PDF.
- * Because there is no text layer, requiresOCR fires and Tesseract reads the text.
- * Used to demo OCR at the hackathon.
+ * The entire page is rendered to a canvas, exported to PNG, then embedded
+ * as an image in the PDF. Because there is no text layer, requiresOCR
+ * fires and Tesseract reads the text. Used to demo the OCR pipeline.
  */
 export async function generateOCRDemoPdf(): Promise<File> {
   // Landscape A4 — feels like a phone photo of an ID on a desk

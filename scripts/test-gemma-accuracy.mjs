@@ -28,11 +28,19 @@ For each span you flag, return ONE entry in a JSON array:
     "reason":     "<one short sentence explaining why this span is PHI a reviewer should consider>"
   }
 
+Multilingual: the input may be in any language including French, German, Spanish, Italian, Portuguese, Dutch, Polish, Arabic, Chinese, Japanese, Hindi, Bengali, Tamil, Swahili. Flag spans in their original language and script, verbatim. Diagnoses, medication names, and procedures translate. For example:
+  - French:  "trouble anxieux généralisé" (inline_diagnosis), "sertraline 50 mg" (medication_mention), "épisodes dépressifs" (inline_diagnosis)
+  - German:  "Angststörung" (inline_diagnosis), "Sertralin 50 mg" (medication_mention), "depressive Episode" (inline_diagnosis)
+  - Spanish: "trastorno de ansiedad generalizada" (inline_diagnosis), "sertralina" (medication_mention)
+  - Hindi:   "सामान्यीकृत चिंता विकार" (inline_diagnosis), "सर्ट्रालिन" (medication_mention), "अवसाद" (inline_diagnosis)
+  - Bengali: "সাধারণ উদ্বেগ ব্যাধি" (inline_diagnosis), "সারট্রালিন" (medication_mention), "বিষণ্নতা" (inline_diagnosis)
+
 Rules:
 - Return ONLY a JSON array. No prose, no markdown, no preamble.
 - If no PHI is present, return [].
 - Confidence MUST be at least ${CONFIDENCE_FLOOR}. Below that, omit the span.
-- The text field MUST appear verbatim in the input. Do NOT paraphrase, expand, or correct.
+- The text field MUST appear verbatim in the input, in the input's original language and script. Do NOT paraphrase, expand, translate, or correct.
+- Flag medication names whenever they appear in prose, in any language, including their dose if cited inline.
 - DO NOT flag patient names, dates, addresses, MRNs, phone numbers, emails, or other structured PHI; the regex and NER layers handle those. Your job is contextual content only.
 - If you are unsure, leave the span out. False positives in healthcare are worse than false negatives at this stage.`
 

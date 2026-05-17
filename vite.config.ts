@@ -27,7 +27,7 @@ export default defineConfig({
         // Don't precache large ML models or WASM binaries — they're fetched on demand
         globPatterns: ['**/*.{js,mjs,css,html,ico,png,svg,woff2}'],
         globIgnores: ['**/ort-wasm*', '**/onnx*', '**/*.wasm', '**/tesseract-core*.js'],
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
+        maximumFileSizeToCacheInBytes: 15 * 1024 * 1024, // 15 MB (WebLLM bundled into main chunk for Gemma 4 browser path)
         // Runtime caching for large assets excluded from precache.
         // CacheFirst: serve from cache if present, fetch and cache on first use.
         // These files are immutable (content-hashed or versioned) so a 1-year TTL is safe.

@@ -7,6 +7,13 @@ import { isFaceDetectionSupported, detectFaces } from './FaceDetector'
 import { KeyVaultService } from './KeyVaultService'
 import { generateSummary } from './ExplainWorker'
 import { sha256Hex, stemName } from '../utils/fileUtils'
+import { startGemmaJob, getGemmaBackend } from './GemmaWorker'
+
+// Below this many characters of extracted page text, Gemma 4 contextual
+// PHI detection is skipped: tiny pages are nearly always headers, footers
+// or blank, and the false-positive surface from running the LLM on them
+// outweighs any real signal.
+const GEMMA_MIN_PAGE_TEXT_CHARS = 100
 
 // ---------------------------------------------------------------------------
 // RedactionPipeline — orchestrates detection, then (separately) PDF output.
@@ -161,6 +168,42 @@ export async function runDetection(
       onProgress({ stage: 'detecting_faces', progress: Math.round((i / total) * 100), page: i + 1, total })
       const faces = await detectFaces(pageBlob, layout, i, tokenCounters)
       faceDetectionsWithBBox.push(...faces)
+    }
+
+    // Gemma 4 contextual PHI — runs after regex + NER have done their
+    // structured-pattern pass. Catches the six HIPAA Safe Harbor #17
+    // shapes the prior layers miss (inline diagnosis, medication in
+    // prose, treatment narrative, indirect health context, sensitive
+    // social, genetic reference). Backend-gated: Ollama preferred,
+    // WebLLM fallback, no-op if neither is reachable.
+    if (pageText.trim().length >= GEMMA_MIN_PAGE_TEXT_CHARS) {
+      const backend = getGemmaBackend()
+      if (backend !== null && backend !== 'unavailable') {
+        onProgress({ stage: 'detecting_gemma', progress: Math.round((i / total) * 100), page: i + 1, total })
+        try {
+          const job = startGemmaJob(pageText, i)
+          const gemmaRaws = await job.result
+          for (const r of gemmaRaws) {
+            const n = (tokenCounters.get('HEALTH_DATA') ?? 0) + 1
+            tokenCounters.set('HEALTH_DATA', n)
+            allDetections.push({
+              id: `gemma_${i}_${n}`,
+              type: 'HEALTH_DATA',
+              text: r.text,
+              token: `[HEALTH_DATA_${String(n).padStart(3, '0')}]`,
+              pageIndex: i,
+              confidence: r.confidence,
+              source: 'GEMMA',
+              enabled: false,
+              ruleId: r.ruleId,
+              reason: r.reason,
+            })
+          }
+        } catch {
+          // Gemma backend unreachable or model unloaded — silent fallback,
+          // the other four detection layers continue carrying the load.
+        }
+      }
     }
   }
 

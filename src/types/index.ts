@@ -143,6 +143,7 @@ export type PipelineStep =
   | { stage: 'detecting_ner'; progress: number; page: number; total: number }
   | { stage: 'detecting_ocr'; progress: number; page: number; total: number }
   | { stage: 'detecting_faces'; progress: number; page: number; total: number }
+  | { stage: 'detecting_gemma'; progress: number; page: number; total: number }
   | { stage: 'redacting'; progress: number }
   | { stage: 'encrypting' }
   | { stage: 'summarizing' }

@@ -115,6 +115,21 @@ export async function generateDemoPdf(): Promise<File> {
   draw(p2, 'No prior hospitalisation. No known medication allergies.', { x: 80, size: 10 })
   gap()
 
+  // Pure-narrative section: no ICD codes, no labels, no structured format.
+  // Regex + BERT NER cannot meaningfully catch these — this is the exact
+  // surface Gemma 4 contextual PHI is for (HIPAA Safe Harbor identifier #17,
+  // catch-all clause). Used as the visual contrast in the demo screencast.
+  rule(p2)
+  draw(p2, 'FAMILY & LIFESTYLE HISTORY', { f: bold, size: 11 })
+  gap(0.3)
+  draw(p2, 'Father (deceased 2019, aged 71): Type 2 diabetes, history of stroke.', { x: 80, size: 10 })
+  draw(p2, 'Mother (alive, aged 68): Bipolar I disorder, stable on lithium for twelve years.', { x: 80, size: 10 })
+  draw(p2, 'Sibling: Generalised anxiety disorder, treated with an SSRI since 2022.', { x: 80, size: 10 })
+  draw(p2, 'Patient reports occasional panic episodes before quarterly board meetings.', { x: 80, size: 10 })
+  draw(p2, 'Currently undergoing weekly cognitive behavioural therapy with the referred clinician.', { x: 80, size: 10 })
+  draw(p2, 'No alcohol dependency. Social drinker, two units per week. Non-smoker since 2017.', { x: 80, size: 10 })
+  gap()
+
   rule(p2)
   draw(p2, 'BILLING ADDRESS', { f: bold, size: 11 })
   gap(0.3)

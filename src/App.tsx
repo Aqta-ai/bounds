@@ -240,7 +240,7 @@ export function App() {
                 {t('hero_tagline')}
               </p>
               <div className="flex flex-wrap items-center justify-center gap-2 mt-3">
-                {['Gemma 4 inside', 'GDPR Art. 9', 'FADP Art. 5', 'HIPAA', 'AES-256-GCM', 'Multilingual'].map((badge) => (
+                {['Gemma 4 inside', 'GDPR Art. 9', 'FADP Art. 5', 'HIPAA Safe Harbor', 'AES-256-GCM'].map((badge) => (
                   <span key={badge} className="text-xs font-medium text-gray-400 border border-gray-200 rounded-full px-2.5 py-0.5">{badge}</span>
                 ))}
               </div>

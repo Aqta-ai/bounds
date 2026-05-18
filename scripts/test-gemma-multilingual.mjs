@@ -103,6 +103,7 @@ async function run(text) {
     }),
     signal: AbortSignal.timeout(120_000),
   })
+  if (!res.ok) throw new Error(`Ollama ${res.status} ${res.statusText}: ${await res.text()}`)
   const data = await res.json()
   return data.message?.content ?? data.response ?? ''
 }

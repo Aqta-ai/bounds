@@ -1,6 +1,6 @@
 # bounds
 
-[![Live App](https://img.shields.io/badge/Live_App-009E60?style=for-the-badge)](https://bounds.aqta.ai)
+[![Live App](https://img.shields.io/badge/Live_App-009E60?style=for-the-badge)](https://bounds-one.vercel.app/)
 [![Demo](https://img.shields.io/badge/Demo-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/-jConrg1GXo)
 [![Gemma 4 inside](https://img.shields.io/badge/Gemma%204-inside-4A6B62?style=for-the-badge)](https://github.com/Aqta-ai/bounds-gemma)
 [![Apache--2.0 engine](https://img.shields.io/badge/Engine-Apache--2.0-blue?style=for-the-badge)](https://github.com/Aqta-ai/bounds-gemma)
@@ -9,7 +9,7 @@
 
 Bounds finds and redacts personal information in PDFs using on-device AI. No server, no account, no document content leaves your machine. Works offline once your language packs are downloaded.
 
-> **Now with Gemma 4 contextual PHI.** Bounds ships a fifth detection layer powered by Google's Gemma 4 E2B running locally via Ollama. It catches the protected-health-information shapes that regex and named-entity recognition systematically miss: inline diagnoses, medication mentions, treatment narratives, indirect health context, sensitive social data, and genetic references. The HIPAA Safe Harbor #17 catch-all gap, closed without sending document bytes anywhere. The in-browser path activates the moment MLC ships a Gemma 4 WebLLM build.
+> **Now with Gemma 4 contextual PHI.** Bounds ships a fifth detection layer powered by Google's Gemma 4 E2B. It catches the protected-health-information shapes that regex and named-entity recognition systematically miss: inline diagnoses, medication mentions, treatment narratives, indirect health context, sensitive social data, and genetic references. The HIPAA Safe Harbor #17 catch-all gap, closed without sending document bytes anywhere. Dual path: Ollama when the local daemon is available (preferred), WebLLM with the `gemma-4-E2B-it-q4f16_1-MLC` build in the browser otherwise.
 >
 > The Gemma 4 pipeline is open-sourced as a standalone toolkit at [Aqta-ai/bounds-gemma](https://github.com/Aqta-ai/bounds-gemma) (Apache-2.0). You can install it via `npm i bounds-gemma` and run the same contextual PHI detection against your own pipelines.
 
@@ -18,7 +18,7 @@ Bounds finds and redacts personal information in PDFs using on-device AI. No ser
 ## Features
 
 - **Five detection layers**: regex patterns (~99% on known patterns), BERT NER (10 trained languages with cross-lingual transfer across mBERT's 104-language pretraining corpus), Tesseract OCR (100% word accuracy on clean printed, 97.6% on noisy rotated/JPEG-compressed scans), face detection, **and Gemma 4 contextual PHI (~85% recall, 100% precision across French, Spanish, German, Hindi-Devanagari, Bengali via Ollama)**
-- **Gemma 4 via Ollama**: contextual layer uses `gemma4:e2b` running on a local Ollama daemon. The other four layers run with no extra install. WebLLM in-browser path is wired and activates when MLC publishes a Gemma 4 build.
+- **Gemma 4, dual path**: contextual layer uses `gemma4:e2b` on a local Ollama daemon when available, or `gemma-4-E2B-it-q4f16_1-MLC` via WebLLM in the browser. The other four layers run with no extra install.
 - **Reversible redaction**: AES-256-GCM encrypted vault lets you restore original values with a key file
 - **Works offline**: layers 1–4 (regex / BERT / OCR / faces) run in-browser via WebAssembly + WebGPU; the Gemma 4 layer runs on a local Ollama daemon. Airplane mode after the first load and an `ollama pull`.
 - **Batch processing**: drop multiple PDFs at once
@@ -38,7 +38,7 @@ Bounds uses Gemma 4 E2B (effective 2B-active parameter, int4 quantised, ~1.5 GB 
 2. **Confidence floor of 0.75**: tuned for healthcare; below this, candidates are omitted before reaching the review panel.
 3. **Default-off in the review UI**: every Gemma detection arrives with `enabled: false`. The reviewer opts in per item.
 
-Document text never leaves your device. The contextual layer routes through your local Ollama daemon at `localhost:11434`. The WebLLM in-browser path is wired and activates the moment MLC publishes a Gemma 4 build.
+Document text never leaves your device. The contextual layer routes through your local Ollama daemon at `localhost:11434` when one is present; otherwise it loads `gemma-4-E2B-it-q4f16_1-MLC` via WebLLM into the browser tab (one-time ~1.5 GB download, cached in IndexedDB after).
 
 For the architecture in detail, the [bounds-gemma](https://github.com/Aqta-ai/bounds-gemma) repo has the worker, parser, system prompt, tests, and a runnable Ollama smoke-test example.
 
@@ -87,7 +87,7 @@ Cross-Origin-Opener-Policy: same-origin
 Cross-Origin-Embedder-Policy: credentialless
 ```
 
-Works on Vercel, Cloudflare Pages, Nginx, Docker. No backend required. Layers 1–4 use WebGPU + cross-origin isolation in the browser; the Gemma 4 contextual layer routes to a local Ollama daemon on the user's machine. WebLLM in-browser Gemma 4 activates when MLC publishes a build.
+Works on Vercel, Cloudflare Pages, Nginx, Docker. No backend required. Layers 1–4 use WebGPU + cross-origin isolation in the browser; the Gemma 4 contextual layer uses Ollama when present and falls back to WebLLM (`gemma-4-E2B-it-q4f16_1-MLC`) in the browser otherwise. Cross-origin isolation (COOP / COEP) is required for the WebLLM path.
 
 ---
 

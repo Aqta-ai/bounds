@@ -1,7 +1,6 @@
 # bounds
 
 [![Live App](https://img.shields.io/badge/Live_App-009E60?style=for-the-badge)](https://bounds-one.vercel.app/)
-[![Demo](https://img.shields.io/badge/Demo-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/-jConrg1GXo)
 [![Gemma 4 inside](https://img.shields.io/badge/Gemma%204-inside-4A6B62?style=for-the-badge)](https://github.com/Aqta-ai/bounds-gemma)
 [![Apache--2.0 engine](https://img.shields.io/badge/Engine-Apache--2.0-blue?style=for-the-badge)](https://github.com/Aqta-ai/bounds-gemma)
 

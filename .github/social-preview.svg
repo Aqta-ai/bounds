@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#04140E"/>
+      <stop offset="1" stop-color="#0A1A18"/>
+    </linearGradient>
+    <radialGradient id="glow-tl" cx="20%" cy="20%" r="50%">
+      <stop offset="0" stop-color="#009B72" stop-opacity="0.32"/>
+      <stop offset="1" stop-color="#009B72" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow-br" cx="80%" cy="80%" r="50%">
+      <stop offset="0" stop-color="#009FB7" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#009FB7" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#22e69b"/>
+      <stop offset="1" stop-color="#009FB7"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Backdrop -->
+  <rect width="1280" height="640" fill="url(#bg)"/>
+  <rect width="1280" height="640" fill="url(#glow-tl)"/>
+  <rect width="1280" height="640" fill="url(#glow-br)"/>
+
+  <!-- Top accent line -->
+  <rect x="0" y="0" width="1280" height="3" fill="url(#accent)" opacity="0.7"/>
+
+  <!-- Logo plate (left) -->
+  <g transform="translate(96 240)">
+    <!-- Reuse the same shape family as public/logo.svg, scaled 1.6x -->
+    <rect width="160" height="160" rx="32" fill="#009B72"/>
+    <polygon points="35,22 99,22 125,48 125,138 35,138" fill="#ffffff"/>
+    <polygon points="99,22 125,48 99,48" fill="#80CDB9"/>
+    <rect x="48" y="60" width="60" height="6.4" rx="3" fill="#CCF0E6"/>
+    <rect x="48" y="74" width="44" height="6.4" rx="3" fill="#CCF0E6"/>
+    <rect x="44" y="87" width="68" height="13" rx="2.5" fill="#003D2E"/>
+    <rect x="48" y="106" width="50" height="6.4" rx="3" fill="#CCF0E6"/>
+    <rect x="48" y="118" width="35" height="6.4" rx="3" fill="#CCF0E6"/>
+  </g>
+
+  <!-- Wordmark + tagline (right of logo) -->
+  <g transform="translate(296 256)" fill="#FFFFFF">
+    <text x="0" y="48" font-size="84" font-weight="800" letter-spacing="-3">b<tspan fill="#22e69b">o</tspan>unds</text>
+    <text x="0" y="100" font-size="28" font-weight="500" fill="#A8C9C2" letter-spacing="-0.3">Private PDF redaction. On-device. Open source.</text>
+  </g>
+
+  <!-- Badge strip (top right) -->
+  <g transform="translate(840 80)" font-size="20" font-weight="600" font-family="ui-monospace, 'SF Mono', Menlo, monospace">
+    <g transform="translate(0 0)">
+      <rect width="160" height="44" rx="22" fill="rgba(34,230,155,0.12)" stroke="#22e69b" stroke-opacity="0.55" stroke-width="1.5"/>
+      <text x="80" y="29" text-anchor="middle" fill="#22e69b">Apache-2.0</text>
+    </g>
+    <g transform="translate(176 0)">
+      <rect width="184" height="44" rx="22" fill="rgba(0,159,183,0.14)" stroke="#3FB8DE" stroke-opacity="0.55" stroke-width="1.5"/>
+      <text x="92" y="29" text-anchor="middle" fill="#3FB8DE">Gemma 4 inside</text>
+    </g>
+  </g>
+
+  <!-- Feature strip (bottom) -->
+  <g transform="translate(96 480)" fill="#A8C9C2" font-size="22" font-weight="500" letter-spacing="0.3">
+    <text>Five detection layers · contextual PHI · OCR · faces · 40+ regex · ten UI locales</text>
+  </g>
+
+  <!-- Repo URL (bottom right) -->
+  <g transform="translate(96 552)" fill="#5C7A74" font-size="20" font-weight="500" font-family="ui-monospace, 'SF Mono', Menlo, monospace">
+    <text>github.com/Aqta-ai/bounds</text>
+  </g>
+
+  <!-- Bottom accent line -->
+  <rect x="0" y="637" width="1280" height="3" fill="url(#accent)" opacity="0.4"/>
+</svg>

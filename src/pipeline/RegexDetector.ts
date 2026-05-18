@@ -430,9 +430,13 @@ const LABEL_CONTEXT_PATTERNS: PatternDef[] = [
   // are far worse than redacting a company number meant to be shared.
   // Lives globally (not just in the ga locale) because an Irish document carries
   // PPSN regardless of which UI language the reviewer has picked.
+  // Forward-match + captureGroup per the file-level convention: variable-length
+  // lookbehinds across many alternations are unreliable in V8 (silently fail
+  // in production browsers despite passing Node tests).
   {
     type: 'ID_NUMBER',
-    regex: /(?<=(?:PPS\s*N(?:o\.?)?|PPSN|Personal\s+Public\s+Service\s+Number|PPSN\s*\/\s*Tax\s+Reference\s+Number|Tax\s+Reference\s+(?:Number|No\.?)|Tax\s+(?:Number|No\.?|ID))\s*[:\-]?\s{0,20})\d{7}[A-W][A-Z]?\b/gi,
+    regex: /\b(?:PPS\s*N(?:o\.?)?|PPSN|Personal\s+Public\s+Service\s+Number|PPSN\s*\/\s*Tax\s+Reference\s+Number|Tax\s+Reference\s+(?:Number|No\.?)|Tax\s+(?:Number|No\.?|ID))\s*[:\-]?\s{0,20}(\d{7}[A-W][A-Z]?)\b/gi,
+    captureGroup: 1,
     confidence: 0.92,
     ruleName: 'Irish PPSN / Tax Reference',
   },

@@ -217,6 +217,19 @@ const UNIVERSAL_PATTERNS: PatternDef[] = [
     defaultEnabled: false,
     ruleName: 'Date of birth (DD.MM.YYYY)',
   },
+  // Irish PPSN / Tax Reference (bare format): 7 digits + 1 letter (A-W) +
+  // optional letter, no label required. Safety net for tabular tax-clearance
+  // documents where PDF span ordering puts non-label content between the
+  // "PPSN/Tax Reference Number:" label and the value, breaking the label-
+  // context detector's lookahead window. Same safety asymmetry as the
+  // label-context rule: better to over-redact (reviewer unchecks for B2B)
+  // than to miss an individual PPSN.
+  {
+    type: 'ID_NUMBER',
+    regex: /\b\d{7}[A-W][A-Z]?\b/g,
+    confidence: 0.85,
+    ruleName: 'Irish PPSN (bare format)',
+  },
 ]
 
 // ---------------------------------------------------------------------------

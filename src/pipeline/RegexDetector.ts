@@ -453,6 +453,20 @@ const LABEL_CONTEXT_PATTERNS: PatternDef[] = [
     confidence: 0.92,
     ruleName: 'Irish PPSN / Tax Reference',
   },
+  // Access codes / verification numbers used to confirm a credential to a
+  // third party (Irish Revenue tax-clearance access number, application
+  // reference codes, MFA confirmation codes printed on letters, etc.).
+  // Pure-numeric 4-8 digits is collision-prone on its own, so we only fire
+  // when an "Access Number/Code" or "Reference/Confirmation Number" label
+  // precedes the value. Default-on but reviewer can uncheck for B2B
+  // certificates where sharing the code is the intended workflow.
+  {
+    type: 'ID_NUMBER',
+    regex: /\b(?:Access\s+(?:Number|No\.?|Code)|Confirmation\s+(?:Number|Code)|Verification\s+(?:Number|Code)|Reference\s+(?:Number|No\.?|Code))\s*[:\-]?\s{0,20}(\d{4,10})\b/gi,
+    captureGroup: 1,
+    confidence: 0.85,
+    ruleName: 'Access / verification code',
+  },
 ]
 
 // ---------------------------------------------------------------------------

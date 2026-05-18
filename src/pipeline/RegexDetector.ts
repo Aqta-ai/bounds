@@ -423,6 +423,19 @@ const LABEL_CONTEXT_PATTERNS: PatternDef[] = [
     confidence: 0.95,
     ruleName: 'Thai National ID',
   },
+  // Irish PPSN / Tax Reference Number: 7 digits + 1 letter (A-W) + optional letter.
+  // Same shape for personal PPSN and corporate tax reference. Format-only detector
+  // cannot distinguish the two, so flagging it by default with the audit reviewer
+  // unchecking the corporate-tax case is the safer asymmetry — individual leaks
+  // are far worse than redacting a company number meant to be shared.
+  // Lives globally (not just in the ga locale) because an Irish document carries
+  // PPSN regardless of which UI language the reviewer has picked.
+  {
+    type: 'ID_NUMBER',
+    regex: /(?<=(?:PPS\s*N(?:o\.?)?|PPSN|Personal\s+Public\s+Service\s+Number|PPSN\s*\/\s*Tax\s+Reference\s+Number|Tax\s+Reference\s+(?:Number|No\.?)|Tax\s+(?:Number|No\.?|ID))\s*[:\-]?\s{0,20})\d{7}[A-W][A-Z]?\b/gi,
+    confidence: 0.92,
+    ruleName: 'Irish PPSN / Tax Reference',
+  },
 ]
 
 // ---------------------------------------------------------------------------

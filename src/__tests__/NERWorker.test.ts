@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { nerLabelToPiiType, buildNERDetections } from '../pipeline/NERWorker'
+import { nerLabelToPiiType, buildNERDetections, mergePersonSpans } from '../pipeline/NERWorker'
 import type { PiiType } from '../types'
 import type { RawNERDetection } from '../pipeline/NERWorker'
 
@@ -19,9 +19,9 @@ describe('nerLabelToPiiType', () => {
 })
 
 // ---------------------------------------------------------------------------
-// buildNERDetections — enabled logic
+// buildNERDetections - enabled logic
 // ---------------------------------------------------------------------------
-describe('buildNERDetections — enabled flag', () => {
+describe('buildNERDetections - enabled flag', () => {
   function makeRaw(type: string, word: string, score: number): RawNERDetection {
     return { text: word, type: type as PiiType, confidence: score, start: 0, end: word.length }
   }
@@ -42,7 +42,7 @@ describe('buildNERDetections — enabled flag', () => {
     expect(dets[0].type).toBe('ADDRESS')
   })
 
-  it('does NOT enable MISC detections — the Swiss-text bug fix', () => {
+  it('does NOT enable MISC detections - the Swiss-text bug fix', () => {
     const dets = buildNERDetections([makeRaw('MISC', 'Swiss', 0.80)], 0, counters())
     expect(dets[0].enabled).toBe(false)
     expect(dets[0].type).toBe('MISC')
@@ -89,5 +89,130 @@ describe('buildNERDetections — enabled flag', () => {
     const dets = buildNERDetections([makeRaw('UNKNOWN_TAG', 'foobar', 0.90)], 0, counters())
     expect(dets[0].type).toBe('MISC')
     expect(dets[0].enabled).toBe(false)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// mergePersonSpans - re-joining tokeniser-split names (source-text path)
+// ---------------------------------------------------------------------------
+describe('mergePersonSpans - source-text path', () => {
+  // Build a raw span whose offsets point into a known source string.
+  function span(word: string, start: number, type = 'PER', score = 0.95): RawNERDetection {
+    return { text: word, type: type as PiiType, confidence: score, start, end: start + word.length }
+  }
+
+  it('joins "Sarah" + "O" + "Donnell" (apostrophe split) into one PERSON span', () => {
+    const src = "Sarah O'Donnell"
+    // BERT splits the apostrophe: "Sarah"[0,5], "O"[6,7], "Donnell"[8,15]
+    const raws = [span('Sarah', 0), span('O', 6), span('Donnell', 8)]
+    const merged = mergePersonSpans(raws, src)
+    expect(merged).toHaveLength(1)
+    expect(merged[0].text).toBe("Sarah O'Donnell")
+    expect(merged[0].start).toBe(0)
+    expect(merged[0].end).toBe(15)
+  })
+
+  it('joins "Mary" + "Mc" + "Donald" into one PERSON span', () => {
+    const src = 'Mary Mc Donald'
+    const raws = [span('Mary', 0), span('Mc', 5), span('Donald', 8)]
+    const merged = mergePersonSpans(raws, src)
+    expect(merged).toHaveLength(1)
+    expect(merged[0].text).toBe('Mary Mc Donald')
+  })
+
+  it('joins "Niall" + "O" + "Brien" into one PERSON span', () => {
+    const src = 'Niall O Brien'
+    const raws = [span('Niall', 0), span('O', 6), span('Brien', 8)]
+    const merged = mergePersonSpans(raws, src)
+    expect(merged).toHaveLength(1)
+    expect(merged[0].text).toBe('Niall O Brien')
+  })
+
+  it('does NOT merge two distinct people separated by other words', () => {
+    const src = 'Alice met with Bob yesterday'
+    const raws = [span('Alice', 0), span('Bob', 15)]
+    const merged = mergePersonSpans(raws, src)
+    expect(merged).toHaveLength(2)
+  })
+
+  it('does NOT merge PERSON spans separated by a non-name word', () => {
+    const src = 'Sarah and Michael'
+    // "Sarah"[0,5] and "Michael"[10,17] separated by " and " (5 chars, not a connector)
+    const raws = [span('Sarah', 0), span('Michael', 10)]
+    const merged = mergePersonSpans(raws, src)
+    expect(merged).toHaveLength(2)
+  })
+
+  it('leaves non-PERSON spans untouched', () => {
+    const src = 'Dublin Cork'
+    const raws = [span('Dublin', 0, 'LOC'), span('Cork', 7, 'LOC')]
+    const merged = mergePersonSpans(raws, src)
+    expect(merged).toHaveLength(2)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// mergePersonSpans - offset-only fallback (no source text)
+// ---------------------------------------------------------------------------
+describe('mergePersonSpans - offset-only fallback', () => {
+  function span(word: string, start: number, type = 'PER', score = 0.95): RawNERDetection {
+    return { text: word, type: type as PiiType, confidence: score, start, end: start + word.length }
+  }
+
+  it('re-joins "Sarah" + "O\'Donnell" without source text', () => {
+    // Two-way split where the apostrophe stays attached to the surname
+    const raws = [span('Sarah', 0), span("O'Donnell", 6)]
+    const merged = mergePersonSpans(raws)
+    expect(merged).toHaveLength(1)
+    expect(merged[0].text).toBe("Sarah O'Donnell")
+  })
+})
+
+// ---------------------------------------------------------------------------
+// buildNERDetections - surname keep + trailing over-capture strip
+// ---------------------------------------------------------------------------
+describe('buildNERDetections - PERSON assembly', () => {
+  function span(word: string, start: number, type = 'PER', score = 0.95): RawNERDetection {
+    return { text: word, type: type as PiiType, confidence: score, start, end: start + word.length }
+  }
+  function counters() {
+    return new Map<PiiType, number>()
+  }
+
+  it('keeps a split surname as one PERSON detection ("Sarah O\'Donnell")', () => {
+    const raws = [span('Sarah', 0), span("O'Donnell", 6)]
+    const dets = buildNERDetections(raws, 0, counters())
+    expect(dets).toHaveLength(1)
+    expect(dets[0].type).toBe('PERSON')
+    expect(dets[0].text).toBe("Sarah O'Donnell")
+  })
+
+  it('strips a trailing article over-captured from the next sentence', () => {
+    // Live failure: NER returned "Dr Michael Byrne The" as one span
+    const dets = buildNERDetections([span('Dr Michael Byrne The', 0)], 0, counters())
+    expect(dets).toHaveLength(1)
+    expect(dets[0].text).toBe('Michael Byrne')
+  })
+
+  it('strips a leading title without touching the name', () => {
+    const dets = buildNERDetections([span('Prof Amara Osei', 0)], 0, counters())
+    expect(dets[0].text).toBe('Amara Osei')
+  })
+
+  it('keeps a plain single-token name', () => {
+    const dets = buildNERDetections([span('Sarah', 0)], 0, counters())
+    expect(dets).toHaveLength(1)
+    expect(dets[0].text).toBe('Sarah')
+  })
+
+  it('does not eat a real name particle when stripping trailing words', () => {
+    // "van" is a particle, never a trailing stopword
+    const dets = buildNERDetections([span('Johan van der Berg', 0)], 0, counters())
+    expect(dets[0].text).toBe('Johan van der Berg')
+  })
+
+  it('still excludes NOT_A_PERSON blocklist words', () => {
+    const dets = buildNERDetections([span('department', 0)], 0, counters())
+    expect(dets).toHaveLength(0)
   })
 })

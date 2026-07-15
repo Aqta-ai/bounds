@@ -507,3 +507,44 @@ describe('False positive avoidance', () => {
     expect(ids).toHaveLength(0)
   })
 })
+
+// ---------------------------------------------------------------------------
+// Irish Eircode full-span detection (ga locale)
+// ---------------------------------------------------------------------------
+describe('Irish Eircode detection', () => {
+  // Asserts the WHOLE Eircode is captured as one ADDRESS span, not partially boxed.
+  function hasExactAddress(text: string, eircode: string) {
+    const r = detect(text, 'ga')
+    return r.some((d) => d.type === 'ADDRESS' && d.text === eircode)
+  }
+
+  it('matches "D06 X4F2" as one full ADDRESS span', () => {
+    expect(hasExactAddress('Eircode: D06 X4F2', 'D06 X4F2')).toBe(true)
+  })
+
+  it('matches the "D6W" special routing key with no space: "D6W1234"', () => {
+    expect(hasExactAddress('Eircode: D6W1234', 'D6W1234')).toBe(true)
+  })
+
+  it('matches "A65 F4E2" as one full ADDRESS span', () => {
+    expect(hasExactAddress('Address code A65 F4E2 here', 'A65 F4E2')).toBe(true)
+  })
+
+  it('matches "T12 XY8Z" as one full ADDRESS span', () => {
+    expect(hasExactAddress('Cork office T12 XY8Z', 'T12 XY8Z')).toBe(true)
+  })
+
+  it('matches case-insensitively: "d06 x4f2"', () => {
+    const r = detect('eircode d06 x4f2', 'ga')
+    expect(r.some((d) => d.type === 'ADDRESS' && d.text.toLowerCase() === 'd06 x4f2')).toBe(true)
+  })
+
+  it('does not misclassify a UK postcode "AB1 2CD" as an Irish Eircode', () => {
+    const r = detect('Postcode AB1 2CD', 'ga')
+    expect(r.some((d) => d.type === 'ADDRESS' && d.text.includes('AB1'))).toBe(false)
+  })
+
+  it('keeps a UK postcode "AB1 2CD" handled by the UK ADDRESS pattern (en locale)', () => {
+    expect(hasMatch(detect('Postcode AB1 2CD', 'en'), 'ADDRESS', 'AB1 2CD')).toBe(true)
+  })
+})

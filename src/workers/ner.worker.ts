@@ -2,6 +2,7 @@
 // The model is downloaded once and cached in browser IndexedDB by Transformers.js.
 
 import { pipeline, env } from '@xenova/transformers'
+import { mergePersonSpans, type RawNERDetection } from '../pipeline/NERWorker'
 
 // Allow remote model downloads (cached after first load)
 env.allowRemoteModels = true
@@ -73,14 +74,17 @@ self.onmessage = async (e: MessageEvent<{ id: number; text: string; language: st
         }
       }
     }
-    const detections = allEntities.map((ent) => ({
+    const detections: RawNERDetection[] = allEntities.map((ent) => ({
       text: ent.word,
-      type: ent.entity_group,
+      type: ent.entity_group as RawNERDetection['type'],
       confidence: ent.score,
       start: ent.start,
       end: ent.end,
     }))
-    self.postMessage({ id, detections })
+    // Re-join PERSON spans the tokeniser split apart, using the original source text
+    // so the merged surface form and char offsets are exact ("Sarah O'Donnell").
+    const merged = mergePersonSpans(detections, text)
+    self.postMessage({ id, detections: merged })
   } catch (err: unknown) {
     self.postMessage({ id, error: String(err) })
   }

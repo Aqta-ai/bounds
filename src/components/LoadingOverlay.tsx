@@ -88,8 +88,8 @@ export function LoadingOverlay({ step, t }: Props) {
           <div className="mt-1 flex flex-col gap-0.5">
             <p className="text-xs text-gray-400">
               {t('loading_model_mb', {
-                downloaded: Math.round((step.modelProgress / 100) * (step.modelSizeMB ?? 430)),
-                total: step.modelSizeMB ?? 430,
+                downloaded: Math.round((step.modelProgress / 100) * (step.modelSizeMB ?? 179)),
+                total: step.modelSizeMB ?? 179,
               })}
             </p>
             <p className="text-xs text-gray-400">

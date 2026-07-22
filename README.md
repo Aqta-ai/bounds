@@ -16,7 +16,7 @@ Bounds finds and redacts personal information in PDFs using on-device AI. No ser
 
 ## Features
 
-- **Five detection layers**: regex patterns (~99% on known patterns), BERT NER (10 trained languages with cross-lingual transfer across mBERT's 104-language pretraining corpus), Tesseract OCR (100% word accuracy on clean printed, 97.6% on noisy rotated/JPEG-compressed scans), face detection, **and Gemma 4 contextual PHI (~85% recall, 100% precision across French, Spanish, German, Hindi-Devanagari, Bengali via Ollama)**
+- **Five detection layers**: regex patterns (~99% on known patterns), BERT NER (10 trained languages with cross-lingual transfer across mBERT's 104-language pretraining corpus), Tesseract OCR (100% word accuracy on clean printed, 97.6% on noisy rotated/JPEG-compressed scans), face detection, **and Gemma 4 contextual PHI (~85% recall on French, Spanish, German, Hindi-Devanagari, Bengali test narratives via Ollama; precision is enforced by the in-corpus substring guardrail, so surviving spans are byte-identical to the source text)**
 - **Gemma 4, dual path**: contextual layer uses `gemma4:e2b` on a local Ollama daemon when available, or `gemma-4-E2B-it-q4f16_1-MLC` via WebLLM in the browser. The other four layers run with no extra install.
 - **Reversible redaction**: AES-256-GCM encrypted vault lets you restore original values with a key file
 - **Works offline**: layers 1–4 (regex / BERT / OCR / faces) run in-browser via WebAssembly + WebGPU; the Gemma 4 layer runs on a local Ollama daemon. Airplane mode after the first load and an `ollama pull`.

@@ -4,8 +4,8 @@ import type { Annotation, BBox, Detection, OcrWord, PageLayout, RedactionOptions
 // ---------------------------------------------------------------------------
 // PDFEngine
 // Two responsibilities:
-//   1. extractLayouts() — use pdfjs-dist to get text content + bounding boxes
-//   2. applyRedactions() — true redaction: rasterize pages with detections via
+//   1. extractLayouts(): use pdfjs-dist to get text content + bounding boxes
+//   2. applyRedactions(): true redaction: rasterize pages with detections via
 //      canvas (removing text layer), then re-embed as images in a new PDF.
 //      Pages without detections are copied intact.
 //
@@ -64,7 +64,7 @@ export async function extractLayouts(buffer: ArrayBuffer): Promise<PageLayout[]>
 
     const totalChars = spans.reduce((n, s) => n + s.text.length, 0)
 
-    // Detect embedded images via operator list — if any image-drawing ops exist,
+    // Detect embedded images via operator list. If any image-drawing ops exist,
     // the page may be a scan or contain a scanned image embedded inside a PDF wrapper.
     // In that case we must run OCR regardless of how many text-layer chars exist.
     const ops = await page.getOperatorList()
@@ -82,7 +82,7 @@ export async function extractLayouts(buffer: ArrayBuffer): Promise<PageLayout[]>
       spans,
       // Require OCR only when text is sparse AND the page has images (scanned form
       // inside a PDF wrapper). Text-rich pages with logos (totalChars >= 300) have a
-      // reliable text layer — forcing OCR on those breaks span bbox resolution.
+      // reliable text layer. Forcing OCR on those breaks span bbox resolution.
       requiresOCR: totalChars < 300 && hasImages,
     })
   }
@@ -93,7 +93,7 @@ export async function extractLayouts(buffer: ArrayBuffer): Promise<PageLayout[]>
 // ---------------------------------------------------------------------------
 // Rasterize a single PDF page to PNG with redaction boxes drawn on the canvas.
 // This is the key to TRUE redaction: the original text is never present in
-// the output — only a flat image remains.
+// the output. Only a flat image remains.
 // ---------------------------------------------------------------------------
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function rasterizePageWithRedactions(
@@ -218,7 +218,7 @@ function addAnnotationToPage(
   let boxX: number, boxY: number, boxWidth: number, boxHeight: number
 
   if (ann.bbox) {
-    // User drew a box — use its exact position and size (PDF user-space coords)
+    // User drew a box: use its exact position and size (PDF user-space coords)
     boxX = ann.bbox.x
     boxY = ann.bbox.y
     boxWidth = Math.max(ann.bbox.width, 40)
@@ -262,7 +262,7 @@ function addAnnotationToPage(
 }
 
 // ---------------------------------------------------------------------------
-// applyRedactions — builds a new PDF document:
+// applyRedactions: builds a new PDF document:
 //   • Pages with detections → rasterized image (text layer removed) + boxes
 //   • Pages without detections → copied verbatim from source
 //   • Watermark stamped on all pages if enabled
@@ -276,7 +276,7 @@ export async function applyRedactions(
   const originalDoc = await PDFDocument.load(originalBuffer)
   const newDoc = await PDFDocument.create()
 
-  // Embed Helvetica once — required for drawText on both new and copied pages
+  // Embed Helvetica once: required for drawText on both new and copied pages
   const helvetica = await newDoc.embedFont(StandardFonts.Helvetica)
 
   // Load pdfjs doc once for all rasterizations
@@ -352,9 +352,9 @@ function unionBBox(spans: TextSpan[]): { x: number; y: number; width: number; he
 /**
  * Scan page spans to find the bounding box of a match string.
  *
- *   Pass 1 — exact substring in a single span
- *   Pass 2 — join 2–5 consecutive same-line spans (handles multi-word names)
- *   Pass 3 — any significant word match ≥3 chars (last-resort fallback)
+ *   Pass 1: exact substring in a single span
+ *   Pass 2: join 2-5 consecutive same-line spans (handles multi-word names)
+ *   Pass 3: any significant word match ≥3 chars (last-resort fallback)
  *
  * `occurrence` (0-based) skips that many earlier matches so duplicate text
  * on the same page (e.g. a name in two columns) each get their own bbox.
@@ -397,7 +397,7 @@ export function findSpanBBox(
     }
   }
 
-  // Pass 3 — any significant word (≥3 chars) from the needle (last-resort)
+  // Pass 3: any significant word (≥3 chars) from the needle (last-resort)
   seen = 0
   const needleWords = needle.split(' ').filter((w) => w.length >= 3)
   for (const word of needleWords) {
@@ -433,9 +433,9 @@ function imgBBoxToPdf(x0: number, y0: number, x1: number, y1: number, pageHeight
  * Find the bounding box of a detection in OCR word results.
  * Words carry image-pixel coordinates at `scale`; we convert to PDF user-space.
  *
- *   Pass 1 — any single word that contains the needle
- *   Pass 2 — 2–6 consecutive words whose joined text contains the needle
- *   Pass 3 — any significant word (≥4 chars) from the needle (last-resort)
+ *   Pass 1: any single word that contains the needle
+ *   Pass 2: 2-6 consecutive words whose joined text contains the needle
+ *   Pass 3: any significant word (≥4 chars) from the needle (last-resort)
  */
 export function findOcrWordBBox(
   words: OcrWord[],
@@ -448,7 +448,7 @@ export function findOcrWordBBox(
   if (!needle) return null
   const lowers = words.map((w) => w.text.toLowerCase())
 
-  // Pass 1 — single word
+  // Pass 1: single word
   let seen = 0
   for (let i = 0; i < words.length; i++) {
     if (lowers[i].includes(needle)) {
@@ -458,7 +458,7 @@ export function findOcrWordBBox(
     }
   }
 
-  // Pass 2 — consecutive window
+  // Pass 2: consecutive window
   seen = 0
   for (let windowSize = 2; windowSize <= 6; windowSize++) {
     for (let i = 0; i <= words.length - windowSize; i++) {
@@ -475,7 +475,7 @@ export function findOcrWordBBox(
     }
   }
 
-  // Pass 3 — any significant part word
+  // Pass 3: any significant part word
   seen = 0
   const parts = needle.split(' ').filter((p) => p.length >= 3)
   for (const part of parts) {

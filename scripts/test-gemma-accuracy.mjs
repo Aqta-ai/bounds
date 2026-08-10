@@ -177,7 +177,7 @@ function scoreDetections(detections, expected) {
 
 async function main() {
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
-  console.log(`Bounds × Gemma 4 — contextual PHI accuracy harness`)
+  console.log(`Bounds × Gemma 4: contextual PHI accuracy harness`)
   console.log(`Model: ${MODEL}  ·  Floor: ${CONFIDENCE_FLOOR}`)
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
 
@@ -186,7 +186,7 @@ async function main() {
   try {
     raw = await runGemma(DEMO_TEXT)
   } catch (err) {
-    console.error('FAIL — could not reach Ollama:', err.message)
+    console.error('FAIL: could not reach Ollama:', err.message)
     process.exit(1)
   }
   const elapsedMs = Date.now() - t0
@@ -244,7 +244,7 @@ async function main() {
   // Exit non-zero only if recall is truly catastrophic
   if (recall < 0.3) {
     console.log()
-    console.log('WARN: recall under 30%% — investigate model or prompt drift')
+    console.log('WARN: recall under 30%%, investigate model or prompt drift')
     process.exit(2)
   }
 }

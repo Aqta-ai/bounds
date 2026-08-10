@@ -60,7 +60,7 @@ export function PrivacyModal({ onClose }: Props) {
             <Code className="w-4 h-4 text-brand-green mt-0.5 shrink-0" />
             <div>
               <p className="text-sm font-semibold text-gray-800">Open source and auditable</p>
-              <p className="text-xs text-gray-500 mt-0.5">Every claim above is verifiable. Open DevTools, go to Network, and upload a PDF — you will see zero outgoing requests carrying document bytes. Model files (BERT NER, Gemma 4 E2B, Tesseract, UltraFace) load once from public CDNs on first use; subsequent uses are fully offline. The full source is on GitHub under Apache-2.0.</p>
+              <p className="text-xs text-gray-500 mt-0.5">Every claim above is verifiable. Open DevTools, go to Network, and upload a PDF: you will see zero outgoing requests carrying document bytes. Model files (BERT NER, Gemma 4 E2B, Tesseract, UltraFace) load once from public CDNs on first use; subsequent uses are fully offline. The full source is on GitHub under Apache-2.0.</p>
             </div>
           </div>
         </div>

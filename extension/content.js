@@ -2,9 +2,9 @@
   'use strict'
 
   // ---------------------------------------------------------------------------
-  // Bounds — content script
+  // Bounds: content script
   // Detects when a PDF is selected for upload on any website and prompts the
-  // user to scan it for sensitive data first. No text extraction, no scanning —
+  // user to scan it for sensitive data first. No text extraction, no scanning,
   // just a privacy nudge before the file leaves the device.
   // ---------------------------------------------------------------------------
 
@@ -55,7 +55,7 @@
     )
     if (pdfs.length === 0) return
 
-    // Show for the first PDF — if multiple, note the count
+    // Show for the first PDF, if multiple, note the count
     const name = pdfs.length === 1
       ? pdfs[0].name
       : `${pdfs[0].name} + ${pdfs.length - 1} more`

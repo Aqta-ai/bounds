@@ -7,7 +7,7 @@
   "step_export": "Exportieren",
   "hero_headline": "Personenbezogene Daten aus PDFs schwärzen.",
   "hero_tagline": "Funktioniert offline. Nichts verlässt Ihr Gerät.",
-  "hero_sub": "Erkennt automatisch Namen, Adressen, E-Mails, IBANs und mehr – vollständig in Ihrem Browser. Kein Upload, kein Server, kein Konto.",
+  "hero_sub": "Erkennt automatisch Namen, Adressen, E-Mails, IBANs und mehr, vollständig in Ihrem Browser. Kein Upload, kein Server, kein Konto.",
   "drop_prompt": "PDF hier ablegen oder klicken zum Auswählen",
   "drop_hint": "Nur PDF-Dateien. Keine Daten verlassen Ihr Gerät.",
   "language_label": "Dokumentsprache",

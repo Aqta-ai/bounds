@@ -28,9 +28,9 @@ function progressLabel(step: PipelineStep, t: Props['t']): string {
   }
 }
 
-// Pipeline timeline, monotonic 0–100:
-//   0–10   extracting · 10–80 per-page detection · 80–95 redacting ·
-//   95–97  encrypting · 97–100 summarising + done.
+// Pipeline timeline, monotonic 0-100:
+//   0-10   extracting · 10-80 per-page detection · 80-95 redacting ·
+//   95-97  encrypting · 97-100 summarising + done.
 // loading_model overlays the first 3% of detection so a fresh model
 // download does not make the bar jump backwards on first inference.
 const DETECT_START = 10

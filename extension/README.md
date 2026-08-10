@@ -1,14 +1,14 @@
-# Bounds Privacy Scanner — Chrome Extension
+# Bounds Privacy Scanner: Chrome Extension
 
 Catches PDF uploads on most sites and warns you about sensitive data before they leave your device.
 
-## Load for demo (sideload — no Chrome Web Store needed)
+## Load for demo (sideload, no Chrome Web Store needed)
 
 1. Open Chrome and go to `chrome://extensions`
 2. Enable **Developer mode** (top right toggle)
 3. Click **Load unpacked**
 4. Select this `extension/` folder
-5. Done — the Bounds shield icon appears in your toolbar
+5. Done. The Bounds shield icon appears in your toolbar
 
 ## Demo flow
 
@@ -32,6 +32,6 @@ Catches PDF uploads on most sites and warns you about sensitive data before they
 ## Notes
 
 - Works on text-layer PDFs (including our demo PDF)
-- Compressed PDFs are skipped silently — never blocks an upload
-- No data is sent anywhere — runs entirely in the content script
+- Compressed PDFs are skipped silently: never blocks an upload
+- No data is sent anywhere: runs entirely in the content script
 - The full Bounds pipeline (BERT NER, OCR, face detection, Gemma 4 contextual PHI) runs in the Bounds web app

@@ -24,7 +24,7 @@ export function DropZone({ onFiles, language, onLanguageChange, t }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [dragging, setDragging] = useState(false)
   const [fileError, setFileError] = useState<string | null>(null)
-  // Counter-based drag tracking — avoids false dragLeave events when the pointer
+  // Counter-based drag tracking: avoids false dragLeave events when the pointer
   // moves over a child element inside the drop zone.
   const dragDepthRef = useRef(0)
 

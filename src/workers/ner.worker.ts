@@ -1,4 +1,4 @@
-// NER Web Worker — runs @xenova/transformers BERT NER model in isolation.
+// NER Web Worker: runs @xenova/transformers BERT NER model in isolation.
 // The model is downloaded once and cached in browser IndexedDB by Transformers.js.
 
 import { pipeline, env } from '@xenova/transformers'
@@ -7,16 +7,16 @@ import { mergePersonSpans, type RawNERDetection } from '../pipeline/NERWorker'
 // Allow remote model downloads (cached after first load)
 env.allowRemoteModels = true
 env.allowLocalModels = false
-// Point ORT to CDN for its WASM binaries — they are not bundled by Vite
+// Point ORT to CDN for its WASM binaries. They are not bundled by Vite
 // and would 404 if loaded from the app origin. The JS bundle is already
 // pre-bundled by Vite (optimizeDeps.include); only the .wasm files need CDN.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ;(env as any).backends.onnx.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.14.0/dist/'
-// Single-threaded WASM — prevents SharedArrayBuffer/Atomics issues in workers.
+// Single-threaded WASM: prevents SharedArrayBuffer/Atomics issues in workers.
 try {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ;(env as any).backends.onnx.wasm.numThreads = 1
-} catch { /* ignore — ORT will use its default thread count */ }
+} catch { /* ignore: ORT will use its default thread count */ }
 
 type TokenClassificationPipeline = Awaited<ReturnType<typeof pipeline<'token-classification'>>>
 
@@ -110,7 +110,7 @@ function chunkText(text: string, maxLen: number): Array<{ text: string; startOff
     while (boundary > i && !/\s/.test(text[boundary])) {
       boundary--
     }
-    if (boundary === i) boundary = end // no whitespace found — hard split
+    if (boundary === i) boundary = end // no whitespace found, hard split
     chunks.push({ text: text.slice(i, boundary), startOffset: i })
     // Skip whitespace between chunks so offsets stay accurate
     i = boundary

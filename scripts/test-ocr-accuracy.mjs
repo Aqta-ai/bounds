@@ -71,7 +71,7 @@ async function runOne(label, imagePath) {
 
 async function main() {
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
-  console.log('Bounds × Tesseract.js — OCR accuracy harness')
+  console.log('Bounds × Tesseract.js: OCR accuracy harness')
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
   console.log(`Ground truth: ${tokenise(GROUND_TRUTH).length} tokens`)
   console.log()

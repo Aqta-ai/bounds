@@ -10,7 +10,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['logo.svg', 'logo.png', 'icons/*.png'],
       manifest: {
-        name: 'Bounds — Private PDF Redaction',
+        name: 'Bounds: Private PDF Redaction',
         short_name: 'Bounds',
         description: 'Zero-trust PDF PII redaction. Everything runs in your browser. Nothing leaves your device.',
         theme_color: '#009B72',
@@ -24,7 +24,7 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // Don't precache large ML models or WASM binaries — they're fetched on demand
+        // Don't precache large ML models or WASM binaries: they're fetched on demand
         globPatterns: ['**/*.{js,mjs,css,html,ico,png,svg,woff2}'],
         globIgnores: ['**/ort-wasm*', '**/onnx*', '**/*.wasm', '**/tesseract-core*.js'],
         maximumFileSizeToCacheInBytes: 15 * 1024 * 1024, // 15 MB (WebLLM bundled into main chunk for Gemma 4 browser path)
@@ -53,7 +53,7 @@ export default defineConfig({
           {
             // ONNX Runtime WASM binaries served from jsDelivr CDN.
             // These are required by @xenova/transformers for NER and Explain
-            // workers — without caching, offline use fails even after first load.
+            // workers: without caching, offline use fails even after first load.
             urlPattern: /https:\/\/cdn\.jsdelivr\.net\/npm\/onnxruntime-web.*\.(wasm|js)(\?.*)?$/,
             handler: 'CacheFirst' as const,
             options: {
@@ -72,7 +72,7 @@ export default defineConfig({
             },
           },
           {
-            // Hugging Face weights: BERT NER (~430 MB), Flan-T5 (~80 MB), and
+            // Hugging Face weights: BERT NER (~179 MB), Flan-T5 (~80 MB), and
             // WebLLM Gemma 4 (~1.5 GB) all resolve to huggingface.co or its
             // LFS / xet CDN. Without an explicit SW cache rule the entries
             // transformers.js / WebLLM put in the Cache API are vulnerable to
@@ -105,7 +105,7 @@ export default defineConfig({
     format: 'es',
   },
   optimizeDeps: {
-    // @xenova/transformers is pure ESM — no pre-bundling needed.
+    // @xenova/transformers is pure ESM: no pre-bundling needed.
     // onnxruntime-web must NOT be excluded: its dist/ort-web.min.js is a
     // webpack UMD bundle that crashes when served raw as an ES module
     // (registerBackend is called before the ORT namespace is assigned).

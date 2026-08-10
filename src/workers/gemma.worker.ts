@@ -1,5 +1,6 @@
-// Probes Ollama first; falls back to WebLLM if absent. Override the
-// Ollama URL with VITE_OLLAMA_URL when Docker has claimed 11434.
+// Probes Ollama first. WebLLM fallback is wired but dormant until MLC
+// publishes a Gemma 4 build. Override the Ollama URL with VITE_OLLAMA_URL
+// when Docker has claimed 11434.
 
 import {
   HEALTHCARE_CONFIDENCE_FLOOR,
@@ -71,9 +72,9 @@ async function detectBackend(): Promise<GemmaBackend> {
     _backend = 'ollama'
   } else {
     // Until MLC publishes a Gemma 4 WebLLM build, the in-browser path is
-    // dormant. We do not silently substitute Gemma 2 / Gemma 3 — the
-    // submission's contextual layer claim stands on Gemma 4 specifically,
-    // so the other four detection layers run alone when Ollama is absent.
+    // dormant. We do not silently substitute Gemma 2 / Gemma 3. The
+    // contextual layer is Gemma 4 only, so the other four detection layers
+    // run alone when Ollama is absent.
     _backend = 'unavailable'
   }
   _backendDetected = true
@@ -128,7 +129,7 @@ async function callOllama(chunk: string): Promise<RawGemmaDetection[]> {
 // here so the in-browser path activates the day MLC publishes a Gemma 4
 // MLC variant; in the meantime detectBackend never returns 'webllm', so
 // this code is dormant. We deliberately do not fall back to an older
-// Gemma family in the browser — the submission stands on Gemma 4 only.
+// Gemma family in the browser. Contextual PHI stays Gemma 4 only.
 const WEBLLM_MODEL_ID = 'gemma-4-E2B-it-q4f16_1-MLC'
 
 interface WebLLMEngine {

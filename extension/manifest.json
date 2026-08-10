@@ -3,7 +3,7 @@
   "name": "Bounds Privacy Scanner",
   "short_name": "Bounds",
   "version": "0.2.0",
-  "description": "Alerts you before uploading a PDF. Scans for names, IBANs, SSNs and more. Runs entirely in your browser — nothing is sent anywhere.",
+  "description": "Alerts you before uploading a PDF. Scans for names, IBANs, SSNs and more. Runs entirely in your browser: nothing is sent anywhere.",
   "permissions": [],
   "host_permissions": ["<all_urls>"],
   "content_scripts": [

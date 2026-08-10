@@ -116,7 +116,7 @@ export async function generateDemoPdf(): Promise<File> {
   gap()
 
   // Pure-narrative section: no ICD codes, no labels, no structured format.
-  // Regex + BERT NER cannot meaningfully catch these — this is the exact
+  // Regex + BERT NER cannot meaningfully catch these: this is the exact
   // surface Gemma 4 contextual PHI is for (HIPAA Safe Harbor identifier #17,
   // catch-all clause). Used as the visual contrast in the demo screencast.
   rule(p2)
@@ -162,7 +162,7 @@ export async function generateDemoPdf(): Promise<File> {
  * fires and Tesseract reads the text. Used to demo the OCR pipeline.
  */
 export async function generateOCRDemoPdf(): Promise<File> {
-  // Landscape A4 — feels like a phone photo of an ID on a desk
+  // Landscape A4: feels like a phone photo of an ID on a desk
   const W = 1123
   const H = 794
 
@@ -179,7 +179,7 @@ export async function generateOCRDemoPdf(): Promise<File> {
     ctx.fillRect(Math.random() * W, Math.random() * H, 2, 2)
   }
 
-  // ── ID card — centered, slight shadow ───────────────────────────────────
+  // ── ID card: centered, slight shadow ───────────────────────────────────
   const CX = 80   // card left
   const CY = 90   // card top
   const CW = 960  // card width
@@ -305,7 +305,7 @@ export async function generateOCRDemoPdf(): Promise<File> {
   ctx.fillStyle = 'rgba(0,0,0,0.4)'
   ctx.font = '11px Arial, sans-serif'
   ctx.textAlign = 'center'
-  ctx.fillText('Demo document — all data is fictitious', W / 2, CY + CH + 26)
+  ctx.fillText('Demo document - all data is fictitious', W / 2, CY + CH + 26)
 
   // ── PNG → PDF (image-only, no text layer → triggers OCR) ────────────────
   const pngBlob = await canvas.convertToBlob({ type: 'image/png' })

@@ -251,7 +251,7 @@ export function ExportPanel({ result, onStartOver, onGoBack, t }: Props) {
         </div>
       )}
 
-      {/* Individual downloads — 2×2 grid */}
+      {/* Individual downloads: 2×2 grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {([
           { icon: <FileText className="w-4 h-4 text-brand-green" />, label: t('export_pdf_label'), hint: t('export_pdf_hint'), fn: downloadPdf },

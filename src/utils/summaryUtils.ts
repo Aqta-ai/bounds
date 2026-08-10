@@ -2,7 +2,7 @@ import type { Detection } from '../types'
 
 /**
  * Produces a sharp, context-aware privacy summary based on what was actually
- * detected. Reads like a privacy expert wrote it — specific types named,
+ * detected. Reads like a privacy expert wrote it: specific types named,
  * most sensitive first, ends with a clear outcome statement.
  */
 export function buildPrivacySummary(
@@ -17,7 +17,7 @@ export function buildPrivacySummary(
 
   const types = new Set(enabled.map((d) => d.type))
 
-  // ── Tier 1 — special-category / high-sensitivity ──
+  // ── Tier 1: special-category / high-sensitivity ──
   const hasHealth      = types.has('HEALTH_DATA')
   const hasSSN         = types.has('SSN')
   const hasPassport    = types.has('PASSPORT')
@@ -25,16 +25,16 @@ export function buildPrivacySummary(
   const hasCreditCard  = types.has('CREDIT_CARD')
   const hasID          = types.has('ID_NUMBER')
 
-  // ── Tier 2 — personal identifiers ──
+  // ── Tier 2: personal identifiers ──
   const hasPerson  = types.has('PERSON')
   const hasDOB     = types.has('DATE_OF_BIRTH')
   const hasAddress = types.has('ADDRESS')
 
-  // ── Tier 3 — contact ──
+  // ── Tier 3: contact ──
   const hasEmail = types.has('EMAIL')
   const hasPhone = types.has('PHONE')
 
-  // Build an ordered label list — most sensitive first
+  // Build an ordered label list: most sensitive first
   const parts: string[] = []
 
   if (hasHealth)     parts.push('special-category health records (GDPR Art. 9)')

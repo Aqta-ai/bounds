@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------------------
-// Minimal ZIP builder — stored (uncompressed) entries, no external dep.
+// Minimal ZIP builder: stored (uncompressed) entries, no external dep.
 // Enough for packaging 4 small export files into a single download.
 // ---------------------------------------------------------------------------
 

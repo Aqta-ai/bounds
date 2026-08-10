@@ -203,7 +203,7 @@ export function RedactionOptionsPanel({ options, onChange, t }: Props) {
         )}
       </div>
 
-      {/* Page notes — added by drawing on the PDF; listed here for review/removal */}
+      {/* Page notes: added by drawing on the PDF; listed here for review/removal */}
       {options.annotations.length > 0 && (
         <div className="flex flex-col gap-2">
           <span className="text-sm font-medium text-gray-700">{t('options_page_notes', { count: options.annotations.length })}</span>

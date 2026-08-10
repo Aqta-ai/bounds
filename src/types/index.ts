@@ -34,7 +34,7 @@ export interface Detection {
   token: string      // replacement token e.g. "[PERSON_001]"
   pageIndex: number
   boundingBox: BBox  // in PDF user-space units
-  confidence: number // 0–1
+  confidence: number // 0-1
   source: DetectionSource
   enabled: boolean   // user can toggle individual detections
   ruleId?: string    // e.g. 'email', 'swiss_ahv', 'label_person', 'ner_bert', 'gemma:inline_diagnosis'
@@ -47,7 +47,7 @@ export interface OcrWord {
   y0: number
   x1: number
   y1: number
-  confidence: number  // Tesseract confidence 0–100
+  confidence: number  // Tesseract confidence 0-100
 }
 
 export interface PageLayout {
@@ -88,7 +88,7 @@ export interface Annotation {
 }
 
 export interface RedactionOptions {
-  color: { r: number; g: number; b: number }  // 0–1 per channel
+  color: { r: number; g: number; b: number }  // 0-1 per channel
   labelStyle: 'blank' | 'token'
   watermark: { enabled: boolean; text: string; opacity: number }
   footer: { enabled: boolean; text: string }

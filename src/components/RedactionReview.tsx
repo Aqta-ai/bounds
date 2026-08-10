@@ -28,8 +28,8 @@ interface Props {
 }
 
 // ---------------------------------------------------------------------------
-// Confidence histogram — mini bar chart showing how detections are distributed
-// across confidence levels. Makes it clear why moving the slider in the 50–90%
+// Confidence histogram: mini bar chart showing how detections are distributed
+// across confidence levels. Makes it clear why moving the slider in the 50-90%
 // range often doesn't change the count (most detections cluster at >90%).
 // ---------------------------------------------------------------------------
 function ConfidenceHistogram({ detections, threshold }: { detections: Detection[]; threshold: number }) {
@@ -51,7 +51,7 @@ function ConfidenceHistogram({ detections, threshold }: { detections: Detection[
             key={i}
             className={`flex-1 rounded-sm transition-all ${active ? 'bg-brand-green/60' : 'bg-gray-200'}`}
             style={{ height: `${Math.max(pct, count > 0 ? 15 : 0)}%` }}
-            title={`${Math.round(bucketMin * 100)}–${Math.round((i + 1) / BUCKETS * 100)}%: ${count}`}
+            title={`${Math.round(bucketMin * 100)}-${Math.round((i + 1) / BUCKETS * 100)}%: ${count}`}
           />
         )
       })}
@@ -290,7 +290,7 @@ export function RedactionReview({
       {/* Controls bar */}
       <div className="bg-gray-50 rounded-xl px-4 py-3 flex flex-col gap-2">
         <ConfidenceSlider value={threshold} onChange={setThreshold} label={t('review_confidence')} />
-        {/* Confidence histogram — shows why mid-range slider moves may not change count */}
+        {/* Confidence histogram: shows why mid-range slider moves may not change count */}
         <ConfidenceHistogram detections={detections} threshold={threshold} />
         <div className="flex items-center justify-between">
           <span className="text-sm text-gray-600">
@@ -309,7 +309,7 @@ export function RedactionReview({
         </div>
       </div>
 
-      {/* AI privacy summary — Flan-T5 generated, streamed in as ready */}
+      {/* AI privacy summary: Flan-T5 generated, streamed in as ready */}
       {(aiSummary || aiSummaryLoading) && (
         <div className="rounded-xl border border-brand-green/25 bg-brand-green/5 px-4 py-3 flex gap-3 items-start">
           <Sparkles className="w-4 h-4 text-brand-green shrink-0 mt-0.5" />
@@ -451,7 +451,7 @@ export function RedactionReview({
                       {gemmaWithReason.map((d) => (
                         <li key={`reason_${d.id}`} className="text-[11px] text-gray-500 leading-snug">
                           <span className="font-medium text-gray-700">{d.text}</span>
-                          <span className="text-gray-400"> — {d.reason}</span>
+                          <span className="text-gray-400"> - {d.reason}</span>
                         </li>
                       ))}
                     </ul>
@@ -468,7 +468,7 @@ export function RedactionReview({
             )}
           </div>
 
-          {/* Pending drawn box — confirm type before adding */}
+          {/* Pending drawn box: confirm type before adding */}
           {pendingBox && (
             <div className="border border-brand-green/25 bg-brand-green/5 rounded-xl p-3 flex flex-col gap-2">
               <div className="flex items-center justify-between">
@@ -506,7 +506,7 @@ export function RedactionReview({
             </div>
           )}
 
-          {/* Pending annotation — type note text before confirming */}
+          {/* Pending annotation: type note text before confirming */}
           {pendingAnnotation && (
             <div className="border border-amber-300 bg-amber-50 rounded-xl p-3 flex flex-col gap-2">
               <div className="flex items-center justify-between">
@@ -604,7 +604,7 @@ export function RedactionReview({
           {/* Redaction options */}
           <RedactionOptionsPanel options={options} onChange={setOptions} t={t} />
 
-          {/* Apply redaction button — anchored below options */}
+          {/* Apply redaction button: anchored below options */}
           <button
             onClick={() => onConfirm(options)}
             disabled={isExporting || enabledCount === 0}

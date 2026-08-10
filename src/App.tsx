@@ -56,7 +56,7 @@ export function App() {
         setDetections(dr.detections)
         setPageCount(dr.pageCount)
         setDetectionResult(dr)
-        // Show deterministic summary immediately — no spinner needed
+        // Show deterministic summary immediately, no spinner needed
         setReviewAiSummary(buildPrivacySummary(dr.detections))
         setReviewAiSummaryLoading(false)
         // Flan-T5 still runs in background (for audit .json), but we don't block the UI on it
@@ -254,7 +254,7 @@ export function App() {
               t={t}
             />
 
-            {/* Demo + Restore — wraps on narrow screens */}
+            {/* Demo + Restore, wraps on narrow screens */}
             <div className="flex flex-wrap items-center justify-center gap-2 w-full">
               <button
                 disabled={sampleLoading !== null}
@@ -269,7 +269,7 @@ export function App() {
                   }
                 }}
                 className="flex items-center justify-center gap-2 text-sm font-medium text-brand-green hover:text-brand-green/80 border border-brand-green/30 hover:border-brand-green/50 bg-brand-green/5 hover:bg-brand-green/10 px-4 py-2 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                title="Text-layer PDF — demos NER detection"
+                title="Text-layer PDF: demos NER detection"
               >
                 {sampleLoading === 'text'
                   ? <span className="w-4 h-4 border-2 border-brand-green/30 border-t-brand-green rounded-full animate-spin" />
@@ -289,7 +289,7 @@ export function App() {
                   }
                 }}
                 className="flex items-center justify-center gap-2 text-sm font-medium text-brand-grape hover:text-brand-grape/80 border border-brand-grape/30 hover:border-brand-grape/50 bg-brand-grape/5 hover:bg-brand-grape/10 px-4 py-2 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                title="Scanned image PDF — demos OCR pipeline"
+                title="Scanned image PDF: demos OCR pipeline"
               >
                 {sampleLoading === 'ocr'
                   ? <span className="w-4 h-4 border-2 border-brand-grape/30 border-t-brand-grape rounded-full animate-spin" />

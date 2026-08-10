@@ -22,21 +22,21 @@ interface PatternDef {
 }
 
 const UNIVERSAL_PATTERNS: PatternDef[] = [
-  // IBAN — ISO 13616 (15–34 chars)
+  // IBAN: ISO 13616 (15-34 chars)
   {
     type: 'IBAN',
     regex: /\b[A-Z]{2}\d{2}[\s]?(?:[A-Z0-9]{4}[\s]?){1,7}[A-Z0-9]{1,4}\b/g,
     confidence: 0.99,
     ruleName: 'IBAN (bank account)',
   },
-  // Email — standard RFC 5321 local part + domain; also covers mailto: links
+  // Email: standard RFC 5321 local part + domain; also covers mailto: links
   {
     type: 'EMAIL',
     regex: /(?:mailto:)?[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}(?=[^@A-Za-z0-9]|$)/g,
     confidence: 0.99,
     ruleName: 'Email address',
   },
-  // Credit card — matches both compact (4111111111111111) and spaced/dashed (4111 1111 1111 1111)
+  // Credit card: matches both compact (4111111111111111) and spaced/dashed (4111 1111 1111 1111)
   // Covers Visa (4), Mastercard (51-55), Amex (34/37), Discover (6011/65), UnionPay (2131/1800/35)
   {
     type: 'CREDIT_CARD',
@@ -44,7 +44,7 @@ const UNIVERSAL_PATTERNS: PatternDef[] = [
     confidence: 0.98,
     ruleName: 'Credit card number',
   },
-  // URLs — http/https/ftp or www-prefixed; strips trailing punctuation that is not part of the URL
+  // URLs: http/https/ftp or www-prefixed; strips trailing punctuation that is not part of the URL
   {
     type: 'URL',
     regex: /\b(?:https?|ftp):\/\/[^\s<>"{}|\\^`[\]]*[^\s<>"{}|\\^`[\].,;!?)'"]|\bwww\.[a-zA-Z0-9](?:[a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z]{2,})+(?:\/[^\s<>"{}|\\^`[\].,;!?)'"]*)?/g,
@@ -65,29 +65,29 @@ const UNIVERSAL_PATTERNS: PatternDef[] = [
     confidence: 0.95,
     ruleName: 'IPv6 address',
   },
-  // Swiss AHV/AVS number — distinctive 756 prefix, covers dotted and spaced formats
+  // Swiss AHV/AVS number: distinctive 756 prefix, covers dotted and spaced formats
   {
     type: 'SSN',
     regex: /\b756[\s.]?\d{4}[\s.]?\d{4}[\s.]?\d{2}\b/g,
     confidence: 0.99,
     ruleName: 'Swiss AHV/AVS number',
   },
-  // Swiss company UID (CHE-XXX.XXX.XXX) — registered with SECO
+  // Swiss company UID (CHE-XXX.XXX.XXX): registered with SECO
   {
     type: 'ID_NUMBER',
     regex: /\bCHE[-\s]?\d{3}[.\s]?\d{3}[.\s]?\d{3}\b/g,
     confidence: 0.97,
     ruleName: 'Swiss company UID (CHE)',
   },
-  // International phone — requires literal + prefix to avoid false positives on IDs/IBANs
+  // International phone: requires literal + prefix to avoid false positives on IDs/IBANs
   {
     type: 'PHONE',
     regex: /\+\d[\d\s.\-()/]{5,18}\d\b/g,
     confidence: 0.92,
     ruleName: 'International phone',
   },
-  // European local phone — starts with 0 (not 00 international access), requires proper digit groups
-  // e.g. 044 123 45 67, 079 555 01 72 — rejects single-digit table values and currency amounts
+  // European local phone: starts with 0 (not 00 international access), requires proper digit groups
+  // e.g. 044 123 45 67, 079 555 01 72: rejects single-digit table values and currency amounts
   {
     type: 'PHONE',
     regex: /(?<![€$£])(?<!(?:CHF|EUR|USD|GBP|Fr\.?)\s{0,3})\b0(?!0)\d{1,3}(?:[\s\-]\d{2,4}){2,4}(?!\.\d)(?!\s*(?:CHF|EUR|USD|GBP|Fr\.?))\b/g,
@@ -95,7 +95,7 @@ const UNIVERSAL_PATTERNS: PatternDef[] = [
     ruleName: 'Local phone number',
   },
   // Dates (DD.MM.YYYY, DD/MM/YYYY, YYYY-MM-DD, written months: Jan 01 1980)
-  // defaultEnabled: false — invoice/service dates shouldn't be redacted by default;
+  // defaultEnabled: false, invoice/service dates shouldn't be redacted by default;
   // the label-context DOB pattern handles true dates-of-birth at higher confidence.
   {
     type: 'DATE_OF_BIRTH',
@@ -103,8 +103,8 @@ const UNIVERSAL_PATTERNS: PatternDef[] = [
     confidence: 0.70,
     defaultEnabled: false,
   },
-  // Passport numbers — most country formats: 1-2 uppercase letters + 6-9 digits
-  // defaultEnabled: false — too many false positives on product codes / reference numbers;
+  // Passport numbers, most country formats: 1-2 uppercase letters + 6-9 digits
+  // defaultEnabled: false, too many false positives on product codes / reference numbers;
   // the label-context passport pattern handles real passports at 0.94 confidence.
   {
     type: 'PASSPORT',
@@ -137,7 +137,7 @@ const UNIVERSAL_PATTERNS: PatternDef[] = [
   // Salutation greeting: "Dear Marco Bianchi," / "Dear Ms. Smith,"
   // Matches the FULL "Dear [name]" string (no lookbehind) so findSpanBBox resolves
   // to the salutation line, not the first occurrence of the bare name on the page.
-  // The comma lookahead keeps generic "Dear Customer," out — a comma after the name
+  // The comma lookahead keeps generic "Dear Customer," out: a comma after the name
   // is essentially mandatory in formal salutations.
   {
     type: 'PERSON',
@@ -146,7 +146,7 @@ const UNIVERSAL_PATTERNS: PatternDef[] = [
   },
 
   // ---------------------------------------------------------------------------
-  // Standalone address patterns — no label required
+  // Standalone address patterns: no label required
   // Anchored on street-type keywords to keep false-positive rate low.
   // ---------------------------------------------------------------------------
 
@@ -165,7 +165,7 @@ const UNIVERSAL_PATTERNS: PatternDef[] = [
     confidence: 0.87,
   },
 
-  // Romance-language streets — keyword as separate word, number either side:
+  // Romance-language streets, keyword as separate word, number either side:
   //   FR: "Rue de la Paix 12", "12 Rue de la Paix"
   //   IT: "Via Roma 88", "Corso Vittorio 4"
   //   ES/PT: "Calle Mayor 88", "Rua Augusta 12"
@@ -182,7 +182,7 @@ const UNIVERSAL_PATTERNS: PatternDef[] = [
     confidence: 0.85,
   },
 
-  // Postcode + city + ISO country code — locale-independent, catches address continuation
+  // Postcode + city + ISO country code: locale-independent, catches address continuation
   // lines like "6900 Lugano, CH" or "75001 Paris, FR" that appear below a label line.
   // 4-digit (CH/AT/BE/NL) and 5-digit (DE/FR/IT/ES) postcodes.
   {
@@ -190,7 +190,7 @@ const UNIVERSAL_PATTERNS: PatternDef[] = [
     regex: /\b[1-9]\d{3,4}\s+[A-Z\u00C0-\u00DE][A-Za-z\u00C0-\u024F\s\-]{1,30},\s*[A-Z]{2}\b/g,
     confidence: 0.90,
   },
-  // Address continuation: "2, 8001 Zürich, Switzerland" — house number + postcode + city + spelled-out country.
+  // Address continuation: "2, 8001 Zürich, Switzerland", house number + postcode + city + spelled-out country.
   // Fires when the street name is in a separate PDF span from the number and city/country tail.
   {
     type: 'ADDRESS',
@@ -204,12 +204,12 @@ const UNIVERSAL_PATTERNS: PatternDef[] = [
     regex: /\b(?!(?:19|20)\d{2}\b)[1-9]\d{3,4}\s+[A-Z\u00C0-\u00DE][A-Za-z\u00C0-\u024F]{2,25}\b/g,
     confidence: 0.80,
   },
-  // European ID card date of birth: DD.MM.YYYY with birth-year range 1900–2019.
+  // European ID card date of birth: DD.MM.YYYY with birth-year range 1900-2019.
   // This format (dot-separated day.month.year) is highly distinctive and almost
   // exclusively used for dates of birth on EU/CH identity documents.
   // Fallback for when the "DATE OF BIRTH" label and value are in separate PDF columns
   // and get interleaved with adjacent labels during text extraction.
-  // defaultEnabled: false — standalone dates still too noisy even with year range filter.
+  // defaultEnabled: false, standalone dates still too noisy even with year range filter.
   {
     type: 'DATE_OF_BIRTH',
     regex: /\b(0[1-9]|[12]\d|3[01])\.(0[1-9]|1[0-2])\.(19\d{2}|200\d|201\d)\b/g,
@@ -242,8 +242,8 @@ const UNIVERSAL_PATTERNS: PatternDef[] = [
 const LABEL_CONTEXT_PATTERNS: PatternDef[] = [
   // Person name after common field labels (case-insensitive so "Name:" and "name:" both match)
   // Value pattern allows: optional prefix abbrev (PT., Dr.), optional initials (A., N.),
-  // then at least one full name component — covers "Lara Meier", "PT. A. Rossi", "N. Keller"
-  // Keyword-based person label detection — instead of enumerating every label variant,
+  // then at least one full name component: covers "Lara Meier", "PT. A. Rossi", "N. Keller"
+  // Keyword-based person label detection: instead of enumerating every label variant,
   // match any form field whose label CONTAINS a person-indicating keyword.
   // Handles "Name:", "Full name:", "Insured person:", "Policy holder:", "Patient name:",
   // "Attending physician:", "Referring doctor:", etc. automatically across all languages.
@@ -266,7 +266,7 @@ const LABEL_CONTEXT_PATTERNS: PatternDef[] = [
     captureGroup: 1,
     confidence: 0.96,
   },
-  // Emergency contact / next of kin / guardian — these labels never appear in prose so
+  // Emergency contact / next of kin / guardian: these labels never appear in prose so
   // "contact" alone is too broad; matching the full phrase is precise enough.
   {
     type: 'PERSON',
@@ -283,14 +283,14 @@ const LABEL_CONTEXT_PATTERNS: PatternDef[] = [
     captureGroup: 1,
     confidence: 0.88,
   },
-  // Credit card after explicit label — catches spaced/dashed formats like "4111 1111 1111 1111"
+  // Credit card after explicit label: catches spaced/dashed formats like "4111 1111 1111 1111"
   {
     type: 'CREDIT_CARD',
     regex: /(?<=(?:credit\s+card|card\s+(?:on\s+file|number|no\.?)|carte\s+(?:de\s+cr[eé]dit|bancaire)|tarjeta|kartennummer)\s*[:\-]?\s{0,10})[\d]{4}[- ]?[\d]{4}[- ]?[\d]{4}[- ]?[\d]{3,4}/gi,
     confidence: 0.97,
     ruleName: 'Credit card (labelled)',
   },
-  // Date of birth after DOB label — matches all common date formats including ISO 8601
+  // Date of birth after DOB label: matches all common date formats including ISO 8601
   //   DD.MM.YYYY / DD/MM/YYYY / DD-MM-YYYY: "02.11.1958", "02/11/1958"
   //   YYYY-MM-DD (ISO 8601):                "1958-11-02"
   {
@@ -318,7 +318,7 @@ const LABEL_CONTEXT_PATTERNS: PatternDef[] = [
     regex: /(?<=(?:(?:national\s+)?id(?:entity|entification)?\s*(?:no\.?|number|#|card)?|ausweis(?:nummer|nr\.?)?|carta\s+d'identit[àa]|dni|nie|permis\s+de\s+s[ée]jour\s*n\.?)\s*[:\-]?\s{0,20})[A-Z0-9][\w.\-]{4,25}/gi,
     confidence: 0.96,
   },
-  // Postal address after a field label — handles:
+  // Postal address after a field label, handles:
   //   US/UK:        "88 Baker Street, London"  (number first)
   //   EU name-first: "Seestrasse 88, 8002 Zurich"  (DE/CH/AT/NL)
   //   FR/IT number-first: "12 Rue de la Paix, 75001 Paris"
@@ -328,7 +328,7 @@ const LABEL_CONTEXT_PATTERNS: PatternDef[] = [
     regex: /(?<=(?:(?:home\s+|postal\s+|mailing\s+|billing\s+|shipping\s+|full\s+)?address|street|residence|domicile|wohnort|wohnanschrift|anschrift|postanschrift|lieferanschrift|rechnungsanschrift|adresse|adresse\s+postale|adresse\s+de\s+r[eé]sidence|indirizzo(?:\s+di\s+residenza)?|direcci[oó]n(?:\s+postal)?|domicilio|morada|endere[cç]o|adres|woonadres|postadres)\s*[:\-]?\s{0,20})(?:\d+[a-zA-Z]?\s+[A-Za-z\u00C0-\u024F][A-Za-z0-9\u00C0-\u024F ,.\-]{4,80}|[A-Za-z\u00C0-\u024F][A-Za-z0-9\u00C0-\u024F .\-]{2,50}\s*\d+[a-zA-Z]?(?:[,\s]+[A-Za-z0-9\u00C0-\u024F ,.\-]{2,50})?)/g,
     confidence: 0.95,
   },
-  // Place of birth after label — catches "PLACE OF BIRTH Geneva" on ID cards
+  // Place of birth after label: catches "PLACE OF BIRTH Geneva" on ID cards
   {
     type: 'ADDRESS',
     regex: /\bPLACE\s+OF\s+BIRTH[\s\n]{1,20}([A-Za-z\u00C0-\u024F][A-Za-z\u00C0-\u024F\s\-]{1,30})\b/g,
@@ -337,7 +337,7 @@ const LABEL_CONTEXT_PATTERNS: PatternDef[] = [
     ruleName: 'ID card place of birth',
   },
   // ---------------------------------------------------------------------------
-  // Swiss / EU ID card fields — ALL-CAPS labels without colon separator
+  // Swiss / EU ID card fields: ALL-CAPS labels without colon separator
   // e.g. "SURNAME FONTAINE" / "GIVEN NAMES Léa Marie" / "DATE OF BIRTH 04.07.1989"
   // captureGroup: 1 extracts only the value, not the label.
   // ---------------------------------------------------------------------------
@@ -363,7 +363,7 @@ const LABEL_CONTEXT_PATTERNS: PatternDef[] = [
     defaultEnabled: true,
     ruleName: 'ID card date of birth',
   },
-  // MRZ name line — ISO 7501 format: DOCTYPE+SURNAME<<GIVENNAME<GIVENNAME
+  // MRZ name line, ISO 7501 format: DOCTYPE+SURNAME<<GIVENNAME<GIVENNAME
   // Whole-line match (for redacting the MRZ zone itself)
   {
     type: 'PERSON',
@@ -371,7 +371,7 @@ const LABEL_CONTEXT_PATTERNS: PatternDef[] = [
     confidence: 0.96,
     ruleName: 'MRZ name line',
   },
-  // MRZ surname extraction — captures JUST the surname component so name propagation
+  // MRZ surname extraction: captures JUST the surname component so name propagation
   // can find and redact the surname wherever it appears in the main body text.
   // Format: [doc-type 1-2 chars][SURNAME]<<... → captureGroup 1 = SURNAME
   {
@@ -381,7 +381,7 @@ const LABEL_CONTEXT_PATTERNS: PatternDef[] = [
     confidence: 0.97,
     ruleName: 'MRZ surname extraction',
   },
-  // MRZ given names extraction — captures first given name from MRZ
+  // MRZ given names extraction: captures first given name from MRZ
   // Format: SURNAME<<GIVENNAME<... → captureGroup 1 = GIVENNAME
   {
     type: 'PERSON',
@@ -390,7 +390,7 @@ const LABEL_CONTEXT_PATTERNS: PatternDef[] = [
     confidence: 0.95,
     ruleName: 'MRZ given name extraction',
   },
-  // MRZ data line — document number + nationality + DOB + expiry + optional check digits
+  // MRZ data line: document number + nationality + DOB + expiry + optional check digits
   {
     type: 'ID_NUMBER',
     regex: /\b[A-Z0-9]{8,12}[A-Z]{3}\d{6,7}[A-Z0-9<]{8,}\b/g,
@@ -398,7 +398,7 @@ const LABEL_CONTEXT_PATTERNS: PatternDef[] = [
     ruleName: 'MRZ data line',
   },
   // ---------------------------------------------------------------------------
-  // Global national-ID formats. These do not depend on the user's UI locale —
+  // Global national-ID formats. These do not depend on the user's UI locale:
   // an Indian / Brazilian / Nigerian / Thai document carries the same shape
   // regardless of who is reviewing it.
   // ---------------------------------------------------------------------------
@@ -439,7 +439,7 @@ const LABEL_CONTEXT_PATTERNS: PatternDef[] = [
   // Irish PPSN / Tax Reference Number: 7 digits + 1 letter (A-W) + optional letter.
   // Same shape for personal PPSN and corporate tax reference. Format-only detector
   // cannot distinguish the two, so flagging it by default with the audit reviewer
-  // unchecking the corporate-tax case is the safer asymmetry — individual leaks
+  // unchecking the corporate-tax case is the safer asymmetry: individual leaks
   // are far worse than redacting a company number meant to be shared.
   // Lives globally (not just in the ga locale) because an Irish document carries
   // PPSN regardless of which UI language the reviewer has picked.
@@ -470,7 +470,7 @@ const LABEL_CONTEXT_PATTERNS: PatternDef[] = [
 ]
 
 // ---------------------------------------------------------------------------
-// Health / clinical data triggers — defaultEnabled: false
+// Health / clinical data triggers, defaultEnabled: false
 // Detected and shown in the review panel but NOT checked by default so that
 // direct identifiers are always redacted and clinical fields remain opt-in.
 // Uses lookbehind to match only the value (not the label) in form-style text.
@@ -479,7 +479,7 @@ const LABEL_CONTEXT_PATTERNS: PatternDef[] = [
 const HEALTH_TRIGGER_PATTERNS: PatternDef[] = [
   // ICD-10 / ICD-11 diagnostic codes (e.g. J18.9, I21.0, F32.1, Z12.11)
   // Pattern: letter in ICD chapter range + exactly 2 digits + optional decimal + 1-2 digits
-  // defaultEnabled: true — diagnosis codes are highly sensitive health data that should
+  // defaultEnabled: true, diagnosis codes are highly sensitive health data that should
   // be redacted by default, particularly in mental health and clinical records.
   {
     type: 'HEALTH_DATA',
@@ -487,15 +487,15 @@ const HEALTH_TRIGGER_PATTERNS: PatternDef[] = [
     confidence: 0.93,
     defaultEnabled: true,
   },
-  // Diagnosis / reason for visit — up to 6 words after the label
+  // Diagnosis / reason for visit: up to 6 words after the label
   {
     type: 'HEALTH_DATA',
     regex: /(?<=(?:diagnosis|preliminary\s+diagnosis|admitting\s+diagnosis|discharge\s+diagnosis|reason\s+for\s+(?:visit|admission|consult(?:ation)?)|chief\s+complaint|presenting\s+(?:complaint|condition|problem)|motif\s+(?:de\s+)?(?:consultation|admission)|aufnahmegrund|aufnahmediagnose|motivo\s+(?:di\s+ricovero|de\s+ingreso|de\s+consulta))\s*[:\-]?\s{0,20})(?:\S+\s+){0,5}\S+/gi,
     confidence: 0.92,
     defaultEnabled: true,
   },
-  // Current medications / prescriptions — up to 8 words (e.g. "Metoprolol 50mg twice daily")
-  // defaultEnabled: true — prescriptions are among the most sensitive health data,
+  // Current medications / prescriptions: up to 8 words (e.g. "Metoprolol 50mg twice daily")
+  // defaultEnabled: true, prescriptions are among the most sensitive health data,
   // especially in mental health contexts (e.g. psychiatric medication, dosages).
   {
     type: 'HEALTH_DATA',
@@ -503,7 +503,7 @@ const HEALTH_TRIGGER_PATTERNS: PatternDef[] = [
     confidence: 0.91,
     defaultEnabled: true,
   },
-  // Known allergies — up to 5 words
+  // Known allergies: up to 5 words
   {
     type: 'HEALTH_DATA',
     regex: /(?<=(?:(?:known\s+|drug\s+|food\s+)?allergies?|allergi(?:es?|en)|allergie[s]?|allergien)\s*[:\-]?\s{0,20})(?:\S+\s+){0,4}\S+/gi,
@@ -520,8 +520,8 @@ const HEALTH_TRIGGER_PATTERNS: PatternDef[] = [
 ]
 
 // ---------------------------------------------------------------------------
-// Sensitive content — non-PII markings, proprietary/IP language, legal clauses
-// defaultEnabled: false — shown in review but unchecked by default
+// Sensitive content: non-PII markings, proprietary/IP language, legal clauses
+// defaultEnabled: false, shown in review but unchecked by default
 // ---------------------------------------------------------------------------
 
 const SENSITIVE_CONTENT_PATTERNS: PatternDef[] = [
@@ -550,7 +550,7 @@ const SENSITIVE_CONTENT_PATTERNS: PatternDef[] = [
 
 const LOCALE_PATTERNS: Record<Language, PatternDef[]> = {
   en: [
-    // US SSN — area 001-899 (not 000 or 666), group 01-99 (not 00), serial 0001-9999 (not 0000)
+    // US SSN: area 001-899 (not 000 or 666), group 01-99 (not 00), serial 0001-9999 (not 0000)
     { type: 'SSN', regex: /\b(?!000|666|9\d{2})\d{3}[-\s](?!00)\d{2}[-\s](?!0000)\d{4}\b/g, confidence: 0.95 },
     // UK NI number
     { type: 'ID_NUMBER', regex: /\b[A-CEGHJ-PR-TW-Z]{2}\s?\d{2}\s?\d{2}\s?\d{2}\s?[A-D]\b/gi, confidence: 0.95 },
@@ -560,11 +560,11 @@ const LOCALE_PATTERNS: Record<Language, PatternDef[]> = {
   de: [
     // German Sozialversicherungsnummer (12 digits)
     { type: 'SSN', regex: /\b\d{2}\s?\d{6}\s?[A-Z]\s?\d{3}\b/g, confidence: 0.92 },
-    // German postcode + city: "10115 Berlin", "80331 München" — high confidence pair
+    // German postcode + city: "10115 Berlin", "80331 München", high confidence pair
     { type: 'ADDRESS', regex: /\b\d{5}\s+[A-ZÄÖÜ][a-zäöüß]{2,25}(?:\s+[A-ZÄÖÜ][a-zäöüß]{2,20})?\b/g, confidence: 0.82 },
     // Swiss/Austrian postcode + city: "8002 Zürich", "1010 Wien", "3011 Bern"
     { type: 'ADDRESS', regex: /\b[1-9]\d{3}\s+[A-ZÄÖÜ][a-zäöüß]{2,25}\b/g, confidence: 0.80 },
-    // Bare Swiss/Austrian postcode — opt-in fallback
+    // Bare Swiss/Austrian postcode: opt-in fallback
     { type: 'ADDRESS', regex: /\b[1-9]\d{3}\b/g, confidence: 0.55, defaultEnabled: false },
     // German Steueridentifikationsnummer
     { type: 'ID_NUMBER', regex: /\b[1-9]\d{10}\b/g, confidence: 0.80 },
@@ -582,7 +582,7 @@ const LOCALE_PATTERNS: Record<Language, PatternDef[]> = {
     { type: 'ADDRESS', regex: /\b(?:0[1-9]|[1-8]\d|9[0-5])\d{3}\s+[A-ZÀÂÉÈÊËÎÏÔÙÛÜ][a-zàâéèêëîïôùûü\-]{2,25}\b/g, confidence: 0.82 },
     // Belgian/Swiss/Luxembourg postcode + city: "1000 Bruxelles", "1200 Genève"
     { type: 'ADDRESS', regex: /\b[1-9]\d{3}\s+[A-ZÀÂÉÈÊËÎÏÔÙÛÜ][a-zàâéèêëîïôùûü\-]{2,25}\b/g, confidence: 0.78 },
-    // Bare French postcode — opt-in fallback
+    // Bare French postcode: opt-in fallback
     { type: 'ADDRESS', regex: /\b(?:0[1-9]|[1-8]\d|9[0-5])\d{3}\b/g, confidence: 0.60, defaultEnabled: false },
     // Swiss AHV/AVS number (also used in French-speaking Switzerland)
     { type: 'SSN', regex: /\b756\.\d{4}\.\d{4}\.\d{2}\b/g, confidence: 0.99 },
@@ -592,7 +592,7 @@ const LOCALE_PATTERNS: Record<Language, PatternDef[]> = {
     { type: 'ID_NUMBER', regex: /\b[A-Z]{6}\d{2}[A-Z]\d{2}[A-Z]\d{3}[A-Z]\b/gi, confidence: 0.96 },
     // Italian CAP + city: "00100 Roma", "20121 Milano"
     { type: 'ADDRESS', regex: /\b\d{5}\s+[A-ZÀÈÉÌÍÎÒÓÙÚ][a-zàèéìíîòóùú\s]{2,25}\b/g, confidence: 0.80 },
-    // Bare CAP — opt-in fallback
+    // Bare CAP: opt-in fallback
     { type: 'ADDRESS', regex: /\b\d{5}\b/g, confidence: 0.60, defaultEnabled: false },
     // Italian VAT (P.IVA)
     { type: 'ID_NUMBER', regex: /\b(?:IT\s?)?\d{11}\b/g, confidence: 0.75 },
@@ -602,7 +602,7 @@ const LOCALE_PATTERNS: Record<Language, PatternDef[]> = {
     { type: 'ID_NUMBER', regex: /\b(?:[0-9]{8}[A-Z]|[XYZ]\d{7}[A-Z])\b/gi, confidence: 0.95 },
     // Spanish CP + city: "28013 Madrid", "08001 Barcelona"
     { type: 'ADDRESS', regex: /\b(?:0[1-9]|[1-4]\d|5[0-2])\d{3}\s+[A-ZÁÉÍÓÚÜÑ][a-záéíóúüñ\s]{2,25}\b/g, confidence: 0.82 },
-    // Bare CP — opt-in fallback
+    // Bare CP: opt-in fallback
     { type: 'ADDRESS', regex: /\b(?:0[1-9]|[1-4]\d|5[0-2])\d{3}\b/g, confidence: 0.60, defaultEnabled: false },
     // Spanish Social Security (12 digits)
     { type: 'SSN', regex: /\b\d{2}[-\s]?\d{8}[-\s]?\d{2}\b/g, confidence: 0.85 },
@@ -616,7 +616,7 @@ const LOCALE_PATTERNS: Record<Language, PatternDef[]> = {
     { type: 'SSN', regex: /\b\d{11}\b/g, confidence: 0.70, defaultEnabled: false },
   ],
   nl: [
-    // Dutch BSN (burgerservicenummer): 9 digits with 11-check — pattern only
+    // Dutch BSN (burgerservicenummer): 9 digits with 11-check, pattern only
     { type: 'ID_NUMBER', regex: /\b\d{9}\b/g, confidence: 0.72, defaultEnabled: false },
     // Dutch postcode: 1234 AB
     { type: 'ADDRESS', regex: /\b\d{4}\s?[A-Z]{2}\b/gi, confidence: 0.88 },
@@ -638,7 +638,7 @@ const LOCALE_PATTERNS: Record<Language, PatternDef[]> = {
     // two digits, with "D6W" the one special case that carries a trailing letter. Matched
     // case-insensitively and word-bounded so the whole code redacts as one ADDRESS span.
     { type: 'ADDRESS', regex: /\b(?:D6W|[A-Z]\d{2})\s?[A-Z0-9]{4}\b/gi, confidence: 0.88 },
-    // Irish Medical Council number: 5–6 digit registration number, often
+    // Irish Medical Council number: 5-6 digit registration number, often
     // prefixed "MCN" or "IMC", e.g. "MCN 012345".
     { type: 'ID_NUMBER', regex: /\b(?:MCN|IMC)\s?\d{5,6}\b/gi, confidence: 0.85 },
   ],
@@ -656,7 +656,7 @@ const LOCALE_PATTERNS: Record<Language, PatternDef[]> = {
 // Exclusion helpers
 // ---------------------------------------------------------------------------
 
-// Medical scoring systems / code-system identifiers — these look like structured
+// Medical scoring systems / code-system identifiers: these look like structured
 // IDs but are NOT patient identifiers (e.g. "ICD-10", "PHQ-9", "GAD-7").
 // Matched against the full detected text to prevent false ID_NUMBER detections.
 const MEDICAL_SCALE_EXCLUSION = /^(?:ICD-(?:\d+(?:\.\d+)?|[IVX]+)|PHQ-\d+|GAD-\d+|DSM-(?:[IVX]+|\d+)|HAM-[AD]\d*|PCL-\d+|AUDIT-?\d*|CAGE(?:-AID)?|MADRS|PANSS|BPRS|MINI|Y-BOCS|OCI-R|SCID|MoCA|MMSE|GCS|NIHSS|APACHE-?\d*)$/i
@@ -679,7 +679,7 @@ function tokenLabel(type: PiiType, counters: Map<PiiType, number>): string {
 
 /**
  * Find all regex-based PII in a flat text string.
- * Returns detections WITHOUT bounding boxes — those are added later by PDFEngine.
+ * Returns detections WITHOUT bounding boxes: those are added later by PDFEngine.
  */
 export function detectRegex(
   text: string,
@@ -707,13 +707,13 @@ export function detectRegex(
       if (type === 'ID_NUMBER' && !/\d/.test(matchText)) continue
 
       // Bug #2 fix: medical scoring system names (ICD-10, PHQ-9, GAD-7 …) are code
-      // system identifiers, not patient IDs — exclude from ID_NUMBER detections.
+      // system identifiers, not patient IDs: exclude from ID_NUMBER detections.
       if (type === 'ID_NUMBER' && MEDICAL_SCALE_EXCLUSION.test(matchText)) continue
 
-      // Address strings shorter than 4 chars are noise / OCR artefacts — skip.
+      // Address strings shorter than 4 chars are noise / OCR artefacts: skip.
       if (type === 'ADDRESS' && matchText.length < 4) continue
 
-      // Deduplicate by position+text, not text alone — the same name can appear
+      // Deduplicate by position+text, not text alone: the same name can appear
       // multiple times on a page (e.g. "Name: Marco Bianchi" and "Dear Marco Bianchi,")
       // and each occurrence needs its own detection so all bounding boxes get redacted.
       const key = `${pageIndex}:${match.index}:${matchText}`

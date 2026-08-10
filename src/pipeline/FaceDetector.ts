@@ -3,15 +3,15 @@ import type { Detection, PageLayout, PiiType } from '../types'
 import { OCR_RENDER_SCALE } from './OCRWorker'
 
 // ---------------------------------------------------------------------------
-// FaceDetector — ONNX UltraFace-320 running via onnxruntime-web WASM.
+// FaceDetector: ONNX UltraFace-320 running via onnxruntime-web WASM.
 //
 // Zero new npm deps: onnxruntime-web is already bundled as a transitive dep
 // of @xenova/transformers and pre-bundled by Vite (optimizeDeps.include).
 //
 // Model: version-RFB-320.onnx (~1.2 MB) served from /public/
 // Input:  [1, 3, 240, 320] float32, normalised to [-1, 1] (per-channel)
-// Output: scores [1, N, 2]  — [bg_prob, face_prob] per anchor
-//         boxes  [1, N, 4]  — [xmin, ymin, xmax, ymax] normalised to [0,1]
+// Output: scores [1, N, 2]: [bg_prob, face_prob] per anchor
+//         boxes  [1, N, 4]: [xmin, ymin, xmax, ymax] normalised to [0,1]
 //                             (already anchor-decoded inside the model)
 // ---------------------------------------------------------------------------
 
@@ -132,7 +132,7 @@ export async function detectFaces(
       })
     }
 
-    // scale is referenced via layout.ocrScale above — suppress unused-var lint
+    // scale is referenced via layout.ocrScale above: suppress unused-var lint
     void scale
 
     return detections

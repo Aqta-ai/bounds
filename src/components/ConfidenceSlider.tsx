@@ -1,5 +1,5 @@
 interface Props {
-  value: number // 0–1
+  value: number // 0-1
   onChange: (v: number) => void
   label: string
 }

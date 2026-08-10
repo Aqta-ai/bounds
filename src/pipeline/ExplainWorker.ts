@@ -4,7 +4,7 @@ import { getGemmaBackend } from './GemmaWorker'
 import { buildPrivacySummary } from '../utils/summaryUtils'
 
 // ---------------------------------------------------------------------------
-// ExplainWorker — generates a plain-English privacy summary for the audit
+// ExplainWorker: generates a plain-English privacy summary for the audit
 // log. Until v0.3.0 this called Xenova/LaMini-Flan-T5-77M in a Web Worker
 // (~80 MB second model). Replaced with Gemma 4 via Ollama so the same
 // model that flags contextual PHI also writes the summary: single

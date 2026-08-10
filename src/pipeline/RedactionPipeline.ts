@@ -51,7 +51,7 @@ export type ProgressCallback = (step: PipelineStep) => void
 
 /**
  * Phase 1: extract text, detect PII, encrypt the redaction map.
- * Does NOT generate the redacted PDF — that happens at export time so the
+ * Does NOT generate the redacted PDF. That happens at export time so the
  * user's chosen options (color, watermark, label style) are applied.
  */
 export async function runDetection(
@@ -80,7 +80,7 @@ export async function runDetection(
   const pageTexts: string[] = []
 
   // ── 2. Per-page detection ────────────────────────────────────────────────
-  // Forward NER model download progress (first run only — cached on subsequent runs)
+  // Forward NER model download progress (first run only, cached on subsequent runs)
   setNERModelProgressCallback((pct) => onProgress({
     stage: 'loading_model', modelProgress: pct, modelName: 'Multilingual NER', modelSizeMB: 179,
   }))
@@ -104,11 +104,11 @@ export async function runDetection(
     let pageText = textLayerText
     let pageBlob: Blob | null = null
 
-    // Render page to image once — reused for both OCR and face detection
+    // Render page to image once, reused for both OCR and face detection
     if (layout.requiresOCR || faceDetectionAvailable) {
       try {
         pageBlob = await renderPageToBlob(buffer, i)
-      } catch { /* non-fatal — OCR/face detection will be skipped */ }
+      } catch { /* non-fatal, OCR/face detection will be skipped */ }
     }
 
     if (layout.requiresOCR && pageBlob) {
@@ -116,7 +116,7 @@ export async function runDetection(
       try {
         const ocrResult = await ocrPageFull(pageBlob, language)
         if (ocrResult.text.trim()) {
-          // Merge OCR text with text layer — don't replace, so text-layer detections
+          // Merge OCR text with text layer, don't replace, so text-layer detections
           // (e.g. headers/footers) are still found even on image-heavy pages.
           pageText = [textLayerText, ocrResult.text].filter(Boolean).join('\n')
           layout.ocrWords = ocrResult.words
@@ -164,11 +164,11 @@ export async function runDetection(
           allDetections.push(nerDet)
         }
       } catch {
-        // NER unavailable — continue with regex only
+        // NER unavailable, continue with regex only
       }
     }
 
-    // Face detection — runs even on image-only pages with no text layer
+    // Face detection: runs even on image-only pages with no text layer
     if (pageBlob) {
       onProgress({ stage: 'detecting_faces', progress: Math.round((i / total) * 100), page: i + 1, total })
       const faces = await detectFaces(pageBlob, layout, i, tokenCounters)
@@ -261,8 +261,8 @@ export async function runDetection(
     let bbox = null
     if (layout?.ocrWords && layout.ocrWords.length > 0) {
       // Page was OCR-processed: prefer coordinates from the rendered image.
-      // Text-layer fallback is intentionally skipped for regex/NER hits —
-      // on pages with embedded images the text layer can contain invisible
+      // Text-layer fallback is intentionally skipped for regex/NER hits.
+      // On pages with embedded images the text layer can contain invisible
       // or mis-positioned text whose coordinates don't correspond to any
       // visible content, producing overlay boxes that float over blank areas.
       bbox = findOcrWordBBox(layout.ocrWords, det.text, layout.height, layout.ocrScale ?? 2.0, occurrence)

@@ -12,7 +12,7 @@ export default {
           grape:  '#6761A8',
           green:  '#009E60',
         },
-        // PII type colours — also defined in src/utils/colors.ts
+        // PII type colours, also defined in src/utils/colors.ts
         pii: {
           name: '#ef4444',       // red-500
           address: '#f97316',    // orange-500

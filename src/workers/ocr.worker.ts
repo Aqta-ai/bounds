@@ -1,9 +1,9 @@
-// OCR Web Worker — runs Tesseract.js WASM in isolation.
+// OCR Web Worker: runs Tesseract.js WASM in isolation.
 // Only invoked for pages with no extractable text (scanned image PDFs).
 //
 // Tesseract worker + WASM are served from /public so OCR runs fully offline.
 // workerBlobURL: false prevents Tesseract from trying to use importScripts
-// inside our ES-module worker (which would fail — importScripts is not
+// inside our ES-module worker (which would fail: importScripts is not
 // available in module workers).
 
 import { createWorker } from 'tesseract.js'

@@ -2,7 +2,7 @@ import type { Language, OcrWord } from '../types'
 import { createWorker } from 'tesseract.js'
 
 // ---------------------------------------------------------------------------
-// OCRWorker — Tesseract.js facade. Runs directly on the main thread.
+// OCRWorker: Tesseract.js facade. Runs directly on the main thread.
 // Tesseract.js v5 creates its own internal sub-worker; wrapping it in an
 // additional Web Worker causes nested-worker failures in ES-module contexts.
 // All Tesseract assets are served locally so OCR works fully offline.
@@ -53,9 +53,9 @@ async function getTesseractWorker(lang: string) {
     langPath,
     workerBlobURL: false,
   })
-  // preserve_interword_spaces: retain spatial word gaps — critical for multi-word
+  // preserve_interword_spaces: retain spatial word gaps, critical for multi-word
   // names so "Jean Dubois" is tokenised as one entity rather than two fragments.
-  // Wrapped in try/catch — tesseract.js v5 parameter passthrough is inconsistent;
+  // Wrapped in try/catch, tesseract.js v5 parameter passthrough is inconsistent;
   // if unsupported it should degrade gracefully rather than breaking OCR entirely.
   try {
     await _tesseractWorker.setParameters({ preserve_interword_spaces: '1' })
@@ -69,8 +69,8 @@ async function getTesseractWorker(lang: string) {
 // ---------------------------------------------------------------------------
 // Reconstruct natural reading order from OCR word bounding boxes.
 //
-// Tesseract's default text output reads in the order it segments text blocks —
-// on two-column forms this means the entire left column (all labels) comes
+// Tesseract's default text output reads in the order it segments text blocks.
+// On two-column forms this means the entire left column (all labels) comes
 // before the right column (all values). "Emergency contact:" and "Jean Dubois"
 // then sit ~20 lines apart in the text stream, breaking every label-context
 // regex that uses a tight whitespace budget.
@@ -84,7 +84,7 @@ function reconstructRowText(words: OcrWord[]): string {
   const heights = words.map((w) => w.y1 - w.y0).filter((h) => h > 0).sort((a, b) => a - b)
   const medH = heights.length ? heights[Math.floor(heights.length / 2)] : 20
   // Allow words within 0.75 line-heights of each other to be on the same row.
-  // ID card forms render labels and values 18px apart at canvas scale — a tighter
+  // ID card forms render labels and values 18px apart at canvas scale. A tighter
   // tolerance would split them onto separate lines, breaking label-context regexes.
   const tol = Math.max(8, medH * 0.75)
 
@@ -128,15 +128,15 @@ export async function ocrPageFull(imageBlob: Blob, language: Language): Promise<
   // Use BOTH Tesseract's raw text AND spatially-reconstructed row text.
   //
   // Why both? Tesseract's raw `data.text` preserves token boundaries like
-  // "04.07.1989" as a single string — essential for date/IBAN/phone regexes.
-  // `reconstructRowText` restores left→right reading order across columns —
+  // "04.07.1989" as a single string, essential for date/IBAN/phone regexes.
+  // `reconstructRowText` restores left→right reading order across columns,
   // essential for label-context regexes on two-column forms where Tesseract
   // reads the entire left column before the right ("Date of birth:" ... 20 lines
   // later ... "1986-05-29"). Combining both means neither class of regex breaks.
   const reconstructed = allWords.length > 0 ? reconstructRowText(allWords) : ''
   const text = reconstructed ? `${data.text}\n${reconstructed}` : data.text
 
-  // Only high-confidence words for bbox lookup — avoids placing redaction boxes
+  // Only high-confidence words for bbox lookup, avoids placing redaction boxes
   // on OCR noise characters that would produce misaligned overlays.
   const words = allWords.filter((w) => w.confidence >= 20)
 

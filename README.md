@@ -8,7 +8,7 @@
 
 Bounds finds and redacts personal information in PDFs using on-device AI. No server, no account, no document content leaves your machine. Works offline once your language packs are downloaded.
 
-> **Now with Gemma 4 contextual PHI.** Bounds ships a fifth detection layer powered by Google's Gemma 4 E2B. It catches the protected-health-information shapes that regex and named-entity recognition systematically miss: inline diagnoses, medication mentions, treatment narratives, indirect health context, sensitive social data, and genetic references. The HIPAA Safe Harbor #17 catch-all gap, closed without sending document bytes anywhere. Dual path: Ollama when the local daemon is available (preferred), WebLLM with the `gemma-4-E2B-it-q4f16_1-MLC` build in the browser otherwise.
+> **Now with Gemma 4 contextual PHI.** Bounds ships a fifth detection layer powered by Google's Gemma 4 E2B. It catches the protected-health-information shapes that regex and named-entity recognition systematically miss: inline diagnoses, medication mentions, treatment narratives, indirect health context, sensitive social data, and genetic references. The HIPAA Safe Harbor #17 catch-all gap, closed without sending document bytes anywhere. Preferred path: local Ollama (`gemma4:e2b`). An in-browser WebLLM path is wired for `gemma-4-E2B-it-q4f16_1-MLC` and activates when that MLC build is available; until then, without Ollama the other four layers run alone (no silent fallback to older Gemma).
 >
 > The Gemma 4 pipeline is open-sourced as a standalone toolkit at [Aqta-ai/bounds-gemma](https://github.com/Aqta-ai/bounds-gemma) (Apache-2.0). You can install it via `npm i bounds-gemma` and run the same contextual PHI detection against your own pipelines.
 
@@ -17,9 +17,9 @@ Bounds finds and redacts personal information in PDFs using on-device AI. No ser
 ## Features
 
 - **Five detection layers**: regex patterns (~99% on known patterns), BERT NER (10 trained languages with cross-lingual transfer across mBERT's 104-language pretraining corpus), Tesseract OCR (100% word accuracy on clean printed, 97.6% on noisy rotated/JPEG-compressed scans), face detection, **and Gemma 4 contextual PHI (~85% recall on French, Spanish, German, Hindi-Devanagari, Bengali test narratives via Ollama; precision is enforced by the in-corpus substring guardrail, so surviving spans are byte-identical to the source text)**
-- **Gemma 4, dual path**: contextual layer uses `gemma4:e2b` on a local Ollama daemon when available, or `gemma-4-E2B-it-q4f16_1-MLC` via WebLLM in the browser. The other four layers run with no extra install.
+- **Gemma 4, Ollama-first**: contextual layer uses `gemma4:e2b` on a local Ollama daemon when available. WebLLM (`gemma-4-E2B-it-q4f16_1-MLC`) is wired and turns on when the MLC build is published; until then, without Ollama the other four layers run alone. No silent substitute of older Gemma.
 - **Reversible redaction**: AES-256-GCM encrypted vault lets you restore original values with a key file
-- **Works offline**: layers 1–4 (regex / BERT / OCR / faces) run in-browser via WebAssembly + WebGPU; the Gemma 4 layer runs on a local Ollama daemon. Airplane mode after the first load and an `ollama pull`.
+- **Works offline**: layers 1-4 (regex / BERT / OCR / faces) run in-browser via WebAssembly + WebGPU; the Gemma 4 layer runs on a local Ollama daemon. Airplane mode after the first load and an `ollama pull`.
 - **Batch processing**: drop multiple PDFs at once
 - **Audit trail**: timestamped JSON log with no document content
 - **Multilingual UI**: EN, DE, FR, ES, IT, PT, NL, PL, GA, TH
@@ -37,7 +37,7 @@ Bounds uses Gemma 4 E2B (effective 2B-active parameter, int4 quantised, ~1.5 GB 
 2. **Confidence floor of 0.75**: tuned for healthcare; below this, candidates are omitted before reaching the review panel.
 3. **Default-off in the review UI**: every Gemma detection arrives with `enabled: false`. The reviewer opts in per item.
 
-Document text never leaves your device. The contextual layer routes through your local Ollama daemon at `localhost:11434` when one is present; otherwise it loads `gemma-4-E2B-it-q4f16_1-MLC` via WebLLM into the browser tab (one-time ~1.5 GB download, cached in IndexedDB after).
+Document text never leaves your device. The contextual layer routes through your local Ollama daemon at `localhost:11434` when one is present. Without Ollama, the other four layers run alone until an MLC WebLLM build of Gemma 4 is available; the in-browser path is already wired for `gemma-4-E2B-it-q4f16_1-MLC` (one-time ~1.5 GB download, cached in IndexedDB after).
 
 For the architecture in detail, the [bounds-gemma](https://github.com/Aqta-ai/bounds-gemma) repo has the worker, parser, system prompt, tests, and a runnable Ollama smoke-test example.
 
@@ -50,7 +50,7 @@ npm install
 npm run dev
 ```
 
-On first use, the BERT NER model (~430 MB) downloads once and caches in the browser. The Gemma 4 contextual layer requires a local Ollama daemon with `ollama pull gemma4:e2b` (~7 GB); without it the other four layers run alone. Subsequent runs are instant.
+On first use, the BERT NER model (~179 MB) downloads once and caches in the browser. The Gemma 4 contextual layer requires a local Ollama daemon with `ollama pull gemma4:e2b` (~7 GB); without it the other four layers run alone. Subsequent runs are instant.
 
 ```bash
 npm run build       # Production build
@@ -86,7 +86,7 @@ Cross-Origin-Opener-Policy: same-origin
 Cross-Origin-Embedder-Policy: credentialless
 ```
 
-Works on Vercel, Cloudflare Pages, Nginx, Docker. No backend required. Layers 1–4 use WebGPU + cross-origin isolation in the browser; the Gemma 4 contextual layer uses Ollama when present and falls back to WebLLM (`gemma-4-E2B-it-q4f16_1-MLC`) in the browser otherwise. Cross-origin isolation (COOP / COEP) is required for the WebLLM path.
+Works on Vercel, Cloudflare Pages, Nginx, Docker. No backend required. Layers 1-4 use WebGPU + cross-origin isolation in the browser; the Gemma 4 contextual layer uses Ollama when present. The WebLLM path requires an MLC Gemma 4 build and COOP/COEP; until that build is published, absence of Ollama means layers 1-4 only.
 
 ---
 

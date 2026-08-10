@@ -80,7 +80,7 @@ export function PDFPageViewer({ pdfBuffer, pageIndex, detections, onToggle, scal
   const pageDetections = detections.filter((d) => d.pageIndex === pageIndex && d.boundingBox.width > 0)
 
   // Use pointer capture so the drag keeps working even when the pointer
-  // moves outside the element at speed — the correct approach for drag UX.
+  // moves outside the element at speed, the correct approach for drag UX.
   function getRelativePointerPos(e: React.PointerEvent<HTMLDivElement>) {
     const rect = e.currentTarget.getBoundingClientRect()
     return { x: e.clientX - rect.left, y: e.clientY - rect.top }
@@ -195,7 +195,7 @@ export function PDFPageViewer({ pdfBuffer, pageIndex, detections, onToggle, scal
         </div>
       )}
 
-      {/* Overlay layer — absolutely positioned over the canvas.
+      {/* Overlay layer: absolutely positioned over the canvas.
           Uses percentage positions so boxes stay aligned when the canvas is
           CSS-scaled smaller than its natural pixel size (maxWidth: 100%). */}
       {viewport && (

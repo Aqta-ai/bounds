@@ -7,9 +7,9 @@ import { uint8ArrayToBase64, base64ToUint8Array } from '../utils/fileUtils'
 // No external crypto libraries required.
 //
 // Output:
-//   .bounds file — { iv: base64, ciphertext: base64, version: 1 }
+//   .bounds file: { iv: base64, ciphertext: base64, version: 1 }
 //                  Contains the encrypted RedactionMap (safe to share)
-//   .key file    — raw 32-byte AES-256 key (must stay secret)
+//   .key file: raw 32-byte AES-256 key (must stay secret)
 // ---------------------------------------------------------------------------
 
 interface EncryptedVault {
@@ -20,7 +20,7 @@ interface EncryptedVault {
   redactedAt: string         // ISO timestamp
   redactedItemCount: number  // total number of tokens replaced
   // PII type counts, e.g. { PERSON: 3, IBAN: 1, EMAIL: 2 }
-  // Values are counts only — no original text is stored in plaintext.
+  // Values are counts only, no original text is stored in plaintext.
   summary: Record<string, number>
   // ── Encrypted payload (requires matching .key file to read) ─────────────
   version: number
@@ -53,14 +53,14 @@ export class KeyVaultService {
 
   /** Export the raw key bytes for the .key download file. */
   async exportKeyBlob(): Promise<Blob> {
-    if (!this.key) throw new Error('No key — call generateKey() first')
+    if (!this.key) throw new Error('No key: call generateKey() first')
     const rawBytes = await crypto.subtle.exportKey('raw', this.key)
     return new Blob([rawBytes], { type: 'application/octet-stream' })
   }
 
   /** Encrypt the redaction map → .bounds Blob. */
   async encrypt(map: RedactionMap): Promise<Blob> {
-    if (!this.key) throw new Error('No key — call generateKey() first')
+    if (!this.key) throw new Error('No key: call generateKey() first')
     const iv = crypto.getRandomValues(new Uint8Array(12))
     const encoded = new TextEncoder().encode(JSON.stringify(map))
     const ciphertext = await crypto.subtle.encrypt(
@@ -69,7 +69,7 @@ export class KeyVaultService {
       encoded,
     )
 
-    // Build a plaintext summary — counts only, no actual PII values.
+    // Build a plaintext summary: counts only, no actual PII values.
     const summary: Record<string, number> = {}
     for (const d of map.detections) {
       summary[d.type] = (summary[d.type] ?? 0) + 1
@@ -91,7 +91,7 @@ export class KeyVaultService {
 
   /** Decrypt a .bounds blob (needs the raw key to have been imported first). */
   async decrypt(vaultBlob: Blob): Promise<RedactionMap> {
-    if (!this.key) throw new Error('No key — call importRawKey() first')
+    if (!this.key) throw new Error('No key: call importRawKey() first')
     const text = await vaultBlob.text()
     const vault: EncryptedVault = JSON.parse(text) as EncryptedVault
     if (vault.version !== 1) throw new Error(`Unsupported vault version: ${vault.version}`)

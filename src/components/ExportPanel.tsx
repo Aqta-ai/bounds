@@ -5,6 +5,7 @@ import { downloadBlob } from '../utils/fileUtils'
 import { PII_TYPE_LABELS } from '../utils/colors'
 import { buildZip } from '../utils/zipUtils'
 import { buildPrivacySummary } from '../utils/summaryUtils'
+import { getSigningIdentity, sha256Hex, signReceipt } from '../lib/receiptSigning'
 
 interface Props {
   result: PipelineResult
@@ -125,7 +126,10 @@ export function ExportPanel({ result, onStartOver, onGoBack, t }: Props) {
     return Object.entries(counts).sort((a, b) => b[1] - a[1])
   })()
 
-  function buildAuditJson(): string {
+  // Signed on this device with a persistent Ed25519 key that never leaves the
+  // browser, and bound to the SHA-256 of the redacted PDF. Verifiable offline
+  // with any Ed25519 implementation (see src/lib/receiptSigning.ts).
+  async function buildAuditJson(): Promise<string> {
     const enabled = detections.filter((d) => d.enabled)
     const counts: Record<string, number> = {}
     for (const d of enabled) {
@@ -133,7 +137,9 @@ export function ExportPanel({ result, onStartOver, onGoBack, t }: Props) {
       counts[label] = (counts[label] ?? 0) + 1
     }
     const report = {
+      schema_version: 'bounds-redaction-receipt/v1',
       document: documentName,
+      redacted_file_sha256: await sha256Hex(redactedPdfBytes as Uint8Array),
       redactedAt: new Date().toISOString(),
       preRedactionRisk: { level: preRedactionRiskLevel, score: preRedactionRiskScore },
       postRedactionResidualRisk: { level: residualRiskLevel, score: residualRiskScore },
@@ -144,7 +150,7 @@ export function ExportPanel({ result, onStartOver, onGoBack, t }: Props) {
       privacySummary: summary,
       tool: 'Bounds',
     }
-    return JSON.stringify(report, null, 2)
+    return JSON.stringify(signReceipt(report, getSigningIdentity()), null, 2)
   }
 
   function downloadPdf() {
@@ -157,24 +163,22 @@ export function ExportPanel({ result, onStartOver, onGoBack, t }: Props) {
   function downloadKeyFile() { downloadBlob(keyFileBlob, `${safeName}.bounds`) }
   function downloadRawKey()  { downloadBlob(rawKeyBlob, `${safeName}.key`) }
 
-  function downloadAuditReport() {
+  async function downloadAuditReport() {
     downloadBlob(
-      new Blob([buildAuditJson()], { type: 'application/json' }),
+      new Blob([await buildAuditJson()], { type: 'application/json' }),
       `${safeName}-audit.json`,
     )
   }
 
   async function downloadAll() {
     const enc = new TextEncoder()
-    const [boundsBytes, keyBytes] = await Promise.all([
-      keyFileBlob.arrayBuffer().then((b) => new Uint8Array(b)),
-      rawKeyBlob.arrayBuffer().then((b) => new Uint8Array(b)),
-    ])
+    // The .key file is the master restore secret; it stays out of the bundle so
+    // one shared archive cannot un-redact itself. Download it separately.
+    const boundsBytes = await keyFileBlob.arrayBuffer().then((b) => new Uint8Array(b))
     const zip = buildZip([
       { name: `${safeName}-redacted.pdf`, data: redactedPdfBytes as Uint8Array },
       { name: `${safeName}.bounds`,       data: boundsBytes },
-      { name: `${safeName}.key`,          data: keyBytes },
-      { name: `${safeName}-audit.json`,   data: enc.encode(buildAuditJson()) },
+      { name: `${safeName}-audit.json`,   data: enc.encode(await buildAuditJson()) },
     ])
     downloadBlob(new Blob([zip.buffer as ArrayBuffer], { type: 'application/zip' }), `${safeName}-redacted.zip`)
   }

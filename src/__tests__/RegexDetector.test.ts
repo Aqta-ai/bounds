@@ -141,7 +141,7 @@ describe('IP address detection', () => {
   })
 
   it('does not match an invalid IPv4 (octet > 255)', () => {
-    // 999.168.1.1 — should not be matched as IP_ADDRESS
+    // 999.168.1.1: should not be matched as IP_ADDRESS
     const r = detect('server 999.168.1.1 online')
     expect(r.filter((d) => d.type === 'IP_ADDRESS' && d.text === '999.168.1.1')).toHaveLength(0)
   })
@@ -176,7 +176,7 @@ describe('Phone detection', () => {
 
   it('does not match international dialing prefix (00) as local phone', () => {
     const r = detect('Dial 0041 79 555 01 72')
-    // 0041 starts with "00" — should not match local phone pattern
+    // 0041 starts with "00": should not match local phone pattern
     const phones = r.filter((d) => d.type === 'PHONE' && d.text.startsWith('00'))
     expect(phones).toHaveLength(0)
   })
@@ -232,7 +232,7 @@ describe('Date of birth detection', () => {
 // ---------------------------------------------------------------------------
 describe('Passport detection', () => {
   it('standalone passport pattern is disabled by default (noisy)', () => {
-    // No label — standalone alphanumeric that looks like a passport number
+    // No label: standalone alphanumeric that looks like a passport number
     const match = detect('Reference A1234567 filed').find((d) => d.type === 'PASSPORT')
     if (match) expect(match.enabled).toBe(false)
   })
@@ -299,7 +299,7 @@ describe('Address detection', () => {
 })
 
 // ---------------------------------------------------------------------------
-// Health data — defaultEnabled: false
+// Health data: defaultEnabled: false
 // ---------------------------------------------------------------------------
 describe('Health data detection', () => {
   it('detects ICD-10 code and auto-enables it', () => {
@@ -339,7 +339,7 @@ describe('Health data detection', () => {
 })
 
 // ---------------------------------------------------------------------------
-// Confidential / proprietary / legal markers — defaultEnabled: false
+// Confidential / proprietary / legal markers: defaultEnabled: false
 // ---------------------------------------------------------------------------
 describe('Sensitive content detection', () => {
   it('detects CONFIDENTIAL marker but does NOT auto-enable it', () => {

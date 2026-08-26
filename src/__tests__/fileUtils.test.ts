@@ -18,7 +18,7 @@ describe('stemName', () => {
   })
 
   it('handles filenames starting with a dot (hidden files)', () => {
-    // ".gitignore" has no extension in the stem sense — the dot is part of the name
+    // ".gitignore" has no extension in the stem sense: the dot is part of the name
     expect(stemName('.gitignore')).toBe('.gitignore')
   })
 

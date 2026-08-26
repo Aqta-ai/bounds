@@ -21,9 +21,9 @@ function det(type: PiiType, enabled = true): Detection {
 }
 
 // ---------------------------------------------------------------------------
-// computeRisk — level thresholds
+// computeRisk: level thresholds
 // ---------------------------------------------------------------------------
-describe('computeRisk — levels', () => {
+describe('computeRisk: levels', () => {
   it('returns "clean" when there are no enabled detections', () => {
     const { riskLevel, riskScore } = computeRisk([])
     expect(riskLevel).toBe('clean')
@@ -70,9 +70,9 @@ describe('computeRisk — levels', () => {
 })
 
 // ---------------------------------------------------------------------------
-// computeRisk — weight correctness
+// computeRisk: weight correctness
 // ---------------------------------------------------------------------------
-describe('computeRisk — weight values', () => {
+describe('computeRisk: weight values', () => {
   const cases: [PiiType, number][] = [
     ['HEALTH_DATA',   4],
     ['SSN',           4],
@@ -102,9 +102,9 @@ describe('computeRisk — weight values', () => {
 })
 
 // ---------------------------------------------------------------------------
-// computeRisk — disabled detections excluded
+// computeRisk: disabled detections excluded
 // ---------------------------------------------------------------------------
-describe('computeRisk — disabled detections', () => {
+describe('computeRisk: disabled detections', () => {
   it('ignores disabled detections in score', () => {
     const dets = [det('SSN', true), det('HEALTH_DATA', false)]
     const { riskScore } = computeRisk(dets)

@@ -7,7 +7,7 @@ import {
 } from '../workers/gemmaParse'
 
 // ---------------------------------------------------------------------------
-// parseAndValidate — accepts only well-formed, in-corpus health PHI.
+// parseAndValidate: accepts only well-formed, in-corpus health PHI.
 // ---------------------------------------------------------------------------
 
 const SAMPLE_CHUNK =
@@ -27,7 +27,7 @@ function buildItem(overrides: Partial<Record<string, unknown>> = {}) {
   ])
 }
 
-describe('parseAndValidate — happy path', () => {
+describe('parseAndValidate: happy path', () => {
   it('accepts a well-formed array with one valid item', () => {
     const out = parseAndValidate(buildItem(), SAMPLE_CHUNK)
     expect(out).toHaveLength(1)
@@ -47,7 +47,7 @@ describe('parseAndValidate — happy path', () => {
   })
 })
 
-describe('parseAndValidate — rejection cases', () => {
+describe('parseAndValidate: rejection cases', () => {
   it('rejects malformed JSON', () => {
     expect(parseAndValidate('not json at all', SAMPLE_CHUNK)).toEqual([])
   })
@@ -87,7 +87,7 @@ describe('parseAndValidate — rejection cases', () => {
   })
 
   it('accepts a model output that differs only in Unicode normalisation form', () => {
-    // "Café" — NFC: single é codepoint; NFD: 'e' + combining acute ́.
+    // "Café": NFC: single é codepoint; NFD: 'e' + combining acute ́.
     // The pipeline must accept either, so an LLM that re-encodes Unicode does
     // not silently drop hits that genuinely appear in the source.
     const wordNfc = String.fromCodePoint(0x64, 0x69, 0x61, 0x62, 0xe8, 0x74, 0x65) // "diabète"
@@ -124,7 +124,7 @@ describe('parseAndValidate — rejection cases', () => {
 })
 
 // ---------------------------------------------------------------------------
-// chunkText — preserves paragraph and sentence boundaries.
+// chunkText: preserves paragraph and sentence boundaries.
 // ---------------------------------------------------------------------------
 
 describe('chunkText', () => {

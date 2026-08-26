@@ -75,7 +75,7 @@ describe('buildExplainPrompt', () => {
     expect(prompt).toContain('iban')
   })
 
-  it('sorts by count descending — highest count appears first in item list', () => {
+  it('sorts by count descending: highest count appears first in item list', () => {
     const dets = [
       det('EMAIL', true, 'e1'),
       det('EMAIL', true, 'e2'),

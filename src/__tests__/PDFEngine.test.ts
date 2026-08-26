@@ -17,7 +17,7 @@ function word(text: string, x0: number, y0: number, x1: number, y1: number): Ocr
 // ---------------------------------------------------------------------------
 // findSpanBBox
 // ---------------------------------------------------------------------------
-describe('findSpanBBox — exact single span match', () => {
+describe('findSpanBBox: exact single span match', () => {
   it('finds a needle that is the entire span', () => {
     const spans = [span('alice@example.com', 100, 700, 120, 12)]
     const bbox = findSpanBBox(spans, 'alice@example.com')
@@ -57,7 +57,7 @@ describe('findSpanBBox — exact single span match', () => {
   })
 })
 
-describe('findSpanBBox — multi-span window match', () => {
+describe('findSpanBBox: multi-span window match', () => {
   it('finds a two-word name split across two same-line spans', () => {
     const spans = [
       span('John', 0, 700, 30, 12),
@@ -71,7 +71,7 @@ describe('findSpanBBox — multi-span window match', () => {
   it('does not match spans on different lines (y diff > 4), falls back to word match', () => {
     const spans = [
       span('John', 0, 700, 30, 12),
-      span('Smith', 36, 720, 40, 12), // 20px apart — different line
+      span('Smith', 36, 720, 40, 12), // 20px apart: different line
     ]
     // Multi-span window pass fails (different lines); pass 3 word fallback picks up "John" (≥3 chars)
     const bbox = findSpanBBox(spans, 'John Smith')
@@ -79,16 +79,16 @@ describe('findSpanBBox — multi-span window match', () => {
   })
 })
 
-describe('findSpanBBox — word fallback (pass 3)', () => {
+describe('findSpanBBox: word fallback (pass 3)', () => {
   it('finds a match via significant word (≥3 chars) when exact join fails', () => {
     const spans = [span('Representative', 50, 700)]
-    // "Representat" is ≥4 chars — the needle is longer than any single span content
+    // "Representat" is ≥4 chars: the needle is longer than any single span content
     // but the fallback should match on the word "representative"
     const bbox = findSpanBBox(spans, 'Representative Council')
     expect(bbox).not.toBeNull()
   })
 
-  it('does not fall back for words shorter than 3 chars — returns null', () => {
+  it('does not fall back for words shorter than 3 chars: returns null', () => {
     const spans = [span('or an if', 0, 700)]
     // Needle "A or if": no single span contains the full string,
     // and every word (A=1, or=2, if=2) is below the 3-char threshold, so pass 3 skips all.
@@ -100,7 +100,7 @@ describe('findSpanBBox — word fallback (pass 3)', () => {
 // ---------------------------------------------------------------------------
 // findOcrWordBBox
 // ---------------------------------------------------------------------------
-describe('findOcrWordBBox — pass 1: single word', () => {
+describe('findOcrWordBBox: pass 1: single word', () => {
   const PAGE_H = 1000
   const SCALE = 2.0
 
@@ -136,7 +136,7 @@ describe('findOcrWordBBox — pass 1: single word', () => {
   })
 })
 
-describe('findOcrWordBBox — pass 2: consecutive window', () => {
+describe('findOcrWordBBox: pass 2: consecutive window', () => {
   const PAGE_H = 1000
   const SCALE = 1.0
 
@@ -152,7 +152,7 @@ describe('findOcrWordBBox — pass 2: consecutive window', () => {
   })
 })
 
-describe('findOcrWordBBox — pass 3: part word fallback', () => {
+describe('findOcrWordBBox: pass 3: part word fallback', () => {
   const PAGE_H = 1000
   const SCALE = 1.0
 

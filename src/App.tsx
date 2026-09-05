@@ -19,6 +19,9 @@ import { RedactionReview } from './components/RedactionReview'
 import { ExportPanel } from './components/ExportPanel'
 import { RestorePanel } from './components/RestorePanel'
 import { ProgressStepper } from './components/ProgressStepper'
+import { runResidualScan, type ResidualScanResult } from './pipeline/ResidualScan'
+import { browserResidualScanDeps } from './pipeline/residualScanBrowser'
+import { buildSignedRecordJson } from './lib/redactionRecord'
 import { BatchPanel } from './components/BatchPanel'
 import type { BatchItem } from './components/BatchPanel'
 
@@ -97,7 +100,12 @@ export function App() {
           const buf = await item.file.arrayBuffer()
           const dr = await runDetection(buf, item.file.name, language, () => {})
           const res = await buildRedactedPdf(buf, dr.detections, dr, DEFAULT_REDACTION_OPTIONS, () => {})
-          setBatchItems((prev) => prev.map((it) => it.id === item.id ? { ...it, status: 'done', result: res } : it))
+          // Proof of removal and a signed record per file, exactly as the
+          // single-file export does. A scan that cannot run is recorded as null.
+          let scan: ResidualScanResult | null = null
+          try { scan = await runResidualScan(res.redactedPdfBytes, res.detections, language, browserResidualScanDeps) } catch { scan = null }
+          const recordJson = await buildSignedRecordJson(res, scan)
+          setBatchItems((prev) => prev.map((it) => it.id === item.id ? { ...it, status: 'done', result: res, scan, recordJson } : it))
         } catch (err) {
           setBatchItems((prev) => prev.map((it) => it.id === item.id ? { ...it, status: 'error', errorMsg: err instanceof Error ? err.message : String(err) } : it))
         }

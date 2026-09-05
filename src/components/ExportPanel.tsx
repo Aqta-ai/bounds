@@ -5,7 +5,7 @@ import { downloadBlob } from '../utils/fileUtils'
 import { PII_TYPE_LABELS } from '../utils/colors'
 import { buildZip } from '../utils/zipUtils'
 import { buildPrivacySummary } from '../utils/summaryUtils'
-import { getSigningIdentity, sha256Hex, signReceipt } from '../lib/receiptSigning'
+import { buildSignedRecordJson } from '../lib/redactionRecord'
 import { runResidualScan, scanPassed, type ResidualScanResult } from '../pipeline/ResidualScan'
 import { browserResidualScanDeps } from '../pipeline/residualScanBrowser'
 
@@ -147,30 +147,10 @@ export function ExportPanel({ result, onStartOver, onGoBack, t }: Props) {
   // browser, and bound to the SHA-256 of the redacted PDF. Verifiable offline
   // with any Ed25519 implementation (see src/lib/receiptSigning.ts).
   async function buildAuditJson(): Promise<string> {
-    const enabled = detections.filter((d) => d.enabled)
-    const counts: Record<string, number> = {}
-    for (const d of enabled) {
-      const label = PII_TYPE_LABELS[d.type]
-      counts[label] = (counts[label] ?? 0) + 1
-    }
-    const report = {
-      schema_version: 'bounds-redaction-receipt/v1',
-      document: documentName,
-      redacted_file_sha256: await sha256Hex(redactedPdfBytes as Uint8Array),
-      redactedAt: new Date().toISOString(),
-      preRedactionRisk: { level: preRedactionRiskLevel, score: preRedactionRiskScore },
-      postRedactionResidualRisk: { level: residualRiskLevel, score: residualRiskScore },
-      totalItemsRedacted: enabled.length,
-      breakdown: Object.entries(counts)
-        .sort((a, b) => b[1] - a[1])
-        .map(([type, count]) => ({ type, count })),
-      privacySummary: summary,
-      tool: 'Bounds',
-      // The scan result is part of the signed body. A record without it, or
-      // with a FAIL in it, says so; it is never omitted to look cleaner.
-      verification: scan ?? (scanPromise.current ? await scanPromise.current : null),
-    }
-    return JSON.stringify(signReceipt(report, getSigningIdentity()), null, 2)
+    // The scan result is part of the signed body. A record without it, or
+    // with a FAIL in it, says so; it is never omitted to look cleaner.
+    const v = scan ?? (scanPromise.current ? await scanPromise.current : null)
+    return buildSignedRecordJson(result, v, summary)
   }
 
   function downloadPdf() {

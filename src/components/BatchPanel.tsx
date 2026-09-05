@@ -1,12 +1,18 @@
 import { Loader2, CheckCircle2, AlertCircle, Clock, Download, RefreshCw, FileText } from 'lucide-react'
 import type { PipelineResult, RiskLevel } from '../types'
 import { downloadBlob } from '../utils/fileUtils'
+import { buildZip } from '../utils/zipUtils'
+import { scanPassed, type ResidualScanResult } from '../pipeline/ResidualScan'
 
 export interface BatchItem {
   id: string
   file: File
   status: 'queued' | 'processing' | 'done' | 'error'
   result?: PipelineResult
+  /** Proof-of-removal scan of this file's output; null if the scan could not run. */
+  scan?: ResidualScanResult | null
+  /** The signed redaction record for this file, as JSON text. */
+  recordJson?: string
   errorMsg?: string
 }
 
@@ -35,13 +41,21 @@ export function BatchPanel({ items, onStartOver }: Props) {
 
   const totalRedacted = done.reduce((n, i) => n + (i.result?.detections.filter((d) => d.enabled).length ?? 0), 0)
 
+  // Each file leaves with its signed record beside it, as in the single-file
+  // export. A redacted PDF without its record is a picture; the pair is evidence.
   function downloadResult(item: BatchItem) {
     if (!item.result) return
     const { redactedPdfBytes, documentName } = item.result
-    downloadBlob(
-      new Blob([redactedPdfBytes as Uint8Array<ArrayBuffer>], { type: 'application/pdf' }),
-      `${documentName}-redacted.pdf`,
-    )
+    const safe = documentName.replace(/[/\\:*?"<>|]/g, '_').replace(/\.pdf$/i, '').trim() || 'document'
+    if (!item.recordJson) {
+      downloadBlob(new Blob([redactedPdfBytes as Uint8Array<ArrayBuffer>], { type: 'application/pdf' }), `${safe}-redacted.pdf`)
+      return
+    }
+    const zip = buildZip([
+      { name: `${safe}-redacted.pdf`, data: redactedPdfBytes as Uint8Array },
+      { name: `${safe}-audit.json`, data: new TextEncoder().encode(item.recordJson) },
+    ])
+    downloadBlob(new Blob([zip.buffer as ArrayBuffer], { type: 'application/zip' }), `${safe}-redacted.zip`)
   }
 
   return (
@@ -106,6 +120,11 @@ export function BatchPanel({ items, onStartOver }: Props) {
             <FileText className="w-4 h-4 text-gray-300 shrink-0" />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-800 truncate">{item.file.name}</p>
+              {item.status === 'done' && (
+                <p className={`text-[11px] font-mono uppercase tracking-wider ${item.scan ? (scanPassed(item.scan) ? 'text-emerald-600' : 'text-red-600') : 'text-gray-400'}`}>
+                  {item.scan ? (scanPassed(item.scan) ? `Proof of removal: PASS · ${item.scan.ocr_chars_read} chars read back` : `Proof of removal: FAIL · ${item.scan.residual_findings} finding(s)`) : 'Proof of removal: not run'} · signed record included
+                </p>
+              )}
               {item.status === 'done' && item.result && (
                 <p className={`text-xs mt-0.5 ${RISK_COLORS[item.result.residualRiskLevel]}`}>
                   {item.result.detections.filter((d) => d.enabled).length} items · residual risk: {item.result.residualRiskLevel}

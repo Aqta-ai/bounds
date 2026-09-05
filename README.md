@@ -12,6 +12,11 @@ Bounds finds and redacts personal information in PDFs using on-device AI. No ser
 >
 > The Gemma 4 pipeline is published as a standalone Apache-2.0 package, [bounds-gemma on npm](https://www.npmjs.com/package/bounds-gemma). Install it with `npm i bounds-gemma` and run the same contextual PHI detection against your own pipelines. It runs through a local Ollama daemon; nothing is sent to a server.
 
+
+![Bounds: upload, four detections, redaction, the proof-of-removal scan, and the offline check](docs/media/proof-of-removal.gif)
+
+*Twelve seconds of the live app: detections, redaction, then the output file is scanned and the result signed into the record. Recorded on bounds.aqta.ai, nothing staged.*
+
 ---
 
 ## Features
@@ -64,6 +69,9 @@ npm run preview     # Preview production build
 
 1. **Upload** a PDF (or drop multiple)
 2. **Review** AI-detected PII: names, addresses, emails, IBANs, dates of birth, health data, and more. Gemma 4's contextual detections appear with their reason text and default-off, ready for you to opt in per item.
+
+   ![Review step: four detections, each with its category, and the page preview with the boxes drawn](docs/media/review-detections.png)
+
 3. **Export** four files:
 
 | File | Purpose |
@@ -95,6 +103,8 @@ without the block, or with a FAIL in it, says so; the scan is never omitted to l
 Spans shorter than six characters once normalised are not searched for in OCR output (a year or
 an initial would match unrelated text) but are still held to the exact-text and metadata scans.
 
+![Export step: Proof of removal PASS, one redacted page rendered and OCR'd, 104 characters read back, four spans checked](docs/media/proof-of-removal.png)
+
 ### Verify without Bounds
 
 Anyone holding the record and the redacted PDF can check both with no Bounds account, no Bounds
@@ -110,6 +120,8 @@ SIGNATURE    PASS   Ed25519, key 3kq9…
 FILE HASH    PASS   sha256 7d8f…
 RESIDUAL     PASS   bounds-residual-scan/v1: 2 page(s) OCR'd, 9 span(s), 0 findings
 ```
+
+![bounds-verify output: SCHEMA, SIGNATURE, FILE HASH and RESIDUAL all PASS; the record holds, nothing was contacted](docs/media/bounds-verify.png)
 
 The verifier is ninety lines of Node with one dependency (`tweetnacl`). It checks the signature
 over the canonical JSON of the record, the fingerprint against the embedded key, the SHA-256 of

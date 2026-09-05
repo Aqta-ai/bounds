@@ -198,10 +198,13 @@ const UNIVERSAL_PATTERNS: PatternDef[] = [
     confidence: 0.85,
   },
   // Postcode + city alone on its own line (no ISO code): "8001 Zürich", "75001 Paris"
-  // Negative lookahead rejects calendar years (19xx/20xx) used in education/work history
+  // Negative lookahead rejects calendar years (19xx/20xx) used in education/work history.
+  // A standard designator ("ISO/IEC 42001 Annex", "EN 50128 Part", "RFC 8785 Section") has the
+  // same shape and is not an address: reject when a standards body precedes the number or a
+  // document-structure word follows it.
   {
     type: 'ADDRESS',
-    regex: /\b(?!(?:19|20)\d{2}\b)[1-9]\d{3,4}\s+[A-Z\u00C0-\u00DE][A-Za-z\u00C0-\u024F]{2,25}\b/g,
+    regex: /(?<!\b(?:ISO|IEC|EN|DIN|BS|IEEE|RFC|NIST|ANSI|ETSI|ITU|CEN|CENELEC|UL|CSA|SP|Reg|Regulation|Directive|No|Nr)(?:\/[A-Z]{2,7})?\.?\s)\b(?!(?:19|20)\d{2}\b)[1-9]\d{3,4}\s+(?!(?:Annex|Annexe|Article|Section|Clause|Part|Chapter|Table|Figure|Schedule|Appendix|Edition|Series|Standard|Amendment|Requirements|Paragraph)\b)[A-Z\u00C0-\u00DE][A-Za-z\u00C0-\u024F]{2,25}\b/g,
     confidence: 0.80,
   },
   // European ID card date of birth: DD.MM.YYYY with birth-year range 1900-2019.

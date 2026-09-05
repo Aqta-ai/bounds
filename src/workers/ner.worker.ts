@@ -11,7 +11,7 @@ env.allowLocalModels = false
 // and would 404 if loaded from the app origin. The JS bundle is already
 // pre-bundled by Vite (optimizeDeps.include); only the .wasm files need CDN.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-;(env as any).backends.onnx.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.14.0/dist/'
+;(env as any).backends.onnx.wasm.wasmPaths = '/'   // self-hosted: public/ort-wasm*.wasm, same 1.14.0 build transformers bundles
 // Single-threaded WASM: prevents SharedArrayBuffer/Atomics issues in workers.
 try {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

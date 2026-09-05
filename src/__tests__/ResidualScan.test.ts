@@ -11,7 +11,7 @@ const bytes = new Uint8Array([1, 2, 3])
 function deps(over: Partial<ResidualScanDeps>): ResidualScanDeps {
   return {
     extractPageTexts: async () => ['', 'Page two has ordinary text only.'],
-    renderAndOcr: async () => 'REDACTED REDACTED consultant note hypertension review',
+    renderAndOcr: async () => ({ text: 'REDACTED REDACTED consultant note hypertension review', words: [], scale: 3, pageHeight: 842 }),
     readMetadata: async () => ({ title: 'summary.pdf', author: '', subject: '', keywords: '', producer: 'Bounds', creator: '' }),
     ...over,
   }
@@ -37,11 +37,32 @@ describe('residual scan', () => {
     expect(r.findings.some((f) => f.kind === 'regex:EMAIL')).toBe(true)
   })
   it('fails when OCR of the rendered page recovers a redacted span, tolerant of spacing and case', async () => {
-    const r = await runResidualScan(bytes, [det({})], 'en', deps({ renderAndOcr: async () => 'MAIRE . OSULLIVAN @ EXAMPLE . IE was seen' }))
+    const r = await runResidualScan(bytes, [det({})], 'en', deps({ renderAndOcr: async () => ({ text: 'MAIRE . OSULLIVAN @ EXAMPLE . IE was seen', words: [], scale: 3, pageHeight: 842 }) }))
     expect(r.rendered_ocr_scan).toBe('FAIL')
   })
+  // Box for a 12pt span at x=100..130, y=700 on an A4 page, drawn with the shared 2pt pad,
+  // in image pixels at scale 3: x 294..396, y 384..432 (top-left origin).
+  const boxed = (text: string, type: Detection['type']) => det({ type, text, boundingBox: { x: 100, y: 700, width: 30, height: 12 } })
+  const word = (text: string, x0: number, x1: number) => ({ text, x0, x1, y0: 390, y1: 426, confidence: 90 })
+  it('fails when a leading glyph is left standing at the left edge of a box', async () => {
+    const r = await runResidualScan(bytes, [boxed('Maire', 'PERSON')], 'en',
+      deps({ renderAndOcr: async () => ({ text: 'Patient: M', words: [word('Patient:', 200, 270), word('M', 280, 293)], scale: 3, pageHeight: 842 }) }))
+    expect(r.rendered_ocr_scan).toBe('FAIL')
+    expect(r.findings).toEqual([{ check: 'rendered_ocr_scan', page: 0, kind: 'PERSON:partial_left' }])
+  })
+  it('fails when a trailing digit is left standing at the right edge of a box', async () => {
+    const r = await runResidualScan(bytes, [boxed('+353 87 123 4567', 'PHONE')], 'en',
+      deps({ renderAndOcr: async () => ({ text: 'Phone 7.', words: [word('Phone', 200, 280), word('7.', 397, 410)], scale: 3, pageHeight: 842 }) }))
+    expect(r.rendered_ocr_scan).toBe('FAIL')
+    expect(r.findings[0].kind).toBe('PHONE:partial_right')
+  })
+  it('ignores neighbouring words that touch a box but are not fragments of its span', async () => {
+    const r = await runResidualScan(bytes, [boxed('Maire', 'PERSON')], 'en',
+      deps({ renderAndOcr: async () => ({ text: 'Patient: DOB', words: [word('Patient:', 220, 293), word('DOB', 397, 440), word('m', 100, 110)], scale: 3, pageHeight: 842 }) }))
+    expect(r.rendered_ocr_scan).toBe('PASS')   // "m" far from the box is not adjacent; "Patient:" and "DOB" are not fragments
+  })
   it('does not search OCR output for spans too short to be meaningful', async () => {
-    const r = await runResidualScan(bytes, [det({ type: 'ID_NUMBER', text: '1981' })], 'en', deps({ renderAndOcr: async () => 'reviewed in 1981' }))
+    const r = await runResidualScan(bytes, [det({ type: 'ID_NUMBER', text: '1981' })], 'en', deps({ renderAndOcr: async () => ({ text: 'reviewed in 1981', words: [], scale: 3, pageHeight: 842 }) }))
     expect(normaliseForMatch('1981').length).toBeLessThan(OCR_MIN_SPAN)
     expect(r.rendered_ocr_scan).toBe('PASS')
     // ...but exact extracted text is still held to it

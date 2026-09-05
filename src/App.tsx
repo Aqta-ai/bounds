@@ -358,11 +358,11 @@ export function App() {
       <footer className="relative z-10 border-t border-gray-100 bg-white px-6 py-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
         <span className="text-xs font-semibold text-gray-400 tracking-tight">b<span className="text-brand-green">●</span>unds</span>
         <span className="text-gray-200">·</span>
-        <button onClick={() => setShowAbout(true)} className="text-xs text-gray-400 hover:text-gray-700 transition-colors">
+        <button onClick={() => setShowAbout(true)} className="inline-flex items-center min-h-[32px] px-1 text-xs text-gray-400 hover:text-gray-700 transition-colors">
           {t('footer_about')}
         </button>
         <span className="text-gray-200">·</span>
-        <button onClick={() => setShowPrivacy(true)} className="text-xs text-gray-400 hover:text-gray-700 transition-colors">
+        <button onClick={() => setShowPrivacy(true)} className="inline-flex items-center min-h-[32px] px-1 text-xs text-gray-400 hover:text-gray-700 transition-colors">
           {t('footer_privacy')}
         </button>
         <span className="text-gray-200">·</span>
@@ -370,7 +370,7 @@ export function App() {
           href="https://github.com/Aqta-ai/bounds"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-xs text-gray-400 hover:text-gray-700 transition-colors"
+          className="inline-flex items-center min-h-[32px] px-1 text-xs text-gray-400 hover:text-gray-700 transition-colors"
         >
           {t('footer_github')}
         </a>

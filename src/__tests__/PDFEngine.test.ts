@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { findSpanBBox, findOcrWordBBox } from '../pipeline/PDFEngine'
+import { computeCharOffsets, findPartialLeaks } from '../pipeline/geometry'
 import type { TextSpan, OcrWord } from '../types'
 
 // ---------------------------------------------------------------------------
@@ -160,5 +161,45 @@ describe('findOcrWordBBox: pass 3: part word fallback', () => {
     const words = [word('Meier-Schmid', 10, 0, 120, 14)]
     const bbox = findOcrWordBBox(words, 'Meier Schmid', PAGE_H, SCALE)
     expect(bbox).not.toBeNull()
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Measured character offsets: boxes follow the glyphs, not an average width
+// ---------------------------------------------------------------------------
+describe('computeCharOffsets', () => {
+  // A toy proportional font: "M" and "O" are wide, "i" and "l" are narrow, everything else 6.
+  const glyph = (ch: string) => (ch === 'M' || ch === 'O' ? 12 : ch === 'i' || ch === 'l' ? 3 : 6)
+  const measure = (s: string) => [...s].reduce((w, ch) => w + glyph(ch), 0)
+  it('returns one boundary per character, scaled to the item width', () => {
+    const off = computeCharOffsets('Mail', 48, measure)   // natural width 12+6+3+3 = 24, item is 48: scale 2
+    expect(off).toEqual([0, 24, 36, 42, 48])
+  })
+  it('returns null when the font cannot be measured', () => {
+    expect(computeCharOffsets('Mail', 48, () => 0)).toBeNull()
+    expect(computeCharOffsets('', 48, measure)).toBeNull()
+  })
+  it('findSpanBBox uses the measured boundaries when present and the average otherwise', () => {
+    const text = 'Patient: Maire O'
+    const width = measure(text)
+    const span = { text, x: 50, y: 700, width, height: 12, charOffsets: computeCharOffsets(text, width, measure)! }
+    const measured = findSpanBBox([span], 'Maire')!
+    expect(measured.x).toBeCloseTo(50 + measure('Patient: '), 5)
+    expect(measured.width).toBeCloseTo(measure('Maire'), 5)
+    const { charOffsets: _drop, ...plain } = span
+    const averaged = findSpanBBox([plain], 'Maire')!
+    expect(averaged.x).not.toBeCloseTo(measured.x, 0)   // the drift the measurement removes
+  })
+})
+
+describe('findPartialLeaks', () => {
+  const det = { id: 'd', type: 'PERSON' as const, text: 'Maire', token: '[NAME_001]', pageIndex: 0, confidence: 0.9, source: 'REGEX' as const, enabled: true,
+    boundingBox: { x: 100, y: 700, width: 30, height: 12 } }
+  const w = (text: string, x0: number, x1: number) => ({ text, x0, x1, y0: 390, y1: 426, confidence: 90 })
+  it('flags a prefix touching the left edge and a suffix touching the right edge, on the same line only', () => {
+    expect(findPartialLeaks([det], [w('M', 280, 293)], 3, 842)).toHaveLength(1)
+    expect(findPartialLeaks([det], [w('re', 397, 420)], 3, 842)).toHaveLength(1)
+    expect(findPartialLeaks([det], [{ ...w('M', 280, 293), y0: 100, y1: 130 }], 3, 842)).toHaveLength(0)
+    expect(findPartialLeaks([det], [w('Patient:', 220, 293), w('Maire', 280, 400)], 3, 842)).toHaveLength(0)  // whole span is not "partial"
   })
 })

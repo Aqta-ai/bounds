@@ -1,5 +1,6 @@
 import { PDFDocument, PDFPage, StandardFonts, rgb, degrees } from 'pdf-lib'
 import type { Annotation, BBox, Detection, OcrWord, PageLayout, RedactionOptions, TextSpan } from '../types'
+import { REDACTION_BOX_PAD, computeCharOffsets } from './geometry'
 
 // ---------------------------------------------------------------------------
 // PDFEngine
@@ -22,6 +23,40 @@ export async function getPdfjs() {
     import.meta.url,
   ).toString()
   return pdfjs
+}
+
+let _measureCtx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null | undefined
+
+/** A 2D context for measuring text with the fonts pdf.js has bound to the document. */
+function getMeasureContext() {
+  if (_measureCtx !== undefined) return _measureCtx
+  _measureCtx = null
+  try {
+    if (typeof document !== 'undefined') _measureCtx = document.createElement('canvas').getContext('2d')
+    else if (typeof OffscreenCanvas !== 'undefined') _measureCtx = new OffscreenCanvas(1, 1).getContext('2d')
+  } catch {
+    _measureCtx = null
+  }
+  return _measureCtx
+}
+
+async function fontsReady(): Promise<void> {
+  try {
+    if (typeof document !== 'undefined' && document.fonts?.ready) await document.fonts.ready
+  } catch {
+    /* measurement falls back to the family's substitute */
+  }
+}
+
+function measureCharOffsets(text: string, width: number, fontSize: number, family: string): number[] | null {
+  const ctx = getMeasureContext()
+  if (!ctx) return null
+  try {
+    ctx.font = `${fontSize}px ${family}`
+    return computeCharOffsets(text, width, (s) => ctx.measureText(s).width)
+  } catch {
+    return null
+  }
 }
 
 export async function extractLayouts(buffer: ArrayBuffer): Promise<PageLayout[]> {
@@ -47,26 +82,11 @@ export async function extractLayouts(buffer: ArrayBuffer): Promise<PageLayout[]>
     const viewport = page.getViewport({ scale: 1.0 })
     const content = await page.getTextContent()
 
-    const spans: TextSpan[] = []
-    for (const item of content.items) {
-      if (!('str' in item) || !item.str.trim()) continue
-      const [sx, , , sy, tx, ty] = item.transform as number[]
-      const width = item.width ?? Math.abs(sx * item.str.length * 0.6)
-      const height = Math.abs(sy)
-      spans.push({
-        text: item.str,
-        x: tx,
-        y: ty,
-        width: width,
-        height: height || 10,
-      })
-    }
-
-    const totalChars = spans.reduce((n, s) => n + s.text.length, 0)
-
     // Detect embedded images via operator list. If any image-drawing ops exist,
     // the page may be a scan or contain a scanned image embedded inside a PDF wrapper.
     // In that case we must run OCR regardless of how many text-layer chars exist.
+    // Building the operator list also loads the page's fonts, which the
+    // character measurement below relies on.
     const ops = await page.getOperatorList()
     const hasImages = ops.fnArray.some(
       (fn: number) =>
@@ -74,6 +94,29 @@ export async function extractLayouts(buffer: ArrayBuffer): Promise<PageLayout[]>
         fn === pdfjs.OPS.paintInlineImageXObject ||
         fn === pdfjs.OPS.paintXObject,
     )
+    await fontsReady()
+
+    const spans: TextSpan[] = []
+    const styles = (content as { styles?: Record<string, { fontFamily?: string }> }).styles ?? {}
+    for (const item of content.items) {
+      if (!('str' in item) || !item.str.trim()) continue
+      const [sx, , c, d, tx, ty] = item.transform as number[]
+      const width = item.width ?? Math.abs(sx * item.str.length * 0.6)
+      const height = Math.abs(d)
+      const fontSize = Math.hypot(c, d) || height || 10
+      const fallback = styles[item.fontName]?.fontFamily ?? 'sans-serif'
+      const charOffsets = measureCharOffsets(item.str, width, fontSize, `"${item.fontName}", ${fallback}`)
+      spans.push({
+        text: item.str,
+        x: tx,
+        y: ty,
+        width: width,
+        height: height || 10,
+        ...(charOffsets ? { charOffsets } : {}),
+      })
+    }
+
+    const totalChars = spans.reduce((n, s) => n + s.text.length, 0)
 
     layouts.push({
       pageIndex: i,
@@ -125,7 +168,7 @@ async function rasterizePageWithRedactions(
     const { x, y, width, height } = det.boundingBox
     if (width <= 0 || height <= 0) continue
 
-    const PAD = 2
+    const PAD = REDACTION_BOX_PAD
     // Convert PDF bottom-left coords → canvas top-left coords, scaled
     const cx = (x - PAD) * SCALE
     const cy = (pageH - y - height - PAD) * SCALE
@@ -373,6 +416,14 @@ export function findSpanBBox(
     const idx = spanLower.indexOf(needle)
     if (idx !== -1) {
       if (seen++ < occurrence) continue
+      const off = span.charOffsets
+      if (off && off.length === span.text.length + 1) {
+        const x0 = off[idx]
+        const x1 = off[Math.min(idx + needle.length, span.text.length)]
+        return { x: span.x + x0, y: span.y, width: x1 - x0, height: span.height }
+      }
+      // No font measurement available: average character width, which drifts
+      // on proportional fonts. The residual scan's partial-leak check covers it.
       const charWidth = span.width / span.text.length
       return {
         x: span.x + idx * charWidth,

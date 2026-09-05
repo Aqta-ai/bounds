@@ -6,6 +6,24 @@ import type { PiiType } from '../types'
 export const HEALTHCARE_CONFIDENCE_FLOOR = 0.75
 export const CHUNK_MAX_CHARS = 800
 
+/** The six category ids the system prompt defines, in prompt order (so "gemma:4" resolves). */
+export const GEMMA_CATEGORIES = new Set([
+  'inline_diagnosis', 'medication_mention', 'treatment_procedure',
+  'indirect_health_context', 'sensitive_social', 'genetic_reference',
+])
+const GEMMA_CATEGORY_ORDER = [...GEMMA_CATEGORIES]
+
+/** Resolve a ruleId to "gemma:<category id>", or '' when no known category can be read from it. */
+export function normaliseRuleId(ruleId: unknown, type: unknown): string {
+  if (typeof ruleId !== 'string' || !ruleId.startsWith('gemma:')) return ''
+  const suffix = ruleId.slice('gemma:'.length).trim().toLowerCase()
+  if (GEMMA_CATEGORIES.has(suffix)) return `gemma:${suffix}`
+  const n = /^[1-6]$/.test(suffix) ? Number(suffix) : 0
+  if (n) return `gemma:${GEMMA_CATEGORY_ORDER[n - 1]}`
+  if (typeof type === 'string' && GEMMA_CATEGORIES.has(type)) return `gemma:${type}`
+  return ''
+}
+
 export interface RawGemmaDetection {
   text: string
   type: PiiType
@@ -14,8 +32,8 @@ export interface RawGemmaDetection {
   reason: string
 }
 
-// Rejects malformed JSON, sub-floor confidence, wrong type, non-gemma
-// ruleId, missing reason, and any text not present in sourceChunk after
+// Rejects malformed JSON, sub-floor confidence, unknown type or category,
+// non-gemma ruleId, missing reason, and any text not present in sourceChunk after
 // NFC normalisation. The NFC normalise is what tolerates the PDF-vs-LLM
 // encoding split that would otherwise drop legitimate hits.
 export function parseAndValidate(raw: string, sourceChunk: string): RawGemmaDetection[] {
@@ -35,15 +53,18 @@ export function parseAndValidate(raw: string, sourceChunk: string): RawGemmaDete
     if (typeof item !== 'object' || item === null) continue
     const obj = item as Record<string, unknown>
     const text = typeof obj.text === 'string' ? obj.text.trim() : ''
-    const type = obj.type === 'HEALTH_DATA' ? 'HEALTH_DATA' : null
     const confidence = typeof obj.confidence === 'number' ? obj.confidence : 0
-    const ruleId = typeof obj.ruleId === 'string' ? obj.ruleId : ''
     const reason = typeof obj.reason === 'string' ? obj.reason : ''
+    const ruleId = normaliseRuleId(obj.ruleId, obj.type)
+    // The prompt asks for type "HEALTH_DATA" and the category in ruleId, but the
+    // model often writes the category into type as well, or numbers the rule
+    // ("gemma:4"). Both are the same detection; only an unknown category is refused.
+    const type = obj.type === 'HEALTH_DATA' || (typeof obj.type === 'string' && GEMMA_CATEGORIES.has(obj.type)) ? 'HEALTH_DATA' : null
 
     if (!text) continue
     if (!type) continue
     if (confidence < HEALTHCARE_CONFIDENCE_FLOOR) continue
-    if (!ruleId.startsWith('gemma:')) continue
+    if (!ruleId) continue
     if (!reason) continue
     if (!sourceNfc.includes(text.normalize('NFC'))) continue
 

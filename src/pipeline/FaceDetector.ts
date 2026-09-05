@@ -27,6 +27,10 @@ let sessionLoading: Promise<ort.InferenceSession> | null = null
 async function getSession(): Promise<ort.InferenceSession> {
   if (session) return session
   if (sessionLoading) return sessionLoading
+  // The runtime's WASM binaries ship with the app (public/ort-wasm*.wasm) so the
+  // face layer is self-hosted and offline like the others; without this line the
+  // runtime resolves them relative to the bundle and 404s on every load.
+  ort.env.wasm.wasmPaths = '/'
   sessionLoading = ort.InferenceSession.create(MODEL_URL, {
     executionProviders: ['wasm'],
   })

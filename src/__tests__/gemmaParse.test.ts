@@ -4,6 +4,7 @@ import {
   CHUNK_MAX_CHARS,
   chunkText,
   parseAndValidate,
+  normaliseRuleId,
 } from '../workers/gemmaParse'
 
 // ---------------------------------------------------------------------------
@@ -160,5 +161,32 @@ describe('chunkText', () => {
     // every word from the original must appear somewhere in the joined chunks
     expect(joined).toContain('paragraph A.')
     expect(joined).toContain('paragraph B.')
+  })
+})
+
+describe('parseAndValidate: the shapes the model actually emits', () => {
+  const src = 'She is on lithium. Her insulin pump alarmed twice. The client is HIV positive.'
+  it('accepts the category id written into type, as the model usually does', () => {
+    const raw = JSON.stringify([{ text: 'lithium', type: 'medication_mention', confidence: 0.95, ruleId: 'gemma:medication_mention', reason: 'medication in prose' }])
+    expect(parseAndValidate(raw, src)).toMatchObject([{ text: 'lithium', type: 'HEALTH_DATA', ruleId: 'gemma:medication_mention' }])
+  })
+  it('resolves a numbered rule to the category id in prompt order', () => {
+    const raw = JSON.stringify([{ text: 'insulin pump', type: 'indirect_health_context', confidence: 0.95, ruleId: 'gemma:4', reason: 'implies a condition' }])
+    expect(parseAndValidate(raw, src)[0].ruleId).toBe('gemma:indirect_health_context')
+  })
+  it('still refuses an unknown category, a non-gemma rule, and a paraphrased span', () => {
+    const bad = [
+      { text: 'lithium', type: 'FINANCIAL', confidence: 0.95, ruleId: 'gemma:something_else', reason: 'r' },
+      { text: 'lithium', type: 'HEALTH_DATA', confidence: 0.95, ruleId: 'regex:medication', reason: 'r' },
+      { text: 'Lithium carbonate', type: 'HEALTH_DATA', confidence: 0.95, ruleId: 'gemma:medication_mention', reason: 'r' },
+    ]
+    expect(parseAndValidate(JSON.stringify(bad), src)).toEqual([])
+  })
+  it('normaliseRuleId', () => {
+    expect(normaliseRuleId('gemma:genetic_reference', undefined)).toBe('gemma:genetic_reference')
+    expect(normaliseRuleId('gemma:6', undefined)).toBe('gemma:genetic_reference')
+    expect(normaliseRuleId('gemma:unknown', 'sensitive_social')).toBe('gemma:sensitive_social')
+    expect(normaliseRuleId('gemma:unknown', 'HEALTH_DATA')).toBe('')
+    expect(normaliseRuleId('other:1', 'medication_mention')).toBe('')
   })
 })

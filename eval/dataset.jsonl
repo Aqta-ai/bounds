@@ -1,0 +1,48 @@
+{"id": "inline_diagnosis-01", "cat": "inline_diagnosis", "text": "She presents with generalised anxiety disorder and reports poor sleep for three months.", "spans": [{"text": "generalised anxiety disorder", "category": "inline_diagnosis"}]}
+{"id": "inline_diagnosis-02", "cat": "inline_diagnosis", "text": "The claimant was diagnosed with type 2 diabetes in 2019 and manages it with diet.", "spans": [{"text": "type 2 diabetes", "category": "inline_diagnosis"}]}
+{"id": "inline_diagnosis-03", "cat": "inline_diagnosis", "text": "History notes chronic obstructive pulmonary disease, stable on current regimen.", "spans": [{"text": "chronic obstructive pulmonary disease", "category": "inline_diagnosis"}]}
+{"id": "inline_diagnosis-04", "cat": "inline_diagnosis", "text": "He has been living with bipolar II disorder since his twenties.", "spans": [{"text": "bipolar II disorder", "category": "inline_diagnosis"}]}
+{"id": "inline_diagnosis-05", "cat": "inline_diagnosis", "text": "Le patient présente un trouble anxieux généralisé depuis l'automne dernier.", "spans": [{"text": "trouble anxieux généralisé", "category": "inline_diagnosis"}]}
+{"id": "inline_diagnosis-06", "cat": "inline_diagnosis", "text": "Bei der Patientin besteht eine depressive Episode mit Schlafstörungen.", "spans": [{"text": "depressive Episode", "category": "inline_diagnosis"}]}
+{"id": "medication_mention-01", "cat": "medication_mention", "text": "She is on lithium and has been taking Adderall for three years.", "spans": [{"text": "lithium", "category": "medication_mention"}, {"text": "Adderall", "category": "medication_mention"}]}
+{"id": "medication_mention-02", "cat": "medication_mention", "text": "Started on metformin 500 mg twice daily after the review.", "spans": [{"text": "metformin 500 mg", "category": "medication_mention"}]}
+{"id": "medication_mention-03", "cat": "medication_mention", "text": "He forgot his sertraline over the weekend and felt worse by Monday.", "spans": [{"text": "sertraline", "category": "medication_mention"}]}
+{"id": "medication_mention-04", "cat": "medication_mention", "text": "Current medication includes apixaban and a low dose of atorvastatin.", "spans": [{"text": "apixaban", "category": "medication_mention"}, {"text": "atorvastatin", "category": "medication_mention"}]}
+{"id": "medication_mention-05", "cat": "medication_mention", "text": "Elle prend de la sertraline 50 mg chaque matin.", "spans": [{"text": "sertraline 50 mg", "category": "medication_mention"}]}
+{"id": "medication_mention-06", "cat": "medication_mention", "text": "Der Patient nimmt seit Mai Sertralin 50 mg ein.", "spans": [{"text": "Sertralin 50 mg", "category": "medication_mention"}]}
+{"id": "treatment_procedure-01", "cat": "treatment_procedure", "text": "Underwent CABG last April, followed by chemo in the summer.", "spans": [{"text": "CABG", "category": "treatment_procedure"}, {"text": "chemo", "category": "treatment_procedure"}]}
+{"id": "treatment_procedure-02", "cat": "treatment_procedure", "text": "She had a hip replacement in March and attends physiotherapy weekly.", "spans": [{"text": "hip replacement", "category": "treatment_procedure"}]}
+{"id": "treatment_procedure-03", "cat": "treatment_procedure", "text": "Completed a course of radiotherapy at the regional centre.", "spans": [{"text": "radiotherapy", "category": "treatment_procedure"}]}
+{"id": "treatment_procedure-04", "cat": "treatment_procedure", "text": "He is scheduled for a colonoscopy next month after the referral.", "spans": [{"text": "colonoscopy", "category": "treatment_procedure"}]}
+{"id": "treatment_procedure-05", "cat": "treatment_procedure", "text": "Started dialysis three times a week following the decline in kidney function.", "spans": [{"text": "dialysis", "category": "treatment_procedure"}]}
+{"id": "treatment_procedure-06", "cat": "treatment_procedure", "text": "A laparoscopic cholecystectomy was performed without complication.", "spans": [{"text": "laparoscopic cholecystectomy", "category": "treatment_procedure"}]}
+{"id": "indirect_health_context-01", "cat": "indirect_health_context", "text": "My therapist suggested I keep a diary of the episodes.", "spans": [{"text": "My therapist", "category": "indirect_health_context"}]}
+{"id": "indirect_health_context-02", "cat": "indirect_health_context", "text": "Her insulin pump alarmed twice during the meeting.", "spans": [{"text": "insulin pump", "category": "indirect_health_context"}]}
+{"id": "indirect_health_context-03", "cat": "indirect_health_context", "text": "He was late because his dialysis centre changed its hours.", "spans": [{"text": "dialysis centre", "category": "indirect_health_context"}]}
+{"id": "indirect_health_context-04", "cat": "indirect_health_context", "text": "The oncology nurse called to move the appointment.", "spans": [{"text": "oncology nurse", "category": "indirect_health_context"}]}
+{"id": "indirect_health_context-05", "cat": "indirect_health_context", "text": "She keeps her inhaler in the glovebox for long drives.", "spans": [{"text": "inhaler", "category": "indirect_health_context"}]}
+{"id": "indirect_health_context-06", "cat": "indirect_health_context", "text": "We met outside the methadone clinic on Thursday.", "spans": [{"text": "methadone clinic", "category": "indirect_health_context"}]}
+{"id": "sensitive_social-01", "cat": "sensitive_social", "text": "The patient, a gay male, lives with his partner of ten years.", "spans": [{"text": "gay male", "category": "sensitive_social"}]}
+{"id": "sensitive_social-02", "cat": "sensitive_social", "text": "They identify as non-binary and asked for that on the paperwork.", "spans": [{"text": "identify as non-binary", "category": "sensitive_social"}]}
+{"id": "sensitive_social-03", "cat": "sensitive_social", "text": "A recovering alcoholic, he has been sober for four years.", "spans": [{"text": "recovering alcoholic", "category": "sensitive_social"}]}
+{"id": "sensitive_social-04", "cat": "sensitive_social", "text": "She disclosed a history of domestic abuse during intake.", "spans": [{"text": "history of domestic abuse", "category": "sensitive_social"}]}
+{"id": "sensitive_social-05", "cat": "sensitive_social", "text": "He is a practising Muslim and asked about fasting during treatment.", "spans": [{"text": "practising Muslim", "category": "sensitive_social"}]}
+{"id": "sensitive_social-06", "cat": "sensitive_social", "text": "The client is HIV positive and stable on treatment.", "spans": [{"text": "HIV positive", "category": "sensitive_social"}]}
+{"id": "genetic_reference-01", "cat": "genetic_reference", "text": "She is BRCA1-positive and attends annual screening.", "spans": [{"text": "BRCA1-positive", "category": "genetic_reference"}]}
+{"id": "genetic_reference-02", "cat": "genetic_reference", "text": "There is a family history of Huntington's disease on the father's side.", "spans": [{"text": "family history of Huntington's disease", "category": "genetic_reference"}]}
+{"id": "genetic_reference-03", "cat": "genetic_reference", "text": "Genetic testing confirmed a CFTR mutation.", "spans": [{"text": "CFTR mutation", "category": "genetic_reference"}]}
+{"id": "genetic_reference-04", "cat": "genetic_reference", "text": "Carrier status for sickle cell trait was noted at the antenatal visit.", "spans": [{"text": "sickle cell trait", "category": "genetic_reference"}]}
+{"id": "genetic_reference-05", "cat": "genetic_reference", "text": "The panel showed a pathogenic variant in the LDLR gene.", "spans": [{"text": "pathogenic variant in the LDLR gene", "category": "genetic_reference"}]}
+{"id": "genetic_reference-06", "cat": "genetic_reference", "text": "He was found to be APOE4 homozygous.", "spans": [{"text": "APOE4 homozygous", "category": "genetic_reference"}]}
+{"id": "negative-01", "cat": "negative", "text": "Patient: Maire O'Sullivan. DOB 14/03/1981. Phone +353 87 123 4567. Email maire@example.ie.", "spans": []}
+{"id": "negative-02", "cat": "negative", "text": "Invoice 2026-0412 for consultation room hire, EUR 240, payable within 30 days.", "spans": []}
+{"id": "negative-03", "cat": "negative", "text": "The hospital pharmacy stocks metformin, sertraline and apixaban in the main store.", "spans": []}
+{"id": "negative-04", "cat": "negative", "text": "The clinic offers physiotherapy, radiotherapy and dialysis services on the ground floor.", "spans": []}
+{"id": "negative-05", "cat": "negative", "text": "Board minutes: the oncology department's budget was approved for 2027.", "spans": []}
+{"id": "negative-06", "cat": "negative", "text": "A general guide to type 2 diabetes for newly diagnosed readers is available at reception.", "spans": []}
+{"id": "negative-07", "cat": "negative", "text": "Meeting moved to Thursday. Bring the signed agreement and two forms of identification.", "spans": []}
+{"id": "negative-08", "cat": "negative", "text": "MRN 00482911. Ward 4B. Consultant: Dr K. Byrne. Next review in six weeks.", "spans": []}
+{"id": "negative-09", "cat": "negative", "text": "The study enrolled 240 participants across three sites; no individual data is reported here.", "spans": []}
+{"id": "negative-10", "cat": "negative", "text": "Please return the equipment (one blood pressure cuff, one thermometer) to the supply room.", "spans": []}
+{"id": "negative-11", "cat": "negative", "text": "Our insurance policy covers dental, optical and physiotherapy up to EUR 600 a year.", "spans": []}
+{"id": "negative-12", "cat": "negative", "text": "The genetics unit runs on Tuesdays and Thursdays; appointments are by referral only.", "spans": []}

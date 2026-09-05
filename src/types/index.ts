@@ -66,6 +66,9 @@ export interface TextSpan {
   y: number
   width: number
   height: number
+  /** Where each character boundary sits, in PDF units from `x` (length text.length + 1),
+      measured with the page font. Absent when the font could not be measured. */
+  charOffsets?: number[]
 }
 
 export interface RedactionMap {

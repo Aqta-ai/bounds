@@ -85,7 +85,7 @@ export function LanguagePicker({ value, onChange, label }: Props) {
                 key={lang.code}
                 onClick={() => onChange(lang.code)}
                 title={`${lang.label}${isCached ? ' · offline ready' : ` · ${lang.sizeMB} MB on first use`}`}
-                className={`relative px-2.5 py-1 rounded-md text-xs font-semibold tracking-wide transition-all ${
+                className={`relative px-3 min-h-[32px] rounded-md text-xs font-semibold tracking-wide transition-all ${
                   isActive
                     ? 'bg-brand-green text-white shadow-sm'
                     : 'bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700'

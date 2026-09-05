@@ -4,7 +4,23 @@
 [![Gemma 4 inside](https://img.shields.io/badge/Gemma%204-inside-4A6B62?style=for-the-badge)](https://www.npmjs.com/package/bounds-gemma)
 [![Apache--2.0 engine](https://img.shields.io/badge/Engine-Apache--2.0-blue?style=for-the-badge)](https://www.npmjs.com/package/bounds-gemma)
 
-**Private PDF redaction. Everything runs on your device. Nothing is uploaded.**
+**Most redaction tools ask you to trust that the information was removed. Bounds produces a signed record that lets someone else verify that it was.**
+
+Detection runs on your device, including contextual PHI detection with Gemma 4, so the document never has to leave the machine that opened it. After redaction, Bounds scans the output file itself, signs the result, and anyone can check the record and the file offline with a ninety-line script.
+
+```text
+document ──► regex · BERT NER · OCR · faces · Gemma 4 (local Ollama) ──► candidate spans
+                                                                            │  in-corpus guardrail, confidence threshold, human review
+                                                                            ▼
+                                                                    rasterised PDF
+                                                                            │
+                                            residual text scan · PDF object scan · rendered OCR scan · metadata scan
+                                                                            │
+                                                                            ▼
+                                                    verification block ──► Ed25519 signature ──► bounds-verify, offline
+```
+
+**Precisely:** layers 1 to 4 run in the browser; the Gemma 4 pass runs through a local Ollama daemon and is absent without one. Nothing in the redaction path contacts a server.
 
 Bounds finds and redacts personal information in PDFs using on-device AI. No server, no account, no document content leaves your machine. Works offline once your language packs are downloaded.
 
@@ -21,7 +37,7 @@ Bounds finds and redacts personal information in PDFs using on-device AI. No ser
 
 ## Features
 
-- **Five detection layers**: regex patterns (~99% on known patterns), BERT NER (10 trained languages with cross-lingual transfer across mBERT's 104-language pretraining corpus), Tesseract OCR (100% word accuracy on clean printed, 97.6% on noisy rotated/JPEG-compressed scans), face detection, **and Gemma 4 contextual PHI (~85% recall on French, Spanish, German, Hindi-Devanagari, Bengali test narratives via Ollama; precision is enforced by the in-corpus substring guardrail, so surviving spans are byte-identical to the source text)**
+- **Five detection layers**: regex patterns (~99% on known patterns), BERT NER (10 trained languages with cross-lingual transfer across mBERT's 104-language pretraining corpus), Tesseract OCR (100% word accuracy on clean printed, 97.6% on noisy rotated/JPEG-compressed scans), face detection, **and Gemma 4 contextual PHI (measured in [`eval/`](eval/): span recall 0.97, precision 0.78 on a labelled synthetic set in English, French and German; precision is enforced by the in-corpus substring guardrail, so surviving spans are byte-identical to the source text)**
 - **Gemma 4, Ollama-first**: contextual layer uses `gemma4:e2b` on a local Ollama daemon when available. WebLLM (`gemma-4-E2B-it-q4f16_1-MLC`) is wired and turns on when the MLC build is published; until then, without Ollama the other four layers run alone. No silent substitute of older Gemma.
 - **Reversible redaction**: AES-256-GCM encrypted vault lets you restore original values with a key file
 - **Works offline**: layers 1-4 (regex / BERT / OCR / faces) run in-browser via WebAssembly + WebGPU; the Gemma 4 layer runs on a local Ollama daemon. Airplane mode after the first load and an `ollama pull`.
@@ -94,7 +110,7 @@ Bounds scans the **output file itself**:
 |---|---|
 | `residual_text_scan` | Extracts the text of every output page and confirms none of the redacted strings, and none of the redacted categories, can be found in it |
 | `pdf_object_scan` | Confirms pages that carried detections expose no text objects at all |
-| `rendered_ocr_scan` | Renders each redacted page to an image, runs OCR on it, and confirms none of the redacted strings can be read back |
+| `rendered_ocr_scan` | Renders each redacted page to an image, runs OCR on it, and confirms none of the redacted strings can be read back, and that no OCR word touching a box's edge is a leading or trailing fragment of the span the box was meant to cover (a lone "M" beside a box that covers "aire") |
 | `metadata_scan` | Confirms the document metadata (title, author, subject, keywords, producer, creator) carries none of the redacted strings |
 
 The result is written into the signed record as a `verification` block, PASS or FAIL per check,
@@ -102,6 +118,11 @@ with a count of findings. Findings name the category and the page, never the tex
 without the block, or with a FAIL in it, says so; the scan is never omitted to look cleaner.
 Spans shorter than six characters once normalised are not searched for in OCR output (a year or
 an initial would match unrelated text) but are still held to the exact-text and metadata scans.
+
+Boxes are placed from per-glyph positions measured with the page's own font, not from an
+average character width; an earlier build drifted on proportional fonts and could leave the
+first or last glyph of a span standing, which the whole-span search above could not see. The
+fragment check exists so that class of failure now fails the record instead of passing it.
 
 ![Export step: Proof of removal PASS, one redacted page rendered and OCR'd, 104 characters read back, four spans checked](docs/media/proof-of-removal.png)
 
@@ -118,7 +139,7 @@ node scripts/bounds-verify.mjs record.json redacted.pdf
 SCHEMA       PASS   bounds-redaction-receipt/v1
 SIGNATURE    PASS   Ed25519, key 3kq9…
 FILE HASH    PASS   sha256 7d8f…
-RESIDUAL     PASS   bounds-residual-scan/v1: 2 page(s) OCR'd, 9 span(s), 0 findings
+RESIDUAL     PASS   bounds-residual-scan/v2: 2 page(s) OCR'd, 9 span(s), 0 findings
 ```
 
 ![bounds-verify output: SCHEMA, SIGNATURE, FILE HASH and RESIDUAL all PASS; the record holds, nothing was contacted](docs/media/bounds-verify.png)
@@ -143,6 +164,14 @@ Cross-Origin-Embedder-Policy: credentialless
 Works on Vercel, Cloudflare Pages, Nginx, Docker. No backend required. Layers 1-4 use WebGPU + cross-origin isolation in the browser; the Gemma 4 contextual layer uses Ollama when present. The WebLLM path requires an MLC Gemma 4 build and COOP/COEP; until that build is published, absence of Ollama means layers 1-4 only.
 
 ---
+
+## Technology, and where the privacy boundary sits
+
+**Google.** Gemma 4 E2B (through the standalone `bounds-gemma` package) finds the contextual PHI that regex and NER miss: inline diagnoses, medications in prose, treatments, indirect health context, sensitive social context, genetic references. Gemma proposes spans with a category and a confidence; the deterministic engine decides and removes; Gemma never touches the PDF.
+
+**NVIDIA.** Ollama uses an NVIDIA GPU for the Gemma pass when one is present (CUDA on Linux and Windows; Apple silicon otherwise). The evaluation harness in [`eval/`](eval/) runs the shipped prompt and acceptance rules against a labelled synthetic set and reports span-level recall and precision per category; results are recorded in [`eval/results/`](eval/results/) with the hardware they ran on, and nothing is claimed for hardware it has not run on. The current result is from Apple silicon; a notebook for a Google Colab T4 run is in the same folder and its result will be committed when it has been run.
+
+**The boundary.** Document bytes never leave the machine as part of redaction. Evaluation uses synthetic narratives only, never real documents. The four residual checks and the signature are computed locally; the verifier needs no network.
 
 ## Related projects
 

@@ -1,0 +1,829 @@
+{
+  "procedure": "bounds-gemma-eval/v1",
+  "date": "2026-09-05T19:22:47+00:00",
+  "backend": "Apple M-series, Ollama",
+  "hardware": {
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "python": "3.12.8",
+    "cpu": "Apple M2 Pro",
+    "gpu": "none detected (no nvidia-smi)"
+  },
+  "model": "gemma4:e2b",
+  "confidence_floor": 0.75,
+  "items": 48,
+  "gold_spans": 39,
+  "negatives": 12,
+  "false_positives_on_positives": 2,
+  "false_positives_on_negatives": 9,
+  "malformed_responses": 0,
+  "labels_emitted": {
+    "inline_diagnosis": 6,
+    "indirect_health_context": 7,
+    "medication_mention": 12,
+    "treatment_procedure": 13,
+    "sensitive_social": 4,
+    "genetic_reference": 7
+  },
+  "latency_s": {
+    "p50": 1.71,
+    "p90": 3.28
+  },
+  "overall": {
+    "tp": 38,
+    "fp": 11,
+    "fn": 1,
+    "precision": 0.7755102040816326,
+    "recall": 0.9743589743589743,
+    "f1": 0.8636363636363635,
+    "category_correct": 0.9473684210526315
+  },
+  "per_category": {
+    "inline_diagnosis": {
+      "gold": 6,
+      "found": 6,
+      "missed": 0,
+      "recall": 1.0,
+      "category_correct": 1.0
+    },
+    "medication_mention": {
+      "gold": 8,
+      "found": 8,
+      "missed": 0,
+      "recall": 1.0,
+      "category_correct": 1.0
+    },
+    "treatment_procedure": {
+      "gold": 7,
+      "found": 7,
+      "missed": 0,
+      "recall": 1.0,
+      "category_correct": 1.0
+    },
+    "indirect_health_context": {
+      "gold": 6,
+      "found": 5,
+      "missed": 1,
+      "recall": 0.8333333333333334,
+      "category_correct": 1.0
+    },
+    "sensitive_social": {
+      "gold": 6,
+      "found": 6,
+      "missed": 0,
+      "recall": 1.0,
+      "category_correct": 0.6666666666666666
+    },
+    "genetic_reference": {
+      "gold": 6,
+      "found": 6,
+      "missed": 0,
+      "recall": 1.0,
+      "category_correct": 1.0
+    }
+  },
+  "rows": [
+    {
+      "id": "inline_diagnosis-01",
+      "gold": [
+        "generalised anxiety disorder"
+      ],
+      "pred": [
+        [
+          "generalised anxiety disorder",
+          "inline_diagnosis",
+          0.98
+        ],
+        [
+          "poor sleep",
+          "indirect_health_context",
+          0.95
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 1677.35,
+      "raw": "[\n  {\n    \"text\": \"generalised anxiety disorder\",\n    \"type\": \"HEALTH_DATA\",\n    \"confidence\": 0.98,\n    \"ruleId\": \"gemma:inline_diagnosis\",\n    \"reason\": \"This is an inline diagnosis explicitly stated in the text.\"\n  },\n  {\n    \"text\": \"poor sleep\",\n    \"type\": \"HEALTH_DATA\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:indirect_health_context\",\n    \"reason\": \"Poor sleep is an indirect reference implying a health condition.\"\n  }\n]"
+    },
+    {
+      "id": "inline_diagnosis-02",
+      "gold": [
+        "type 2 diabetes"
+      ],
+      "pred": [
+        [
+          "type 2 diabetes",
+          "inline_diagnosis",
+          0.95
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 1.72,
+      "raw": "[\n  {\n    \"text\": \"type 2 diabetes\",\n    \"type\": \"HEALTH_DATA\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:inline_diagnosis\",\n    \"reason\": \"This is an inline diagnosis of a medical condition.\"\n  }\n]"
+    },
+    {
+      "id": "inline_diagnosis-03",
+      "gold": [
+        "chronic obstructive pulmonary disease"
+      ],
+      "pred": [
+        [
+          "chronic obstructive pulmonary disease",
+          "inline_diagnosis",
+          0.95
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 1.8,
+      "raw": "[\n  {\n    \"text\": \"chronic obstructive pulmonary disease\",\n    \"type\": \"HEALTH_DATA\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:inline_diagnosis\",\n    \"reason\": \"This is an explicit mention of a chronic medical condition.\"\n  }\n]"
+    },
+    {
+      "id": "inline_diagnosis-04",
+      "gold": [
+        "bipolar II disorder"
+      ],
+      "pred": [
+        [
+          "bipolar II disorder",
+          "inline_diagnosis",
+          0.95
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 1.74,
+      "raw": "[\n  {\n    \"text\": \"bipolar II disorder\",\n    \"type\": \"HEALTH_DATA\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:inline_diagnosis\",\n    \"reason\": \"This is an inline diagnosis of a mental health condition.\"\n  }\n]"
+    },
+    {
+      "id": "inline_diagnosis-05",
+      "gold": [
+        "trouble anxieux généralisé"
+      ],
+      "pred": [
+        [
+          "trouble anxieux généralisé",
+          "inline_diagnosis",
+          0.98
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 1.8,
+      "raw": "[\n  {\n    \"text\": \"trouble anxieux généralisé\",\n    \"type\": \"HEALTH_DATA\",\n    \"confidence\": 0.98,\n    \"ruleId\": \"gemma:inline_diagnosis\",\n    \"reason\": \"This is an explicit mention of a mental health diagnosis.\"\n  }\n]"
+    },
+    {
+      "id": "inline_diagnosis-06",
+      "gold": [
+        "depressive Episode"
+      ],
+      "pred": [
+        [
+          "depressive Episode mit Schlafstörungen",
+          "inline_diagnosis",
+          0.95
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 1.82,
+      "raw": "[\n  {\n    \"text\": \"depressive Episode mit Schlafstörungen\",\n    \"type\": \"HEALTH_DATA\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:inline_diagnosis\",\n    \"reason\": \"This span describes a clinical diagnosis and associated symptoms.\"\n  }\n]"
+    },
+    {
+      "id": "medication_mention-01",
+      "gold": [
+        "lithium",
+        "Adderall"
+      ],
+      "pred": [
+        [
+          "lithium",
+          "medication_mention",
+          0.95
+        ],
+        [
+          "Adderall",
+          "medication_mention",
+          0.95
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 2.95,
+      "raw": "[\n  {\n    \"text\": \"lithium\",\n    \"type\": \"medication_mention\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:medication_mention\",\n    \"reason\": \"Lithium is a medication mentioned in the text.\"\n  },\n  {\n    \"text\": \"Adderall\",\n    \"type\": \"medication_mention\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:medication_mention\",\n    \"reason\": \"Adderall is a medication mentioned in the text.\"\n  }\n]"
+    },
+    {
+      "id": "medication_mention-02",
+      "gold": [
+        "metformin 500 mg"
+      ],
+      "pred": [
+        [
+          "metformin 500 mg twice daily",
+          "medication_mention",
+          0.95
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 1.76,
+      "raw": "[\n  {\n    \"text\": \"metformin 500 mg twice daily\",\n    \"type\": \"medication_mention\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:medication_mention\",\n    \"reason\": \"The text explicitly mentions a medication and its dosage.\"\n  }\n]"
+    },
+    {
+      "id": "medication_mention-03",
+      "gold": [
+        "sertraline"
+      ],
+      "pred": [
+        [
+          "sertraline",
+          "medication_mention",
+          0.95
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 1.68,
+      "raw": "[\n  {\n    \"text\": \"sertraline\",\n    \"type\": \"medication_mention\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:medication_mention\",\n    \"reason\": \"The text mentions a specific medication name in running prose.\"\n  }\n]"
+    },
+    {
+      "id": "medication_mention-04",
+      "gold": [
+        "apixaban",
+        "atorvastatin"
+      ],
+      "pred": [
+        [
+          "apixaban",
+          "medication_mention",
+          0.95
+        ],
+        [
+          "atorvastatin",
+          "medication_mention",
+          0.95
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 2.8,
+      "raw": "[\n  {\n    \"text\": \"apixaban\",\n    \"type\": \"medication_mention\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:medication_mention\",\n    \"reason\": \"Medication name is mentioned in the text.\"\n  },\n  {\n    \"text\": \"atorvastatin\",\n    \"type\": \"medication_mention\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:medication_mention\",\n    \"reason\": \"Medication name is mentioned in the text.\"\n  }\n]"
+    },
+    {
+      "id": "medication_mention-05",
+      "gold": [
+        "sertraline 50 mg"
+      ],
+      "pred": [
+        [
+          "sertraline 50 mg",
+          "medication_mention",
+          0.95
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 1.76,
+      "raw": "[\n  {\n    \"text\": \"sertraline 50 mg\",\n    \"type\": \"medication_mention\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:medication_mention\",\n    \"reason\": \"The text explicitly mentions a specific medication and dosage.\"\n  }\n]"
+    },
+    {
+      "id": "medication_mention-06",
+      "gold": [
+        "Sertralin 50 mg"
+      ],
+      "pred": [
+        [
+          "Sertralin 50 mg",
+          "medication_mention",
+          0.95
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 1.81,
+      "raw": "[\n  {\n    \"text\": \"Sertralin 50 mg\",\n    \"type\": \"medication_mention\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:medication_mention\",\n    \"reason\": \"The text explicitly mentions a specific medication and dosage.\"\n  }\n]"
+    },
+    {
+      "id": "treatment_procedure-01",
+      "gold": [
+        "CABG",
+        "chemo"
+      ],
+      "pred": [
+        [
+          "Underwent CABG last April",
+          "treatment_procedure",
+          0.95
+        ],
+        [
+          "followed by chemo in the summer",
+          "treatment_procedure",
+          0.9
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 2.86,
+      "raw": "[\n  {\n    \"text\": \"Underwent CABG last April\",\n    \"type\": \"treatment_procedure\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:treatment_procedure\",\n    \"reason\": \"This span describes a specific medical procedure that constitutes treatment.\"\n  },\n  {\n    \"text\": \"followed by chemo in the summer\",\n    \"type\": \"treatment_procedure\",\n    \"confidence\": 0.90,\n    \"ruleId\": \"gemma:treatment_procedure\",\n    \"reason\": \"This span describes a specific medical treatment received.\"\n  }\n]"
+    },
+    {
+      "id": "treatment_procedure-02",
+      "gold": [
+        "hip replacement"
+      ],
+      "pred": [
+        [
+          "hip replacement",
+          "treatment_procedure",
+          0.95
+        ],
+        [
+          "physiotherapy",
+          "treatment_procedure",
+          0.9
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 2.73,
+      "raw": "[\n  {\n    \"text\": \"hip replacement\",\n    \"type\": \"treatment_procedure\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:treatment_procedure\",\n    \"reason\": \"This mentions a specific surgical procedure the patient underwent.\"\n  },\n  {\n    \"text\": \"physiotherapy\",\n    \"type\": \"treatment_procedure\",\n    \"confidence\": 0.90,\n    \"ruleId\": \"gemma:treatment_procedure\",\n    \"reason\": \"This refers to a specific type of ongoing treatment.\"\n  }\n]"
+    },
+    {
+      "id": "treatment_procedure-03",
+      "gold": [
+        "radiotherapy"
+      ],
+      "pred": [
+        [
+          "radiotherapy",
+          "treatment_procedure",
+          0.95
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 1.56,
+      "raw": "[\n  {\n    \"text\": \"radiotherapy\",\n    \"type\": \"treatment_procedure\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:treatment_procedure\",\n    \"reason\": \"The text mentions a specific medical treatment received by the individual.\"\n  }\n]"
+    },
+    {
+      "id": "treatment_procedure-04",
+      "gold": [
+        "colonoscopy"
+      ],
+      "pred": [
+        [
+          "colonoscopy",
+          "treatment_procedure",
+          0.95
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 1.59,
+      "raw": "[\n  {\n    \"text\": \"colonoscopy\",\n    \"type\": \"treatment_procedure\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:treatment_procedure\",\n    \"reason\": \"The text mentions a specific medical procedure.\"\n  }\n]"
+    },
+    {
+      "id": "treatment_procedure-05",
+      "gold": [
+        "dialysis"
+      ],
+      "pred": [
+        [
+          "dialysis three times a week",
+          "treatment_procedure",
+          0.95
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 1.59,
+      "raw": "[\n  {\n    \"text\": \"dialysis three times a week\",\n    \"type\": \"treatment_procedure\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:treatment_procedure\",\n    \"reason\": \"This describes a specific medical treatment procedure.\"\n  }\n]"
+    },
+    {
+      "id": "treatment_procedure-06",
+      "gold": [
+        "laparoscopic cholecystectomy"
+      ],
+      "pred": [
+        [
+          "laparoscopic cholecystectomy",
+          "treatment_procedure",
+          0.95
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 1.73,
+      "raw": "[\n  {\n    \"text\": \"laparoscopic cholecystectomy\",\n    \"type\": \"treatment_procedure\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:treatment_procedure\",\n    \"reason\": \"This describes a specific surgical procedure performed on the patient.\"\n  }\n]"
+    },
+    {
+      "id": "indirect_health_context-01",
+      "gold": [
+        "My therapist"
+      ],
+      "pred": [
+        [
+          "My therapist suggested I keep a diary of the episodes.",
+          "indirect_health_context",
+          0.95
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 1.72,
+      "raw": "[\n  {\n    \"text\": \"My therapist suggested I keep a diary of the episodes.\",\n    \"type\": \"indirect_health_context\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:4\",\n    \"reason\": \"Reference to a therapist and keeping a diary implies mental health context.\"\n  }\n]"
+    },
+    {
+      "id": "indirect_health_context-02",
+      "gold": [
+        "insulin pump"
+      ],
+      "pred": [
+        [
+          "insulin pump",
+          "indirect_health_context",
+          0.95
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 1.68,
+      "raw": "[\n  {\n    \"text\": \"insulin pump\",\n    \"type\": \"indirect_health_context\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:4\",\n    \"reason\": \"The mention of an insulin pump indirectly refers to a patient's medical management.\"\n  }\n]"
+    },
+    {
+      "id": "indirect_health_context-03",
+      "gold": [
+        "dialysis centre"
+      ],
+      "pred": [
+        [
+          "dialysis centre",
+          "indirect_health_context",
+          0.95
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 1.71,
+      "raw": "[\n  {\n    \"text\": \"dialysis centre\",\n    \"type\": \"indirect_health_context\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:indirect_health_context\",\n    \"reason\": \"Reference to a dialysis center implies a health condition or treatment.\"\n  }\n]"
+    },
+    {
+      "id": "indirect_health_context-04",
+      "gold": [
+        "oncology nurse"
+      ],
+      "pred": [],
+      "status": "ok",
+      "latency_s": 0.35,
+      "raw": "[]"
+    },
+    {
+      "id": "indirect_health_context-05",
+      "gold": [
+        "inhaler"
+      ],
+      "pred": [
+        [
+          "inhaler",
+          "indirect_health_context",
+          0.95
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 1.72,
+      "raw": "[\n  {\n    \"text\": \"inhaler\",\n    \"type\": \"indirect_health_context\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:indirect_health_context\",\n    \"reason\": \"The mention of an inhaler indirectly suggests a respiratory condition or chronic illness.\"\n  }\n]"
+    },
+    {
+      "id": "indirect_health_context-06",
+      "gold": [
+        "methadone clinic"
+      ],
+      "pred": [
+        [
+          "methadone clinic",
+          "indirect_health_context",
+          0.95
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 1.69,
+      "raw": "[\n  {\n    \"text\": \"methadone clinic\",\n    \"type\": \"indirect_health_context\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:indirect_health_context\",\n    \"reason\": \"Reference to a specific clinic implies engagement with substance use treatment.\"\n  }\n]"
+    },
+    {
+      "id": "sensitive_social-01",
+      "gold": [
+        "gay male"
+      ],
+      "pred": [
+        [
+          "gay male",
+          "sensitive_social",
+          0.95
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 140.81,
+      "raw": "[\n  {\n    \"text\": \"gay male\",\n    \"type\": \"sensitive_social\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:sensitive_social\",\n    \"reason\": \"The text describes a sexual orientation and gender identity.\"\n  }\n]"
+    },
+    {
+      "id": "sensitive_social-02",
+      "gold": [
+        "identify as non-binary"
+      ],
+      "pred": [
+        [
+          "non-binary",
+          "sensitive_social",
+          0.95
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 1.66,
+      "raw": "[\n  {\n    \"text\": \"non-binary\",\n    \"type\": \"sensitive_social\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:sensitive_social\",\n    \"reason\": \"The text mentions a gender identity, which is sensitive social data.\"\n  }\n]"
+    },
+    {
+      "id": "sensitive_social-03",
+      "gold": [
+        "recovering alcoholic"
+      ],
+      "pred": [
+        [
+          "recovering alcoholic",
+          "medication_mention",
+          0.95
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 1.77,
+      "raw": "[\n  {\n    \"text\": \"recovering alcoholic\",\n    \"type\": \"medication_mention\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:medication_mention\",\n    \"reason\": \"This implies a history of substance use disorder, which is a health context.\"\n  }\n]"
+    },
+    {
+      "id": "sensitive_social-04",
+      "gold": [
+        "history of domestic abuse"
+      ],
+      "pred": [
+        [
+          "history of domestic abuse",
+          "sensitive_social",
+          0.95
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 1.55,
+      "raw": "[\n  {\n    \"text\": \"history of domestic abuse\",\n    \"type\": \"sensitive_social\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:sensitive_social\",\n    \"reason\": \"Disclosure of domestic abuse is sensitive social information.\"\n  }\n]"
+    },
+    {
+      "id": "sensitive_social-05",
+      "gold": [
+        "practising Muslim"
+      ],
+      "pred": [
+        [
+          "Muslim",
+          "sensitive_social",
+          0.95
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 1.55,
+      "raw": "[\n  {\n    \"text\": \"Muslim\",\n    \"type\": \"sensitive_social\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:sensitive_social\",\n    \"reason\": \"Religion is a sensitive social category.\"\n  }\n]"
+    },
+    {
+      "id": "sensitive_social-06",
+      "gold": [
+        "HIV positive"
+      ],
+      "pred": [
+        [
+          "HIV positive",
+          "genetic_reference",
+          0.95
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 1.59,
+      "raw": "[\n  {\n    \"text\": \"HIV positive\",\n    \"type\": \"HEALTH_DATA\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:genetic_reference\",\n    \"reason\": \"This indicates a specific genetic/biological status related to health.\"\n  }\n]"
+    },
+    {
+      "id": "genetic_reference-01",
+      "gold": [
+        "BRCA1-positive"
+      ],
+      "pred": [
+        [
+          "BRCA1-positive",
+          "genetic_reference",
+          0.95
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 1.52,
+      "raw": "[\n  {\n    \"text\": \"BRCA1-positive\",\n    \"type\": \"HEALTH_DATA\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:genetic_reference\",\n    \"reason\": \"This span indicates a specific genetic marker.\"\n  }\n]"
+    },
+    {
+      "id": "genetic_reference-02",
+      "gold": [
+        "family history of Huntington's disease"
+      ],
+      "pred": [
+        [
+          "family history of Huntington's disease on the father's side",
+          "genetic_reference",
+          0.95
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 1.82,
+      "raw": "[\n  {\n    \"text\": \"family history of Huntington's disease on the father's side\",\n    \"type\": \"genetic_reference\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:genetic_reference\",\n    \"reason\": \"This span explicitly mentions a known genetic condition and family history.\"\n  }\n]"
+    },
+    {
+      "id": "genetic_reference-03",
+      "gold": [
+        "CFTR mutation"
+      ],
+      "pred": [
+        [
+          "CFTR mutation",
+          "genetic_reference",
+          0.95
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 1.56,
+      "raw": "[\n  {\n    \"text\": \"CFTR mutation\",\n    \"type\": \"genetic_reference\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:genetic_reference\",\n    \"reason\": \"This span refers to a specific genetic finding.\"\n  }\n]"
+    },
+    {
+      "id": "genetic_reference-04",
+      "gold": [
+        "sickle cell trait"
+      ],
+      "pred": [
+        [
+          "sickle cell trait",
+          "genetic_reference",
+          0.95
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 1.58,
+      "raw": "[\n  {\n    \"text\": \"sickle cell trait\",\n    \"type\": \"genetic_reference\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:genetic_reference\",\n    \"reason\": \"This refers to a specific genetic trait.\"\n  }\n]"
+    },
+    {
+      "id": "genetic_reference-05",
+      "gold": [
+        "pathogenic variant in the LDLR gene"
+      ],
+      "pred": [
+        [
+          "pathogenic variant in the LDLR gene",
+          "genetic_reference",
+          0.95
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 1.65,
+      "raw": "[\n  {\n    \"text\": \"pathogenic variant in the LDLR gene\",\n    \"type\": \"genetic_reference\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:genetic_reference\",\n    \"reason\": \"This refers to a specific genetic finding.\"\n  }\n]"
+    },
+    {
+      "id": "genetic_reference-06",
+      "gold": [
+        "APOE4 homozygous"
+      ],
+      "pred": [
+        [
+          "APOE4 homozygous",
+          "genetic_reference",
+          0.95
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 1.59,
+      "raw": "[\n  {\n    \"text\": \"APOE4 homozygous\",\n    \"type\": \"genetic_reference\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:genetic_reference\",\n    \"reason\": \"This span refers to a specific genetic marker/result.\"\n  }\n]"
+    },
+    {
+      "id": "negative-01",
+      "gold": [],
+      "pred": [],
+      "status": "ok",
+      "latency_s": 3.28,
+      "raw": "[\n  {\n    \"text\": \"Maire O'Sullivan\",\n    \"type\": \"HEALTH_DATA\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:none\",\n    \"reason\": \"Patient name is a direct identifier, though the instructions state not to flag names, this is a direct entity that should be noted if context implies PHI handling.\"\n  },\n  {\n    \"text\": \"DOB 14/03/1981\",\n    \"type\": \"HEALTH_DATA\",\n    \"confidence\": 0.98,\n    \"ruleId\": \"gemma:none\",\n    \"reason\": \"Date of Birth is direct demographic health information.\"\n  }\n]"
+    },
+    {
+      "id": "negative-02",
+      "gold": [],
+      "pred": [],
+      "status": "ok",
+      "latency_s": 0.38,
+      "raw": "[]"
+    },
+    {
+      "id": "negative-03",
+      "gold": [],
+      "pred": [
+        [
+          "metformin",
+          "medication_mention",
+          0.95
+        ],
+        [
+          "sertraline",
+          "medication_mention",
+          0.95
+        ],
+        [
+          "apixaban",
+          "medication_mention",
+          0.95
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 4.11,
+      "raw": "[\n  {\n    \"text\": \"metformin\",\n    \"type\": \"medication_mention\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:medication_mention\",\n    \"reason\": \"Medication name is mentioned in the context of pharmacy stock.\"\n  },\n  {\n    \"text\": \"sertraline\",\n    \"type\": \"medication_mention\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:medication_mention\",\n    \"reason\": \"Medication name is mentioned in the context of pharmacy stock.\"\n  },\n  {\n    \"text\": \"apixaban\",\n    \"type\": \"medication_mention\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:medication_mention\",\n    \"reason\": \"Medication name is mentioned in the context of pharmacy stock.\"\n  }\n]"
+    },
+    {
+      "id": "negative-04",
+      "gold": [],
+      "pred": [
+        [
+          "physiotherapy",
+          "treatment_procedure",
+          0.95
+        ],
+        [
+          "radiotherapy",
+          "treatment_procedure",
+          0.95
+        ],
+        [
+          "dialysis services",
+          "treatment_procedure",
+          0.95
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 3.82,
+      "raw": "[\n  {\n    \"text\": \"physiotherapy\",\n    \"type\": \"HEALTH_DATA\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:treatment_procedure\",\n    \"reason\": \"Physiotherapy is a specific medical treatment service.\"\n  },\n  {\n    \"text\": \"radiotherapy\",\n    \"type\": \"HEALTH_DATA\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:treatment_procedure\",\n    \"reason\": \"Radiotherapy is a specific medical treatment service.\"\n  },\n  {\n    \"text\": \"dialysis services\",\n    \"type\": \"HEALTH_DATA\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:treatment_procedure\",\n    \"reason\": \"Dialysis is a specific medical treatment service.\"\n  }\n]"
+    },
+    {
+      "id": "negative-05",
+      "gold": [],
+      "pred": [],
+      "status": "ok",
+      "latency_s": 0.37,
+      "raw": "[]"
+    },
+    {
+      "id": "negative-06",
+      "gold": [],
+      "pred": [],
+      "status": "ok",
+      "latency_s": 0.35,
+      "raw": "[]"
+    },
+    {
+      "id": "negative-07",
+      "gold": [],
+      "pred": [],
+      "status": "ok",
+      "latency_s": 0.36,
+      "raw": "[]"
+    },
+    {
+      "id": "negative-08",
+      "gold": [],
+      "pred": [
+        [
+          "Dr K. Byrne",
+          "indirect_health_context",
+          0.95
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 1.68,
+      "raw": "[\n  {\n    \"text\": \"Dr K. Byrne\",\n    \"type\": \"indirect_health_context\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:4\",\n    \"reason\": \"This mentions a specific consultant, which implies a healthcare provider context.\"\n  }\n]"
+    },
+    {
+      "id": "negative-09",
+      "gold": [],
+      "pred": [],
+      "status": "ok",
+      "latency_s": 0.35,
+      "raw": "[]"
+    },
+    {
+      "id": "negative-10",
+      "gold": [],
+      "pred": [
+        [
+          "blood pressure cuff",
+          "treatment_procedure",
+          0.95
+        ],
+        [
+          "thermometer",
+          "treatment_procedure",
+          0.95
+        ]
+      ],
+      "status": "ok",
+      "latency_s": 2.75,
+      "raw": "[\n  {\n    \"text\": \"blood pressure cuff\",\n    \"type\": \"HEALTH_DATA\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:treatment_procedure\",\n    \"reason\": \"Mention of medical equipment implies a health context or procedure.\"\n  },\n  {\n    \"text\": \"thermometer\",\n    \"type\": \"HEALTH_DATA\",\n    \"confidence\": 0.95,\n    \"ruleId\": \"gemma:treatment_procedure\",\n    \"reason\": \"Mention of medical equipment implies a health context or procedure.\"\n  }\n]"
+    },
+    {
+      "id": "negative-11",
+      "gold": [],
+      "pred": [],
+      "status": "ok",
+      "latency_s": 0.37,
+      "raw": "[]"
+    },
+    {
+      "id": "negative-12",
+      "gold": [],
+      "pred": [],
+      "status": "ok",
+      "latency_s": 0.35,
+      "raw": "[]"
+    }
+  ]
+}

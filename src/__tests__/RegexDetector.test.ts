@@ -548,3 +548,17 @@ describe('Irish Eircode detection', () => {
     expect(hasMatch(detect('Postcode AB1 2CD', 'en'), 'ADDRESS', 'AB1 2CD')).toBe(true)
   })
 })
+
+describe('ADDRESS: standard designators are not postcodes', () => {
+  const types = (text: string) => detectRegex(text, 0, 'en', new Map()).map((d) => `${d.type}:${d.text}`)
+  it('does not flag ISO, IEC, EN or RFC numbers followed by a structure word', () => {
+    expect(types('ISO/IEC 42001 Annex A.6.2.8 requires recording AI system event logs.')).toEqual([])
+    expect(types('ISO/IEC 27001 Annex A.8.15 requires that logs be protected.')).toEqual([])
+    expect(types('EN 50128 Part 2 and RFC 8785 Section 3 apply.')).toEqual([])
+    expect(types('see 42001 Annex A for the controls')).toEqual([])
+  })
+  it('still flags a bare postcode and city', () => {
+    expect(types('8001 Zürich')).toContain('ADDRESS:8001 Zürich')
+    expect(types('75001 Paris')).toContain('ADDRESS:75001 Paris')
+  })
+})

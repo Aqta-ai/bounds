@@ -15,8 +15,10 @@
  *                       the redacted categories in it
  *   pdf_object_scan     pages that carried detections expose no text objects
  *                       at all (they were rasterised)
- *   rendered_ocr_scan   each redacted page is rendered and OCR'd, and the OCR
- *                       text contains none of the redacted strings
+ *   rendered_ocr_scan   each redacted page is rendered and OCR'd; the OCR text
+ *                       contains none of the redacted strings, and no OCR word
+ *                       touching a box's edge is a leading or trailing fragment
+ *                       of the span the box was meant to cover
  *   metadata_scan       document metadata carries none of the redacted strings
  *
  * The scan depends on three capabilities injected as functions so the logic
@@ -24,16 +26,28 @@
  * Node adapter share one procedure.
  */
 
-import type { Detection, Language, PiiType } from '../types'
+import type { Detection, Language, OcrWord, PiiType } from '../types'
 import { detectRegex } from './RegexDetector'
+import { findPartialLeaks, normaliseForMatch } from './geometry'
 
-export const RESIDUAL_SCAN_PROCEDURE = 'bounds-residual-scan/v1'
+export { normaliseForMatch }
+
+/** v2 adds the partial-leak check: a glyph left standing beside a box. */
+export const RESIDUAL_SCAN_PROCEDURE = 'bounds-residual-scan/v2'
+
+/** One rendered, OCR'd page of the output: text, word boxes in image pixels at `scale`, page height in PDF units. */
+export interface OcrRender {
+  text: string
+  words: OcrWord[]
+  scale: number
+  pageHeight: number
+}
 
 export interface ResidualScanDeps {
   /** Text content of every page of the OUTPUT file, in page order. */
   extractPageTexts(outputBytes: Uint8Array): Promise<string[]>
-  /** Render one page of the OUTPUT file and OCR it; returns the recognised text. */
-  renderAndOcr(outputBytes: Uint8Array, pageIndex: number, language: Language): Promise<string>
+  /** Render one page of the OUTPUT file and OCR it: recognised text plus word boxes. */
+  renderAndOcr(outputBytes: Uint8Array, pageIndex: number, language: Language): Promise<OcrRender>
   /** Document metadata of the OUTPUT file: title, author, subject, keywords, producer, creator. */
   readMetadata(outputBytes: Uint8Array): Promise<Record<string, string>>
 }
@@ -63,11 +77,6 @@ export interface ResidualScanResult {
   ocr_chars_read: number
   residual_findings: number
   findings: ResidualFinding[]
-}
-
-/** Strip everything that OCR or extraction can legitimately change: case, spacing, punctuation. */
-export function normaliseForMatch(s: string): string {
-  return s.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '')
 }
 
 /** Spans shorter than this, once normalised, are not searched for in OCR
@@ -122,13 +131,17 @@ export async function runResidualScan(
   let renderedOcr: ScanVerdict = 'PASS'
   let ocrChars = 0
   for (const pageIndex of [...redactedPages].sort((a, b) => a - b)) {
-    const raw = await deps.renderAndOcr(outputBytes, pageIndex, language)
-    ocrChars += raw.replace(/\s+/g, '').length
-    const ocrText = normaliseForMatch(raw)
+    const rendered = await deps.renderAndOcr(outputBytes, pageIndex, language)
+    ocrChars += rendered.text.replace(/\s+/g, '').length
+    const ocrText = normaliseForMatch(rendered.text)
     for (const s of spans) {
       if (s.norm.length >= OCR_MIN_SPAN && ocrText.includes(s.norm)) {
         renderedOcr = 'FAIL'; add({ check: 'rendered_ocr_scan', page: pageIndex, kind: s.type })
       }
+    }
+    const pageDets = enabled.filter((d) => d.pageIndex === pageIndex)
+    for (const leak of findPartialLeaks(pageDets, rendered.words, rendered.scale, rendered.pageHeight)) {
+      renderedOcr = 'FAIL'; add({ check: 'rendered_ocr_scan', page: pageIndex, kind: `${leak.detection.type}:partial_${leak.side}` })
     }
   }
 

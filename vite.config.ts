@@ -51,6 +51,15 @@ export default defineConfig({
             },
           },
           {
+            // ONNX Runtime WASM binaries, self-hosted from public/ for the NER and face layers.
+            urlPattern: /\/ort-wasm[^/]*\.wasm(\?.*)?$/,
+            handler: 'CacheFirst' as const,
+            options: {
+              cacheName: 'onnx-runtime-local',
+              expiration: { maxEntries: 6, maxAgeSeconds: 60 * 60 * 24 * 365 },
+            },
+          },
+          {
             // ONNX Runtime WASM binaries served from jsDelivr CDN.
             // These are required by @xenova/transformers for NER and Explain
             // workers: without caching, offline use fails even after first load.

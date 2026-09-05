@@ -16,7 +16,7 @@ function signed(body: Record<string, unknown>) {
   const sig = nacl.sign.detached(new TextEncoder().encode(canonicalizeJson(unsigned)), kp.secretKey)
   return { ...unsigned, signature_b64: b64(sig) }
 }
-const PASS_SCAN = { procedure: 'bounds-residual-scan/v1', pages_scanned: 2, redacted_pages: 1, spans_checked: 3, ocr_language: 'en',
+const PASS_SCAN = { procedure: 'bounds-residual-scan/v2', pages_scanned: 2, redacted_pages: 1, spans_checked: 3, ocr_language: 'en',
   residual_text_scan: 'PASS', pdf_object_scan: 'PASS', rendered_ocr_scan: 'PASS', metadata_scan: 'PASS', residual_findings: 0, findings: [] }
 
 function run(record: unknown, pdf?: Buffer) {

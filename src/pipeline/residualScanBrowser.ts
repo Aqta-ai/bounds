@@ -3,7 +3,7 @@
 import { PDFDocument } from 'pdf-lib'
 import type { Language } from '../types'
 import { getPdfjs } from './PDFEngine'
-import { ocrPage, renderPageToBlob } from './OCRWorker'
+import { OCR_RENDER_SCALE, ocrPageFull, renderPageToBlob } from './OCRWorker'
 import type { ResidualScanDeps } from './ResidualScan'
 
 function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
@@ -24,8 +24,14 @@ export const browserResidualScanDeps: ResidualScanDeps = {
     return texts
   },
   async renderAndOcr(outputBytes, pageIndex, language: Language) {
-    const blob = await renderPageToBlob(toArrayBuffer(outputBytes), pageIndex)
-    return ocrPage(blob, language)
+    const buf = toArrayBuffer(outputBytes)
+    const blob = await renderPageToBlob(buf, pageIndex)
+    const { text, words } = await ocrPageFull(blob, language)
+    const pdfjs = await getPdfjs()
+    const doc = await pdfjs.getDocument({ data: new Uint8Array(buf.slice(0)) }).promise
+    const pageHeight = (await doc.getPage(pageIndex + 1)).getViewport({ scale: 1 }).height
+    await doc.destroy()
+    return { text, words, scale: OCR_RENDER_SCALE, pageHeight }
   },
   async readMetadata(outputBytes) {
     const doc = await PDFDocument.load(outputBytes, { updateMetadata: false })

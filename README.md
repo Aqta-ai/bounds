@@ -1,8 +1,8 @@
 # bounds
 
 [![Live App](https://img.shields.io/badge/Live_App-009E60?style=for-the-badge)](https://bounds.aqta.ai/)
-[![Gemma 4 inside](https://img.shields.io/badge/Gemma%204-inside-4A6B62?style=for-the-badge)](https://github.com/Aqta-ai/bounds-gemma)
-[![Apache--2.0 engine](https://img.shields.io/badge/Engine-Apache--2.0-blue?style=for-the-badge)](https://github.com/Aqta-ai/bounds-gemma)
+[![Gemma 4 inside](https://img.shields.io/badge/Gemma%204-inside-4A6B62?style=for-the-badge)](https://www.npmjs.com/package/bounds-gemma)
+[![Apache--2.0 engine](https://img.shields.io/badge/Engine-Apache--2.0-blue?style=for-the-badge)](https://www.npmjs.com/package/bounds-gemma)
 
 **Private PDF redaction. Everything runs on your device. Nothing is uploaded.**
 
@@ -10,7 +10,7 @@ Bounds finds and redacts personal information in PDFs using on-device AI. No ser
 
 > **Now with Gemma 4 contextual PHI.** Bounds ships a fifth detection layer powered by Google's Gemma 4 E2B. It catches the protected-health-information shapes that regex and named-entity recognition systematically miss: inline diagnoses, medication mentions, treatment narratives, indirect health context, sensitive social data, and genetic references. The HIPAA Safe Harbor #17 catch-all gap, closed without sending document bytes anywhere. Preferred path: local Ollama (`gemma4:e2b`). An in-browser WebLLM path is wired for `gemma-4-E2B-it-q4f16_1-MLC` and activates when that MLC build is available; until then, without Ollama the other four layers run alone (no silent fallback to older Gemma).
 >
-> The Gemma 4 pipeline is open-sourced as a standalone toolkit at [Aqta-ai/bounds-gemma](https://github.com/Aqta-ai/bounds-gemma) (Apache-2.0). You can install it via `npm i bounds-gemma` and run the same contextual PHI detection against your own pipelines.
+> The Gemma 4 pipeline is published as a standalone Apache-2.0 package, [bounds-gemma on npm](https://www.npmjs.com/package/bounds-gemma). Install it with `npm i bounds-gemma` and run the same contextual PHI detection against your own pipelines. It runs through a local Ollama daemon; nothing is sent to a server.
 
 ---
 
@@ -39,7 +39,7 @@ Bounds uses Gemma 4 E2B (effective 2B-active parameter, int4 quantised, ~1.5 GB 
 
 Document text never leaves your device. The contextual layer routes through your local Ollama daemon at `localhost:11434` when one is present. Without Ollama, the other four layers run alone until an MLC WebLLM build of Gemma 4 is available; the in-browser path is already wired for `gemma-4-E2B-it-q4f16_1-MLC` (one-time ~1.5 GB download, cached in IndexedDB after).
 
-For the architecture in detail, the [bounds-gemma](https://github.com/Aqta-ai/bounds-gemma) repo has the worker, parser, system prompt, tests, and a runnable Ollama smoke-test example.
+For the architecture in detail, the [bounds-gemma package](https://www.npmjs.com/package/bounds-gemma) ships the worker, the parser and the system prompt with source maps. The toolkit's source repository, with its tests and a runnable Ollama smoke-test example, is private for now and shared on request.
 
 ---
 
@@ -92,7 +92,7 @@ Works on Vercel, Cloudflare Pages, Nginx, Docker. No backend required. Layers 1-
 
 ## Related projects
 
-- **[Aqta-ai/bounds-gemma](https://github.com/Aqta-ai/bounds-gemma)**: the Gemma 4 contextual PHI pipeline as a standalone Apache-2.0 toolkit. Worker, parser, system prompt, unit tests, runnable smoke-test example. `npm i bounds-gemma`.
+- **[bounds-gemma on npm](https://www.npmjs.com/package/bounds-gemma)**: the Gemma 4 contextual PHI pipeline as a standalone Apache-2.0 package. Worker, parser, system prompt. `npm i bounds-gemma`. Source repository private for now, shared on request.
 
 ---
 

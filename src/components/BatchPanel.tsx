@@ -140,7 +140,7 @@ export function BatchPanel({ items, onStartOver }: Props) {
                 className="shrink-0 flex items-center gap-1 text-xs text-brand-green hover:text-brand-green/80 font-semibold transition-colors"
               >
                 <Download className="w-3.5 h-3.5" />
-                PDF
+                {item.recordJson ? 'PDF + record' : 'PDF'}
               </button>
             )}
           </div>

@@ -62,7 +62,7 @@ export function verifyRecord(record, pdfBytes) {
     const scans = ['residual_text_scan', 'pdf_object_scan', 'rendered_ocr_scan', 'metadata_scan']
     const failed = scans.filter((k) => v[k] !== 'PASS')
     checks.push({ name: 'RESIDUAL', pass: failed.length === 0,
-      detail: failed.length === 0 ? `${v.procedure ?? 'scan'}: ${v.redacted_pages ?? '?'} page(s) OCR'd, ${v.spans_checked ?? '?'} span(s), 0 findings` : `${failed.join(', ')} not PASS (${v.residual_findings ?? '?'} finding(s))` })
+      detail: failed.length === 0 ? `${v.procedure ?? 'scan'}: ${v.redacted_pages ?? '?'} page(s) OCR'd (${v.ocr_chars_read ?? '?'} chars read), ${v.spans_checked ?? '?'} span(s), 0 findings` : `${failed.join(', ')} not PASS (${v.residual_findings ?? '?'} finding(s))` })
   } else {
     checks.push({ name: 'RESIDUAL', pass: false, detail: 'record carries no verification block; the output was not scanned' })
   }

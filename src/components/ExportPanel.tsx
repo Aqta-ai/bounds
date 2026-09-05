@@ -219,7 +219,7 @@ export function ExportPanel({ result, onStartOver, onGoBack, t }: Props) {
         ) : scan ? (
           <span className={scanPassed(scan) ? 'text-gray-900' : 'text-red-700'}>
             <b>{scanPassed(scan) ? 'Proof of removal: PASS' : `Proof of removal: FAIL (${scan.residual_findings} finding${scan.residual_findings === 1 ? '' : 's'})`}</b>
-            {' · '}{scan.redacted_pages} redacted page{scan.redacted_pages === 1 ? '' : 's'} rendered and OCR&rsquo;d, {scan.spans_checked} span{scan.spans_checked === 1 ? '' : 's'} checked, text objects and metadata scanned. Written into the signed record.
+            {' · '}{scan.redacted_pages} redacted page{scan.redacted_pages === 1 ? '' : 's'} rendered and OCR&rsquo;d ({scan.ocr_chars_read} characters read back), {scan.spans_checked} span{scan.spans_checked === 1 ? '' : 's'} checked, text objects and metadata scanned. Written into the signed record.
           </span>
         ) : (
           <span className="text-gray-600">Scanning the redacted file for anything that was meant to be removed&hellip;</span>

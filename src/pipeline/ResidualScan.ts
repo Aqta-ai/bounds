@@ -57,6 +57,10 @@ export interface ResidualScanResult {
   pdf_object_scan: ScanVerdict
   rendered_ocr_scan: ScanVerdict
   metadata_scan: ScanVerdict
+  /** Characters the OCR read back from the rendered redacted pages. A PASS with
+      zero characters read on a page that still carries other text would be a
+      no-op, so the number travels with the verdict. */
+  ocr_chars_read: number
   residual_findings: number
   findings: ResidualFinding[]
 }
@@ -116,8 +120,11 @@ export async function runResidualScan(
 
   // 2. Render and OCR every page that carried a redaction.
   let renderedOcr: ScanVerdict = 'PASS'
+  let ocrChars = 0
   for (const pageIndex of [...redactedPages].sort((a, b) => a - b)) {
-    const ocrText = normaliseForMatch(await deps.renderAndOcr(outputBytes, pageIndex, language))
+    const raw = await deps.renderAndOcr(outputBytes, pageIndex, language)
+    ocrChars += raw.replace(/\s+/g, '').length
+    const ocrText = normaliseForMatch(raw)
     for (const s of spans) {
       if (s.norm.length >= OCR_MIN_SPAN && ocrText.includes(s.norm)) {
         renderedOcr = 'FAIL'; add({ check: 'rendered_ocr_scan', page: pageIndex, kind: s.type })
@@ -147,6 +154,7 @@ export async function runResidualScan(
     pdf_object_scan: pdfObject,
     rendered_ocr_scan: renderedOcr,
     metadata_scan: metadata,
+    ocr_chars_read: ocrChars,
     residual_findings: findings.length,
     findings,
   }

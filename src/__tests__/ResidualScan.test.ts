@@ -22,6 +22,7 @@ describe('residual scan', () => {
     const r = await runResidualScan(bytes, [det({})], 'en', deps({}))
     expect(scanPassed(r)).toBe(true)
     expect(r).toMatchObject({ pages_scanned: 2, redacted_pages: 1, spans_checked: 1, residual_findings: 0 })
+    expect(r.ocr_chars_read).toBeGreaterThan(0)   // the OCR leg actually read text, so the PASS is not a no-op
   })
   it('fails when the extracted text still contains a redacted span', async () => {
     const r = await runResidualScan(bytes, [det({})], 'en', deps({ extractPageTexts: async () => ['contact maire.osullivan@example.ie today', ''] }))

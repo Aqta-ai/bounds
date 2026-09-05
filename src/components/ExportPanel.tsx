@@ -6,6 +6,8 @@ import { PII_TYPE_LABELS } from '../utils/colors'
 import { buildZip } from '../utils/zipUtils'
 import { buildPrivacySummary } from '../utils/summaryUtils'
 import { getSigningIdentity, sha256Hex, signReceipt } from '../lib/receiptSigning'
+import { runResidualScan, scanPassed, type ResidualScanResult } from '../pipeline/ResidualScan'
+import { browserResidualScanDeps } from '../pipeline/residualScanBrowser'
 
 interface Props {
   result: PipelineResult
@@ -113,6 +115,21 @@ export function ExportPanel({ result, onStartOver, onGoBack, t }: Props) {
   const summary = buildPrivacySummary(detections, residualRiskLevel)
   // Sanitize filename: strip path traversal chars and characters invalid on Windows/macOS
   const safeName = documentName.replace(/[/\\:*?"<>|]/g, '_').replace(/\.pdf$/i, '').trim() || 'document'
+
+  // Proof of removal: scan the OUTPUT file, not the plan. Runs once per
+  // export view; the record is not signed until it has a result, so a record
+  // never claims a check that did not run.
+  const [scan, setScan] = useState<ResidualScanResult | null>(null)
+  const [scanError, setScanError] = useState<string | null>(null)
+  const scanPromise = useRef<Promise<ResidualScanResult> | null>(null)
+  useEffect(() => {
+    let cancelled = false
+    const p = runResidualScan(redactedPdfBytes as Uint8Array, detections, 'en', browserResidualScanDeps)
+    scanPromise.current = p
+    p.then((r) => { if (!cancelled) setScan(r) })
+     .catch((e) => { if (!cancelled) setScanError(String(e instanceof Error ? e.message : e)) })
+    return () => { cancelled = true }
+  }, [redactedPdfBytes, detections])
   const unredactedCount = detections.filter((d) => !d.enabled).length
   const allRedacted = unredactedCount === 0
 
@@ -149,6 +166,9 @@ export function ExportPanel({ result, onStartOver, onGoBack, t }: Props) {
         .map(([type, count]) => ({ type, count })),
       privacySummary: summary,
       tool: 'Bounds',
+      // The scan result is part of the signed body. A record without it, or
+      // with a FAIL in it, says so; it is never omitted to look cleaner.
+      verification: scan ?? (scanPromise.current ? await scanPromise.current : null),
     }
     return JSON.stringify(signReceipt(report, getSigningIdentity()), null, 2)
   }
@@ -190,6 +210,20 @@ export function ExportPanel({ result, onStartOver, onGoBack, t }: Props) {
       {/* Preview full-width above CTA */}
       <div className="rounded-xl border border-gray-200 overflow-hidden bg-gray-50">
         <RedactedPreview pdfBytes={redactedPdfBytes as Uint8Array} />
+      </div>
+
+      {/* Proof of removal: the scan of the actual output file. */}
+      <div className={`rounded-xl border px-4 py-3 text-sm ${scan ? (scanPassed(scan) ? 'border-brand-green/40 bg-brand-green/5' : 'border-red-300 bg-red-50') : 'border-gray-200 bg-gray-50'}`} role="status" aria-live="polite">
+        {scanError ? (
+          <span className="text-red-700">Residual scan could not run: {scanError}. The record will say so.</span>
+        ) : scan ? (
+          <span className={scanPassed(scan) ? 'text-gray-900' : 'text-red-700'}>
+            <b>{scanPassed(scan) ? 'Proof of removal: PASS' : `Proof of removal: FAIL (${scan.residual_findings} finding${scan.residual_findings === 1 ? '' : 's'})`}</b>
+            {' · '}{scan.redacted_pages} redacted page{scan.redacted_pages === 1 ? '' : 's'} rendered and OCR&rsquo;d, {scan.spans_checked} span{scan.spans_checked === 1 ? '' : 's'} checked, text objects and metadata scanned. Written into the signed record.
+          </span>
+        ) : (
+          <span className="text-gray-600">Scanning the redacted file for anything that was meant to be removed&hellip;</span>
+        )}
       </div>
 
       {/* Download CTA + risk */}

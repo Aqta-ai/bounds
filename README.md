@@ -71,9 +71,51 @@ npm run preview     # Preview production build
 | `*-redacted.pdf` | Safe to share: PII permanently replaced with flat images |
 | `*.bounds` | Encrypted redaction map |
 | `*.key` | AES decryption key: keep this secret |
-| `*-audit.json` | Timestamped audit log |
+| `*-audit.json` | Signed redaction record: what was removed, the SHA-256 of the redacted PDF, and the result of the proof-of-removal scan, under an Ed25519 signature |
 
 To restore original values, drag the `.bounds` and `.key` files into the Restore panel.
+
+### Proof of removal
+
+A redaction that merely looks redacted is the classic failure in this category: a black box drawn
+over text that a copy-paste recovers. Bounds rasterises every page that carried a detection, so
+the text layer is gone by construction. A claim is not a check, so before the record is signed
+Bounds scans the **output file itself**:
+
+| Check | What it does |
+|---|---|
+| `residual_text_scan` | Extracts the text of every output page and confirms none of the redacted strings, and none of the redacted categories, can be found in it |
+| `pdf_object_scan` | Confirms pages that carried detections expose no text objects at all |
+| `rendered_ocr_scan` | Renders each redacted page to an image, runs OCR on it, and confirms none of the redacted strings can be read back |
+| `metadata_scan` | Confirms the document metadata (title, author, subject, keywords, producer, creator) carries none of the redacted strings |
+
+The result is written into the signed record as a `verification` block, PASS or FAIL per check,
+with a count of findings. Findings name the category and the page, never the text. A record
+without the block, or with a FAIL in it, says so; the scan is never omitted to look cleaner.
+Spans shorter than six characters once normalised are not searched for in OCR output (a year or
+an initial would match unrelated text) but are still held to the exact-text and metadata scans.
+
+### Verify without Bounds
+
+Anyone holding the record and the redacted PDF can check both with no Bounds account, no Bounds
+server and no network:
+
+```bash
+node scripts/bounds-verify.mjs record.json redacted.pdf
+```
+
+```text
+SCHEMA       PASS   bounds-redaction-receipt/v1
+SIGNATURE    PASS   Ed25519, key 3kq9…
+FILE HASH    PASS   sha256 7d8f…
+RESIDUAL     PASS   bounds-residual-scan/v1: 2 page(s) OCR'd, 9 span(s), 0 findings
+```
+
+The verifier is ninety lines of Node with one dependency (`tweetnacl`). It checks the signature
+over the canonical JSON of the record, the fingerprint against the embedded key, the SHA-256 of
+the PDF against the record, and that every scan in the `verification` block is PASS. Change one
+field of the record, or one byte of the PDF, and it says so. `npm run verify -- record.json
+redacted.pdf` does the same from the repo.
 
 ---
 

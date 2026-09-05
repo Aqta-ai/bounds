@@ -15,7 +15,7 @@ import type { Annotation, BBox, Detection, OcrWord, PageLayout, RedactionOptions
 //   pdf-lib: origin bottom-left, y increases upward
 // ---------------------------------------------------------------------------
 
-async function getPdfjs() {
+export async function getPdfjs() {
   const pdfjs = await import('pdfjs-dist')
   pdfjs.GlobalWorkerOptions.workerSrc = new URL(
     'pdfjs-dist/build/pdf.worker.mjs',
